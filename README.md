@@ -1,2 +1,2 @@
-# parser_sd
-Parser for senior design (only for development purposes not production)
+# Shopping Stories API
+Navigate to code directory to see the real README.
