@@ -7,6 +7,12 @@ import pandas as pd
 import pymongo
 from fuzzywuzzy import fuzz, process
 from pathlib import Path
+from json import dump, dumps, loads
+from dotenv import load_dotenv
+from os import environ
+from os.path import join, dirname
+
+load_dotenv(join(dirname(__file__), ".env"))
 
 #create function that separates 1 entry column into multiple entries to pass to next function
 def seperate(text):
@@ -133,15 +139,11 @@ def preprocess(string):#function that is acctually called
 # Function to connect to database
 def get_database():  
     # Creates a connection to MongoDB
-    client = pymongo.MongoClient("mongodb://root:Lsfr5n3J0Jib@ec2-52-203-105-125.compute-1.amazonaws.com:27017/shoppingStories?authSource=admin&readPreference=primary&ssl=false")
+    client = pymongo.MongoClient(environ.get("MONGO_LOGIN_STRING"))
 
     # Returns the database collection we'll be using
     return client["shoppingStories"]
  
-# Allows many files can reuse the function get_database()
-if __name__ == "__main__":    
-    # Get the database
-    db = get_database()
 
 db = get_database()   # Creates a varibale for the database
 lem = nltk.WordNetLemmatizer()  # Initializes lemmatizer
@@ -151,6 +153,8 @@ qRatio = fuzz.QRatio    # Scorer for string comparison
 # =========================================== #
 #    Generating  Lists From Database Data     #
 # =========================================== #
+
+### TODO: CACHE THIS INFORMATION SO WE DON'T DO IT EVERY SINGLE TIME WE IMPORT THIS FILE
 
 # Generates dataframes for the database collections
 places_df = pd.DataFrame(db["places"].find())
@@ -451,7 +455,10 @@ def alphaFirstParse(array,transDict,transReview,peopleArray,placesArray,otherIte
         checkForCost(array,idx,transDict,transReview,placesArray,peopleArray,otherItems)
 
     if transDict == transactionObject:
-        transReview.append("Error: Transaction in unrecognizeable pattern.")
+        transReview.append(f"Error: Transaction {array} in unrecognizeable pattern.")
+    
+    if transReview:
+        print(transReview)
 
 
 # Determines if  transaction is a trade/bartern transaction
@@ -3214,14 +3221,7 @@ def parse_transaction(transArr):    # sourcery skip: hoist-statement-from-loop
               
     return [allTransactionsList, peopleArray, placesArray, transactionType,transReview]
 
-# Function to connect to database
-def get_database():  
-    # Creates a connection to MongoDB
-    client = pymongo.MongoClient("mongodb://root:Lsfr5n3J0Jib@ec2-52-203-105-125.compute-1.amazonaws.com:27017/shoppingStories?authSource=admin&readPreference=primary&ssl=false")
 
-    # Returns the database collection we'll be using
-    return client["shoppingStories"]
- 
 #create function that separates 1 entry column into multiple entries to pass to next function
 def seperate(text):
   #will always return an array
@@ -3408,14 +3408,14 @@ def parse(df):
     transcriber_time = df.iloc[0][0]
     filename = df.iloc[0][1]
     # print(f'transcriber: {transcriber_time}\nfilename: {filename}')
-    df.at[1,'[Transcriber/Time]'] = np.nan
-    df.at[1,'[File Name]'] = np.nan
+    df.at[1,'[Transcriber/Time]'] = None
+    df.at[1,'[File Name]'] = None
     df.at[2,'[Transcriber/Time]'] = transcriber_time
     df.at[2,'[File Name]'] = filename
     # df.drop(labels = 1, axis = 0)
     df = df.iloc[1:]
     # df.head()
-    
+    df.fillna('', inplace=True)
     
     temp_entry = df['Entry']
     entry_mat = []
@@ -3602,8 +3602,8 @@ def parse(df):
                 entry_obj['entry'] = entry[counter]
                 entry_obj['money'] = money_obj
                 entry_obj['__v'] = 0
-                entry_obj['createdAt'] = datetime.datetime.utcnow()
-                entry_obj['updatedAt'] = datetime.datetime.utcnow()
+                entry_obj['createdAt'] = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+                entry_obj['createdAt'] = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
                 entry_obj['errorReview'] = transaction[4]
                 
                 
@@ -3673,25 +3673,36 @@ def parse(df):
 
         # increment
         counter+=1
-        print(entry_obj_list[0])
+        # print(entry_obj_list[0])
+
     return entry_obj_list
 
 
     # --------------------------------------------------------------------
 
-def main():
-    cwd = Path.cwd()
-    fp = cwd / 'code/C_1760_002_FINAL_2.xlsx'
+def parse_file(filePath):
     # print(f'dir is : {above}')
 
-    df = pd.read_excel(fp)
+    df = pd.read_excel(filePath)
 
     for idx in range(0, df.shape[0]-1):
         if str(df['EntryID'][idx+1])[:-1] == str(df['EntryID'][idx]):
             df = df.reset_index(drop=True)
 
     entry_objs = parse(df)
-    result_ids = db.parsedEntries.insert_many(entry_objs)
+    # # result_ids = db.parsedEntries.insert_many(entry_objs)
+    # file = open('out.json', 'w')
+    # dump(entry_objs, file)
+    # file.close()
+    # # print(type(entry_objs[0]["createdAt"]))
+    # for x in entry_objs:
+    #     print(x)
+    #     input()
+    return entry_objs
 
 if __name__ == '__main__':
-    main()
+    from sys import argv
+    if len(argv) > 1:
+        parse_file(argv[1])
+    else:
+        print("Error, please provide an excel file to parse")
