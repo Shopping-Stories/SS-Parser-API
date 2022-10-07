@@ -1,4 +1,5 @@
-python3 -m venv ..\parserEnv
+cd setup_scripts
+python -m venv ..\parserEnv
 call ..\parserEnv\Scripts\activate.bat
 pip install -r ..\requirements.txt
 python .\setup.py
