@@ -27,4 +27,4 @@ sudo chmod +x /usr/bin/nginx
 /usr/bin/nginx
 nginx -s start
 cd ..
-gunicorn -w 3 --forwarded-allow-ips="*" api_entry:incoming
+gunicorn -w 2 -k "gthread" --threads 2 --forwarded-allow-ips="*" api_entry:incoming
