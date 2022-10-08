@@ -24,6 +24,7 @@ sudo mkdir -p  /usr/local/etc/nginx || true
 sudo cp ./nginx.conf /etc/nginx/nginx.conf
 sudo cp ./nginx.conf  /usr/local/etc/nginx/nginx.conf
 sudo cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
+sudo chmod 777 /var/log/nginx/error.log
 sudo chmod +x /usr/sbin/nginx
 /usr/sbin/nginx
 nginx -s start
