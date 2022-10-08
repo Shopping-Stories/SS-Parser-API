@@ -26,6 +26,7 @@ sudo cp ./nginx.conf  /usr/local/etc/nginx/nginx.conf
 sudo cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
 sudo chmod 777 /var/log/nginx/error.log
 sudo chmod +x /usr/sbin/nginx
+sudo chmod 777 /var/log/nginx/access.log
 /usr/sbin/nginx
 nginx -s start
 cd ..
