@@ -2,7 +2,7 @@
 cd setup_scripts
 sudo apt install -y python3-venv
 python3 -m venv ../parserEnv
-source ../parserEnv/Scripts/activate
+source ../parserEnv/bin/activate
 pip install -r ../requirements.txt
 python ./setup.py
 sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring
