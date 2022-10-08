@@ -3,6 +3,7 @@ cd setup_scripts
 sudo apt install -y python3-venv
 python3 -m venv ../parserEnv
 source ../parserEnv/bin/activate
+pip install --upgrade pip
 pip install -r ../requirements.txt
 python ./setup.py
 sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring
@@ -27,7 +28,7 @@ sudo cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
 sudo chmod 777 /var/log/nginx/error.log
 sudo chmod +x /usr/sbin/nginx
 sudo chmod 777 /var/log/nginx/access.log
-/usr/sbin/nginx
+sudo /usr/sbin/nginx
 nginx -s start
 cd ..
 gunicorn -w 2 -k "gthread" --threads 2 --forwarded-allow-ips="*" api_entry:incoming
