@@ -30,4 +30,6 @@ sudo chmod 777 /var/log/nginx/access.log
 sudo service nginx stop ||  true
 sudo service nginx start
 cd ..
-gunicorn -w 3 -k uvicorn.workers.UvicornWorker -b 'unix:/tmp/gunicorn.sock' --forwarded-allow-ips="*" api_entry:incoming
+sudo pkill gunicorn || true
+gunicorn -w 3 -k uvicorn.workers.UvicornWorker -b 'unix:/tmp/gunicorn.sock' --forwarded-allow-ips="*" api_entry:incoming &
+disown -h -r
