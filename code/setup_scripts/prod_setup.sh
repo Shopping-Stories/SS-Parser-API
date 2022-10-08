@@ -32,4 +32,4 @@ sudo service nginx start
 cd ..
 sudo pkill gunicorn || true
 gunicorn -w 3 -k uvicorn.workers.UvicornWorker -b 'unix:/tmp/gunicorn.sock' --forwarded-allow-ips="*" api_entry:incoming &
-disown -h -r
+disown

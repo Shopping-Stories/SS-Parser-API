@@ -7,3 +7,4 @@ git checkout .
 git pull
 chmod +x ./setup_scripts/prod_setup.sh
 ./setup_scripts/prod_setup.sh
+disown
