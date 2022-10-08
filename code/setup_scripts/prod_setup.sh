@@ -1,6 +1,5 @@
 #!/bin/bash
 cd setup_scripts
-sudo apt install -y python3-venv
 python3 -m venv ../parserEnv
 source ../parserEnv/bin/activate
 pip install --upgrade pip
@@ -28,6 +27,7 @@ sudo cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
 sudo chmod 777 /var/log/nginx/error.log
 sudo chmod +x /usr/sbin/nginx
 sudo chmod 777 /var/log/nginx/access.log
-sudo /usr/sbin/nginx
+sudo service nginx stop
+sudo service nginx start
 cd ..
 gunicorn -w 3 -k uvicorn.workers.UvicornWorker -b 'unix:/tmp/gunicorn.sock' --forwarded-allow-ips="*" api_entry:incoming
