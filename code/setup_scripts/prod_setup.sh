@@ -30,4 +30,4 @@ sudo chmod +x /usr/sbin/nginx
 sudo chmod 777 /var/log/nginx/access.log
 sudo /usr/sbin/nginx
 cd ..
-gunicorn -w 2 -k "gthread" --threads 2 --forwarded-allow-ips="*" api_entry:incoming
+gunicorn -w 3 -k uvicorn.workers.UvicornWorker -b 'unix:/tmp/gunicorn.sock' --forwarded-allow-ips="*" api_entry:incoming
