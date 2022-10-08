@@ -24,8 +24,8 @@ sudo mkdir -p  /usr/local/etc/nginx || true
 sudo cp ./nginx.conf /etc/nginx/nginx.conf
 sudo cp ./nginx.conf  /usr/local/etc/nginx/nginx.conf
 sudo cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
-sudo chmod +x /usr/bin/nginx
-/usr/bin/nginx
+sudo chmod +x /usr/sbin/nginx
+/usr/sbin/nginx
 nginx -s start
 cd ..
 gunicorn -w 2 -k "gthread" --threads 2 --forwarded-allow-ips="*" api_entry:incoming
