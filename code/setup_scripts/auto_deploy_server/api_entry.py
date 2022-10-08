@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 import uvicorn
-import os
+from subprocess import Popen
 
 incoming = FastAPI()
 
 @incoming.get("/")
 async def main():
-    os.system("./redeploy.sh")
+    Popen("./redeploy.sh", shell=True)
     return {"message": "Redeploying..."}
 
 if __name__ == "__main__":
