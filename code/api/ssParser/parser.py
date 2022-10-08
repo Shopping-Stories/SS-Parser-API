@@ -3410,6 +3410,7 @@ def parse(df):
     # print(f'transcriber: {transcriber_time}\nfilename: {filename}')
     df.at[1,'[Transcriber/Time]'] = None
     df.at[1,'[File Name]'] = None
+    print(transcriber_time)
     df.at[2,'[Transcriber/Time]'] = transcriber_time
     df.at[2,'[File Name]'] = filename
     # df.drop(labels = 1, axis = 0)
