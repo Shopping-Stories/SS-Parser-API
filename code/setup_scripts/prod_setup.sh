@@ -29,6 +29,5 @@ sudo chmod 777 /var/log/nginx/error.log
 sudo chmod +x /usr/sbin/nginx
 sudo chmod 777 /var/log/nginx/access.log
 sudo /usr/sbin/nginx
-nginx -s start
 cd ..
 gunicorn -w 2 -k "gthread" --threads 2 --forwarded-allow-ips="*" api_entry:incoming
