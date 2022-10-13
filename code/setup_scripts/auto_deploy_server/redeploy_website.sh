@@ -2,9 +2,8 @@
 sudo pkill node || true
 cd ..
 cd shopping-stories/website
-git checkout .
+git checkout preprod
 git pull
-mv package_linux.json package.json
 npm install
 npm run build
 npm run start &
