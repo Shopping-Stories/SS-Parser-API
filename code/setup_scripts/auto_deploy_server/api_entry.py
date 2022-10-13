@@ -4,13 +4,23 @@ from subprocess import Popen
 incoming = FastAPI()
 
 @incoming.get("/")
-async def main():
+async def gmain():
     Popen("./redeploy.sh", shell=True)
     return {"message": "Redeploying..."}
 
 @incoming.post("/")
-async def main():
+async def pmain():
     Popen("./redeploy.sh", shell=True)
+    return {"message": "Redeploying..."}
+
+@incoming.get("/website")
+async def gweb():
+    Popen("./redeploy_website.sh", shell=True)
+    return {"message": "Redeploying..."}
+
+@incoming.post("/website")
+async def pweb():
+    Popen("./redeploy_website.sh", shell=True)
     return {"message": "Redeploying..."}
 
 
