@@ -3707,9 +3707,9 @@ def parse_file(filePath):
 
     entry_objs = [x for x in entry_objs if is_good_entry(x)]
     
-    for x in entry_objs:
-        print(x)
-        input()
+    # for x in entry_objs:
+    #     print(x)
+    #     input()
 
     return entry_objs
 
