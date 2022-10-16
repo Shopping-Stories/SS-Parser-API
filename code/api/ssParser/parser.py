@@ -154,7 +154,6 @@ qRatio = fuzz.QRatio    # Scorer for string comparison
 #    Generating  Lists From Database Data     #
 # =========================================== #
 
-### TODO: CACHE THIS INFORMATION SO WE DON'T DO IT EVERY SINGLE TIME WE IMPORT THIS FILE
 
 # Generates dataframes for the database collections
 places_df = pd.DataFrame(db["places"].find())
@@ -3435,7 +3434,6 @@ def parse(df):
         temp = parse_transaction(em)
         parsed_transactions.append(temp)
 
-
     # returned entry obj
     entry_obj_list = []
 
@@ -3460,6 +3458,8 @@ def parse(df):
     year = df['Year'].tolist()
     month = df['_Month'].tolist()
     day = df['Day'].tolist()
+
+    # df.to_csv("out.csv")
 
     entry = df['Entry'].tolist()
 
@@ -3506,10 +3506,14 @@ def parse(df):
 
         # date obj
         date_obj = {}
-        date_obj["day"] = datetime.datetime.now().day
-        date_obj["month"] = datetime.datetime.now().month
-        date_obj["year"] = datetime.datetime.now().year
-        date_obj["fullDate"] = int(datetime.datetime.utcnow().strftime('%Y%m%d'))
+        date_obj["day"] = day[counter]
+        date_obj["month"] = month[counter]
+        date_obj["year"] = year[counter]
+        try:
+            date_obj["fullDate"] = int(datetime.date(int(year[counter]), int(month[counter]), int(day[counter])).strftime("%Y%m%d"))
+        except ValueError:
+            date_obj["fullDate"] = None    
+        
         # change to an appended datetime obj
         # date_obj['fullDate'] = None
 
@@ -3695,9 +3699,18 @@ def parse_file(filePath):
     # dump(entry_objs, file)
     # file.close()
     # # print(type(entry_objs[0]["createdAt"]))
-    # for x in entry_objs:
-    #     print(x)
-    #     input()
+    notAllNullableAccHolder = ["prefix", "accountFirstName", "accountLastName", "suffix"]
+    notAllNullableMeta = ["reel", "owner", "store"]
+
+    def is_good_entry(x):
+        return not (x["dateInfo"]["year"] == '-')
+
+    entry_objs = [x for x in entry_objs if is_good_entry(x)]
+    
+    for x in entry_objs:
+        print(x)
+        input()
+
     return entry_objs
 
 if __name__ == '__main__':
