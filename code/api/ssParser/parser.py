@@ -328,7 +328,9 @@ def intFirstParse(array,transDict,transReview,peopleArray,placesArray,otherItems
 def alphaFirstParse(array,transDict,transReview,peopleArray,placesArray,otherItems): # sourcery skip: merge-duplicate-blocks, merge-nested-ifs, remove-redundant-if
     
     def checkForCost(array,index,transDict,transReview,placesArray,peopleArray,otherItems):
-        if transDict["totalCost"]=="" and transDict["unitCost"]=="" and (array[-1][0].isdigit()==True or ".." in array[-1]):
+        if array[-1] == "":
+            pass
+        elif transDict["totalCost"]=="" and transDict["unitCost"]=="" and (array[-1][0].isdigit()==True or ".." in array[-1]):
             index = array.index(array[-1])
             x = getCost(array,index,transDict,transReview,placesArray,peopleArray,otherItems) 
             index = compareIdx(idx,x)
@@ -337,7 +339,6 @@ def alphaFirstParse(array,transDict,transReview,peopleArray,placesArray,otherIte
     idx = 0
     if array[0] in ["the", "a"]:  # Removes preceding "the"/"a"
         array.pop(0)
-
     # Checks what word/phrase/symbol the transaction begins with
     if fuzz.ratio(lem.lemmatize(array[idx]), "charge") >= 90:  
         beginsCharge(array,idx,transDict,transReview,peopleArray,placesArray,otherItems)
@@ -457,7 +458,7 @@ def alphaFirstParse(array,transDict,transReview,peopleArray,placesArray,otherIte
         transReview.append(f"Error: Transaction {array} in unrecognizeable pattern.")
     
     if transReview:
-        print(transReview)
+        print(transReview, array)
 
 
 # Determines if  transaction is a trade/bartern transaction
@@ -863,19 +864,19 @@ def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherIt
             idx = idx-1
             variantsArray = []
             variantsArray.append(array[idx])
-            transReview.append("Review: Confirm ADJECTIVE.")
+            transReview.append(f"Review: Confirm ADJECTIVE {variantsArray}.")
             idx = getAdjs(idx)
         elif 0<idx-2 and lem.lemmatize(array[idx-2]) in qualifierList:  # Accounts for 2 ADJECTIVEs
             idx = idx-2
             variantsArray = []
             variantsArray.append(array[idx])
             variantsArray.append(array[idx-1])
-            transReview.append("Review: Confirm ADJECTIVES.")
+            transReview.append(f"Review: Confirm ADJECTIVES {variantsArray}. ")
             idx = getAdjs(idx)
 
 # Runs the keyword functions
 def searchAllKeywords(array,idx,transDict,transReview,peopleArray,placesArray,otherItems):
-
+    print(array)
     if "per" in array:  # Checks for "per" keyword
         index = None
         per_Keyword(array,index,transDict,transReview,peopleArray,placesArray,otherItems)
@@ -1267,7 +1268,7 @@ def QQI_Pattern(array,idx,transDict,transReview,peopleArray,placesArray,otherIte
                     transDict["item"] = "Tobacco"
                     idx = afterItemCheck(array,idx,transDict,transReview,peopleArray,placesArray,otherItems)
                     idx = compareIdx(idx,x)
-            elif len(array)>idx+1 and array[idx] == "of" and array[id+1] not in ignore and process.extractBests(lem.lemmatize(array[idx+1]), itemList, scorer=tsr, score_cutoff=95):
+            elif len(array)>idx+1 and array[idx] == "of" and array[idx+1] not in ignore and process.extractBests(lem.lemmatize(array[idx+1]), itemList, scorer=tsr, score_cutoff=95):
                 idx+=1
                 idx = getItem(array,idx,transDict,transReview,peopleArray,placesArray,otherItems)
                 if transDict["quantity"] == "" and process.extractBests(transDict["item"],nonItems,scorer=tsr,score_cutoff=95)==[]:
@@ -2031,7 +2032,7 @@ def beginsCash(array,idx,transDict,transReview,peopleArray,placesArray,otherItem
             array[idx] = ""  # Removes "per"
             idx+=1
             temp = per_Keyword(array,idx,transDict,transReview,peopleArray,placesArray,otherItems)
-            if temp !=0:
+            if temp !=0 and temp is not None:
                 idx = idx+temp
                 x = getCost(array,idx,transDict,transReview,peopleArray,placesArray,otherItems)
                 idx = compareIdx(idx,x)
@@ -2912,6 +2913,7 @@ def by_Keyword(array, transReview,placesArray,peopleArray):
 
 # Handles the "for" keyword
 def for_Keyword(array,idx,transDict,transReview,peopleArray,placesArray,otherItems):    # sourcery skip: low-code-quality
+    # f[x for x in nltk.chunk.ne_chunk(nltk.pos_tag(array))]
     if idx is None:   # Sets index
         idx = array.index('for')  # Gets the array index for "for"
     array[idx] = ""  # Removes "for"
