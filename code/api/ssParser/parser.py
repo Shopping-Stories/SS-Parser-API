@@ -876,7 +876,7 @@ def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherIt
 
 # Runs the keyword functions
 def searchAllKeywords(array,idx,transDict,transReview,peopleArray,placesArray,otherItems):
-    print(array)
+    
     if "per" in array:  # Checks for "per" keyword
         index = None
         per_Keyword(array,index,transDict,transReview,peopleArray,placesArray,otherItems)
