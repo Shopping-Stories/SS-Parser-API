@@ -760,9 +760,8 @@ def reverseFindName(array,idx,transReviwe,peopleArray):
 # Reverse parses transactions
 def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherItems):
     idx = len(array)-1
-
     # Helper Function to account for ADJECTIVES
-    def getAdjs():
+    def getAdjs(idx):
         transDict["qualifier"] = array[idx]
         idx = idx-1
         if idx>0 and array[idx][0].isdigit() == True and array[idx].isalnum() == False: # Checks for QUANTITY
@@ -777,15 +776,17 @@ def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherIt
                 else:
                     transDict["category"] = array[idx]
                     transReview.append("REVIEW: Confirm Service")
+        return idx
 
     # Helper Function to account for SERVICES
-    def servicesHelper():
+    def servicesHelper(idx):
         if idx>0 and array[idx] not in ignore and process.extractBests(lem.lemmatize(array[idx]),servicesList,scorer=tsr,score_cutoff=90): 
             transDict["category"] = process.extractBests(lem.lemmatize(array[idx]),servicesList,scorer=tsr,score_cutoff=90)[0][0]
         elif len(array[idx])>3 and array[idx] not in ignore and (array[idx][-3:]== "ing" or array[idx][-4:]== "ings") and process.extractBests(array[idx],ingList,scorer=fuzz.QRatio,score_cutoff=90)==[]:
             transDict["category"] = array[idx]
         elif idx > 1 and array[idx] == "of" and array[idx-1] not in ignore and process.extractBests(lem.lemmatize(array[idx-1]),servicesList,scorer=tsr,score_cutoff=90) or lem.lemmatize(array[idx-1])[-3:]=="ing":
             transDict["category"] = array[idx-1]
+        return idx
 
     # Checks if last element is a COST
     if len(array)>3 and array[idx] == "order" and array[idx-1] == "per" and array[idx-2][0].isdigit()==True:
@@ -797,7 +798,6 @@ def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherIt
     # Checks if "at" precedes COST
     if 0<idx and array[idx] == "at":
         idx = idx-1
-
     if 0<idx and array[idx] in qualifierList:   # Accounts for ITEMS that are also QUALIFIERS
         transDict["item"] = array[idx]
         idx = idx-1
@@ -839,11 +839,11 @@ def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherIt
                 if 0<idx and array[0] in ["a", "an"]:  # Checks if "a" or "an" precedes QUALIFIER
                     transDict["quantity"] = "1"    # Saves QUANTITY as 1
                     idx = idx-1
-                    servicesHelper()  # Checks for SERVICES
+                    idx = servicesHelper(idx)  # Checks for SERVICES
                 elif 0<idx and array[idx][0].isdigit()==True:  # Checks if a digit precedes QUALIFIER
                     transDict["quantity"] = array[idx]   # Saves QUANTITY
                     idx = idx-1
-                    servicesHelper()  # Checks for SERVICES
+                    idx = servicesHelper(idx)  # Checks for SERVICES
         elif 0<idx and lem.lemmatize(array[idx]) in qualifierList:  # Checks for QUALIFIER
             transDict["qualifier"] = array[idx]
             idx = idx-1
@@ -864,14 +864,14 @@ def reverseParse(array,idx,transDict,transReview,peopleArray,placesArray,otherIt
             variantsArray = []
             variantsArray.append(array[idx])
             transReview.append("Review: Confirm ADJECTIVE.")
-            getAdjs()
+            idx = getAdjs(idx)
         elif 0<idx-2 and lem.lemmatize(array[idx-2]) in qualifierList:  # Accounts for 2 ADJECTIVEs
             idx = idx-2
             variantsArray = []
             variantsArray.append(array[idx])
             variantsArray.append(array[idx-1])
             transReview.append("Review: Confirm ADJECTIVES.")
-            getAdjs()
+            idx = getAdjs(idx)
 
 # Runs the keyword functions
 def searchAllKeywords(array,idx,transDict,transReview,peopleArray,placesArray,otherItems):
@@ -3404,6 +3404,29 @@ def preprocess(string):#function that is acctually called
 # code for the function that parses everything
 def parse(df):
     
+    def get_col(df, colname):
+        colname2 = colname[:]
+        if colname2[0] != "[":
+            colname2 = "[" + colname2 + "]"
+        else:
+            colname2 = colname.strip("[]")
+        if colname2 in df:
+            return df[colname2]
+        elif colname in df:
+            return df[colname]
+        else:
+            if colname == "Folio Year":
+                return get_col(df, "Year")
+            elif colname == "Colony Currency":
+                return get_col(df, "Colony")
+            elif len(col := colname.split(" ")) > 1:
+                if col[1] == "Sterling":
+                    return get_col(df, col[0])
+                elif col[1] == "Currency":
+                    return get_col(df, col[0] + ".1")
+                raise KeyError(f"Column with name {colname} not in df")
+            raise KeyError(f"Column with name {colname} not in df")
+
     transcriber_time = df.iloc[0][0]
     filename = df.iloc[0][1]
     # print(f'transcriber: {transcriber_time}\nfilename: {filename}')
@@ -3438,51 +3461,51 @@ def parse(df):
     entry_obj_list = []
 
     # make lists for each column
-    transcriber_time = df['Transcriber/Time'].tolist()
-    file_name = df['File Name'].tolist()
-    reel = df['Reel'].tolist()
-    owner = df['Owner'].tolist()
-    store = df['Store'].tolist()
-    folio_year = df['Folio Year'].tolist()
-    folio_page = df['Folio Page'].tolist()
-    entry_id = df['EntryID'].tolist()
-    # marginalia = df['Marginalia']
-    prefix = df['Prefix'].tolist()
-    account_firstname = df['Account First Name'].tolist()
-    account_lastname = df['Account Last Name'].tolist()
-    suffix = df['Suffix'].tolist()
-    profession = df['Profession'].tolist()
-    location = df['Location'].tolist()
-    reference = df['Reference'].tolist()
-    drcr = df['Dr/Cr'].tolist()
-    year = df['Year'].tolist()
-    month = df['_Month'].tolist()
-    day = df['Day'].tolist()
+    transcriber_time = get_col(df, 'Transcriber/Time').tolist()
+    file_name = get_col(df, 'File Name').tolist()
+    reel = get_col(df, 'Reel').tolist()
+    owner = get_col(df, 'Owner').tolist()
+    store = get_col(df, 'Store').tolist()
+    folio_year = get_col(df, 'Folio Year').tolist()
+    folio_page = get_col(df, 'Folio Page').tolist()
+    entry_id = get_col(df, 'EntryID').tolist()
+    # marginalia = get_col(df, 'Marginalia']
+    prefix = get_col(df, 'Prefix').tolist()
+    account_firstname = get_col(df, 'Account First Name').tolist()
+    account_lastname = get_col(df, 'Account Last Name').tolist()
+    suffix = get_col(df, 'Suffix').tolist()
+    profession = get_col(df, 'Profession').tolist()
+    location = get_col(df, 'Location').tolist()
+    reference = get_col(df, 'Reference').tolist()
+    drcr = get_col(df, 'Dr/Cr').tolist()
+    year = get_col(df, 'Year').tolist()
+    month = get_col(df, '_Month').tolist()
+    day = get_col(df, 'Day').tolist()
 
     # df.to_csv("out.csv")
 
-    entry = df['Entry'].tolist()
+    entry = get_col(df, 'Entry').tolist()
 
     # CHANGE THIS TO EXTRACT INFO
     # people = df['PEOPLE']
     # places = df['PLACES']
 
-    folio_reference = df['Folio Reference'].tolist()
+    folio_reference = get_col(df, 'Folio Reference').tolist()
 
     # CHANGE THIS TO EXTRACT INFO
     # entry_type = df['ENTRY TYPE']
     # ledger = df['LEDGER']
 
-    quantity = df['Quantity'].tolist()
-    commodity = df['Commodity'].tolist()
-    SL = df['L Sterling'].tolist()
-    SS = df['s Sterling'].tolist()
-    SD = df['d Sterling'].tolist()
-    colony = df['Colony Currency'].tolist()
-    CL = df['L Currency'].tolist()
-    CS = df['s Currency'].tolist()
-    CD = df['d Currency'].tolist()
-    final = df['Final'].tolist()
+    quantity = get_col(df, 'Quantity').tolist()
+    commodity = get_col(df, 'Commodity').tolist()
+    SL = get_col(df, 'L Sterling').tolist()
+    SS = get_col(df, 's Sterling').tolist()
+    SD = get_col(df, 'd Sterling').tolist()
+    colony = get_col(df, 'Colony Currency').tolist()
+    CL = get_col(df, 'L Currency').tolist()
+    CS = get_col(df, 's Currency').tolist()
+    CD = get_col(df, 'd Currency').tolist()
+    final = get_col(df, 'Final').tolist()
 
     counter = 0
 
@@ -3688,10 +3711,20 @@ def parse_file(filePath):
     # print(f'dir is : {above}')
 
     df = pd.read_excel(filePath)
-
+    
+    n = 0
+    while "EntryID" not in df and "[EntryID]" not in df:
+        n += 1
+        df = pd.read_excel(filePath, skiprows=n)
     for idx in range(0, df.shape[0]-1):
-        if str(df['EntryID'][idx+1])[:-1] == str(df['EntryID'][idx]):
-            df = df.reset_index(drop=True)
+        if "EntryID" in df:
+            if str(df['EntryID'][idx+1])[:-1] == str(df['EntryID'][idx]):
+                df = df.reset_index(drop=True)
+        else:
+            if str(df['[EntryID]'][idx+1])[:-1] == str(df['[EntryID]'][idx]):
+                df = df.reset_index(drop=True)
+    
+
 
     entry_objs = parse(df)
     # # result_ids = db.parsedEntries.insert_many(entry_objs)
@@ -3716,6 +3749,8 @@ def parse_file(filePath):
 if __name__ == '__main__':
     from sys import argv
     if len(argv) > 1:
-        parse_file(argv[1])
+        out = parse_file(argv[1])
+        with open("out.json", 'w') as file:
+            dump(out, file)
     else:
         print("Error, please provide an excel file to parse")
