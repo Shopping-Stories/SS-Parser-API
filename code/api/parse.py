@@ -4,7 +4,7 @@
 from decimal import ROUND_CEILING
 from fastapi import APIRouter
 from json import loads
-from .ssParser.parser import parse_file
+from .ssParser.ss_parser import parse_file
 
 router = APIRouter()
 

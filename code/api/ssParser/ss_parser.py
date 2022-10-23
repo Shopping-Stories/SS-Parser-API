@@ -3161,7 +3161,7 @@ def parse_transaction(transArr):    # sourcery skip: hoist-statement-from-loop
  # Initializes error array for entry
     entryErrors = []
     parsedTransactionsArray = []
-
+    
     i = 0
     # Converts all array elememts to lowercase
     # print(type(transArr))
@@ -3444,9 +3444,11 @@ def parse(df):
     temp_entry = df['Entry']
     entry_mat = []
     for e in temp_entry:
+        if e == "":
+            continue
         temp = preprocess(e)
         entry_mat.append(temp)
-
+    
     # make repeated idxs dict
     repeated_idxs = {}
     for x in range(0,len(entry_mat)):
