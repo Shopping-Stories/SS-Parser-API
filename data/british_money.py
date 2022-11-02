@@ -6,7 +6,7 @@ from itertools import chain
 # Class to make dealing with money easier, implements arithmetic with money as well as dict-style accessing of attributes
 # e.g. if type(a) is Money, a["pounds"] == a["Pounds"] == a["L"] is the amount of pounds in the transaction
 class Money:
-    def __init__(self, moneystr=None, is_combo=False, l=0, s=0, d=0, f=0, tot_f=None, context=None) -> None:
+    def __init__(self, moneystr=None, l=0, s=0, d=0, f=0, tot_f=None, context=None) -> None:
         
         farthings = 0
         pounds = 0
@@ -18,63 +18,68 @@ class Money:
             self.totalFarthings = tot_f
         else:
             if moneystr is not None:
-                if is_combo:
-                    raise AssertionError("Money string processing for combo strings is not implemented.")
-                else:
-                    if match(r"\d+[Lsdp]", moneystr.strip()):
-                        unit = moneystr[-1]
-                        money = moneystr[:-1]
-                        if unit == "L":
-                            pounds = int(money)
-                        elif unit == "s":
-                            shillings = int(money)
-                        elif unit in "dp":
-                            pennies = int(money)
-                        else:
-                            raise ValueError(f"This error should never be raised, panic if it is. It was probably raised by this: {moneystr} in context {context}")
+                if match(r"\d+[Lsdp]", moneystr.strip()):
+                    moneystr = moneystr.split(" ")
+                    unit = moneystr[0][-1]
+                    money = moneystr[0][:-1]
+                    if unit == "L":
+                        pounds = int(money)
+                        if len(moneystr) > 1:
+                            shillings = int(numeric(moneystr[1]) * 20)
+                    elif unit == "s":
+                        shillings = int(money)
+                        if len(moneystr) > 1:
+                            pennies = int(numeric(moneystr[1]) * 12)
+                    elif unit in "dp":
+                        pennies = int(money)
+                        if len(moneystr) > 1:
+                            farthings = int(numeric(moneystr[1]) * 4)
+                    else:
+                        raise ValueError(f"This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
+                    
 
-                    elif match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", moneystr.strip()):
-                        moneystr = moneystr.split("/")
-                        if len(moneystr) == 2:
-                            if len(doublesplit := split(r"\s+", moneystr[1])) > 1:
-                                if len(doublesplit) > 2:
+                elif match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", moneystr.strip()):
+                    moneystr = moneystr.split("/")
+                    if len(moneystr) == 2:
+                        if len(doublesplit := split(r"\s+", moneystr[1])) > 1:
+                            if len(doublesplit) > 2:
+                                raise ValueError(f"Bad money string {moneystr}.")
+                            try:
+                                if numeric(doublesplit[1]) < 1 and numeric(doublesplit[1]) > 0:
+                                    s, crap = moneystr
+                                    p = doublesplit[0]
+                                    f = round(numeric(doublesplit[1]) * 4)
+                                    if s != ":":
+                                        shillings = int(s)
+                                    if p != ":":
+                                        pennies = int(p)
+                                    farthings = f
+                                else:
                                     raise ValueError(f"Bad money string {moneystr}.")
-                                try:
-                                    if numeric(doublesplit[1]) < 1 and numeric(doublesplit[1]) > 0:
-                                        s, crap = moneystr
-                                        p = doublesplit[0]
-                                        f = round(numeric(doublesplit[1]) * 4)
-                                        if s != ":":
-                                            shillings = int(s)
-                                        if p != ":":
-                                            pennies = int(p)
-                                        farthings = f
-                                    else:
-                                        raise ValueError(f"Bad money string {moneystr}.")
-                                except TypeError:
-                                    raise ValueError(f"Bad money string {moneystr}")
-                            else:
-                                s, p = moneystr
-                                if s != ":":
-                                    shillings = int(s)
-                                if p != ":":
-                                    pennies = int(p)
-
-                        elif len(moneystr) == 3:
-                            l, s, p = moneystr
-
-                            if l != ":":
-                                pounds = int(l)
+                            except TypeError:
+                                raise ValueError(f"Bad money string {moneystr}")
+                        else:
+                            s, p = moneystr
                             if s != ":":
                                 shillings = int(s)
                             if p != ":":
                                 pennies = int(p)
-                        
-                        else:
-                            raise ValueError(f"Money string {moneystr} was too long for the l/s/d format")
 
+                    elif len(moneystr) == 3:
+                        l, s, p = moneystr
+
+                        if l != ":":
+                            pounds = int(l)
+                        if s != ":":
+                            shillings = int(s)
+                        if p != ":":
+                            pennies = int(p)
+                    
                     else:
-                        raise ValueError(f"Money string {moneystr} did not match any known patterns for {is_combo=} in context {context}")
+                        raise ValueError(f"Money string {moneystr} was too long for the l/s/d format")
+
+                else:
+                    raise ValueError(f"Money string {moneystr} did not match any known patterns in context {context}")
             elif type(l) is int and type(s) is int and type(d) is int and type(f) is int:
                 pounds = l
                 shillings = s
@@ -106,7 +111,7 @@ class Money:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}")
                         try:
                             pennies = int(d[0])
-                            farthings = int(12 * numeric(d[1]))
+                            farthings = int(4 * numeric(d[1]))
                         except TypeError:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}.")
                     else:
@@ -190,6 +195,8 @@ class Money:
 
     def __eq__(self, other: Money) -> bool:
         if type(other) is not Money:
+            if other == 0:
+                return 0 == self.totalFarthings
             raise ValueError(f"Error: other {other} must be of type money")
         return self.totalFarthings == other.totalFarthings
 
