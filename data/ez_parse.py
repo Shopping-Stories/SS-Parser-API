@@ -297,7 +297,7 @@ def get_transactions(df: pd.DataFrame):
                                 cur_phrase = []
                         
                         # If we see a definite cardinal number or quantity, write it down as the amount
-                        elif info == "CARDINAL" or info == "QUANTITY" or info == "COMB.QUANTITY":
+                        elif info == "CARDINAL":
                             # Make sure that there is a noun after the amount
                             if i < len(entry) - 1:
                                 flag = False
@@ -319,7 +319,18 @@ def get_transactions(df: pd.DataFrame):
                             else:
                                 # Not an amount since it is at the end
                                 pass
-                            
+                        
+                        # If we have something labelled specifically as quantity, write it down as amount
+                        elif info == "QUANTITY" or info == "COMB.QUANTITY":
+                            transaction["amount"] = word
+                            # Remove the currently found item as it is definitely not right
+                            if "item" in transaction:
+                                del transaction["item"]
+                            if info == "COMB.QUANTITY":
+                                transaction["amount_is_combo"] = True
+                            else:
+                                transaction["amount_is_combo"] = False
+                        
                         
                         # If we see a preposition that is not telling us the transaction type, mark the start of a phrase
                         elif pos == "IN" and info != "TRANS":
