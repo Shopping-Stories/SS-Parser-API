@@ -1,6 +1,6 @@
 import pandas as pd
 from parser_utils import get_col, add_to_by, isNoun
-from re import split, match
+from re import split, match, search
 import spacy
 from itertools import chain
 
@@ -16,6 +16,13 @@ def preprocess(df: pd.DataFrame):
         big_entry = get_col(row, "Entry")
         if big_entry == "-" or big_entry == "" or big_entry is None or str(big_entry) == "nan":
             continue
+
+        # Remove "Ditto"
+        ditto = search("Ditto \[\w+\]", big_entry)
+        if ditto:
+            newRe = search("\[\w+\]", ditto.group())
+            newStr = (newRe.group())[1:-1]
+            big_entry = big_entry.replace(ditto.group(), newStr)
         
         # Split the entry by "    " or \n or \t
         smaller_entries = split(r"(?<!\s)([\n\t]|    )(?!\s)", big_entry)
