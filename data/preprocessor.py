@@ -18,7 +18,7 @@ def preprocess(df: pd.DataFrame):
             continue
 
         # Remove "Ditto"
-        ditto = search("Ditto\s*\[\w+\]", big_entry)
+        ditto = search("(DO|Do|DITTO|Ditto)\s*\[\w+\]", big_entry)
         if ditto:
             newRe = search("\[\w+\]", ditto.group())
             newStr = (newRe.group())[1:-1]
