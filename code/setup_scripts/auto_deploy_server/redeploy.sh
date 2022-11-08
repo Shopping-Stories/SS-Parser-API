@@ -5,6 +5,6 @@ cd ..
 cd shoppingstories-parser/code
 sudo git checkout .
 sudo git pull
-chmod +x ./setup_scripts/prod_setup.sh
+sudo chmod +x ./setup_scripts/prod_setup.sh
 ./setup_scripts/prod_setup.sh
 disown
