@@ -142,10 +142,6 @@ def get_transactions(df: pd.DataFrame):
 
     # For all rows in the preprocessed df
     for entries, row in rows:
-        # TODO: Ignore tobacco mark rows and column total rows for now
-        if "TM" in get_col(row, "Entry") or search(r"\sN\s\d", get_col(row, "Entry")):
-            continue
-        
         # Remember specific things about the row
         row_context = {}
 
@@ -188,6 +184,19 @@ def get_transactions(df: pd.DataFrame):
 
         # First check if it is a bad row, if so, make a mostly empty transaction with an error.
         if entries and entries[0] == "BAD_ENTRY":
+            add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
+            transaction = {}
+            add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
+            trans_in_row_counter += 1
+            # Break the transaction list when the account holder changes if a total has not occurred.
+            if transactions and "account_name" in transaction and "account_name" in transactions[-1] and transaction["account_name"] != transactions[-1]["account_name"]:
+                break_transactions = True
+            if break_transactions:
+                break_counter += 1
+            transactions.append(transaction)
+
+        # TODO: Ignore tobacco mark rows and column total rows for now, delete this later
+        elif "TM" in get_col(row, "Entry") or search(r"\sN\s\d", get_col(row, "Entry")):
             add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
             transaction = {}
             add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
