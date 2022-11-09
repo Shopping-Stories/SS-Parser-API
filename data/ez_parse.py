@@ -455,10 +455,11 @@ def get_transactions(df: pd.DataFrame):
                     if "errors" in row_context:
                         add_error(transaction, "Error from row context: " + str(row_context["errors"]), entry)
                     
-                    # Remember everything from the row that we haven't remembered already
+                    # Remember everything from the row that we haven't remembered already, except farthings
                     for key, value in row_context.items():
                         if key not in transaction:
-                            transaction[key] = value
+                            if "farthings" not in key:
+                                transaction[key] = value
 
 
                     # Break the transaction list when the account holder changes if a total has not occurred.
