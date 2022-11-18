@@ -56,7 +56,6 @@ def preprocess(df: pd.DataFrame):
         parsed_entries_in_row = []
         # For entry in row
         for entry in new_smaller_entries:
-            # print(entry)
             nlp = spacy.load("en_core_web_trf")
             entry = nlp(entry)
 
@@ -106,9 +105,6 @@ def preprocess(df: pd.DataFrame):
             # Token stack
             new_entry = []
 
-            # print()
-            # print(entry)
-            
             # Labels specific tokens, and attmepts to combine as many adjacent tokens as possible into larger tokens 
             for i, token in enumerate(entry):
                 # print(token.text, token.ent_type_, token.tag_)
@@ -269,8 +265,6 @@ def preprocess(df: pd.DataFrame):
                 else:
                     stack_append(token_stack, token)
 
-            # print(token_stack)
-            # print(new_entry)
             # If we detect weird characters (e.g. *), stop processing the row
             parsed_entries_in_row.append(token_stack)
             if any((x[2] == "XX" for x in token_stack)):

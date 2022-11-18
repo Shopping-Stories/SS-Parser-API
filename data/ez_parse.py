@@ -322,6 +322,10 @@ def get_transactions(df: pd.DataFrame):
                         elif "VB" in pos and "item" not in transaction and word[0].isupper():
                             transaction["item"] = word
 
+                        # If we see a verb in the transaction and it is in the object index, it is actually the item.
+                        elif "VB" in pos and word.lower() in item_set:
+                            transaction["item"] = word
+
                         # Same thing as above but for adjective/adverb
                         elif "JJ" in pos and "item" not in transaction and word.lower() in item_set:
                             transaction["item"] = word
@@ -587,7 +591,7 @@ def get_transactions(df: pd.DataFrame):
 
 
         # Yield transactions grouped by ends of lists of transactions
-        # TODO: Get [Subtotal tobacco] to work
+        # TODO: Get [Subtotal tobacco] to work and probably subtotals in general to work.
         if "is_ender" in row_context and row_context["is_ender"]:
             # Make sure there are errors in transactions with no money or commodity.
             add_errors_to_transactions()
