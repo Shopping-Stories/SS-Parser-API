@@ -576,6 +576,7 @@ def get_transactions(df: pd.DataFrame):
                 transactions[-1]["farthings"] = currency["farthings"]
                 transactions[-1]["money_obj"] = currency
             
+            # TODO: Add checks for commodity totaling contextless and move this outside this if statement
             if "Commodity" in row_context:
                 transactions[-1]["Commodity"] = row_context["Commodity"]
             if "Quantity" in row_context:
@@ -700,12 +701,10 @@ if __name__ == "__main__":
         file.close()
 
 # Known issues: 
-# By [entity that is not an item] does not work, often assumes the person is an item, but is not consistent. We need some way to classify if it is a person or entity vs if it is an item. Try: if there are no quantities or determiners it is person/entity
-# Amount words are handled inconsistently e.g. gallon, pounds are sometimes combined with the item and sometimes combined with the amount. We want them to always be combined with the amount. Fixable by making a list of all of them
-# Not making good use of when ent_type_ = ORG
-# Make a second pass on transactions in which the item is followed by a phrase and get them to work better
-# Does not support tobacco in transaction rather than in quantity/commodity columns
-# Sometimes we identify things like Cotton as people, which we do not want, probably check if the thing preceding it is a quantity/amount to fix
+# By [entity that is not an item] does not work, often assumes the person is an item, but is not consistent. We need some way to classify if it is a person or entity vs if it is an item. Try: if there are no quantities or determiners it is person/entity, this issue largely fixed by object index - low priority
+# Amount words are handled inconsistently e.g. gallon, pounds are sometimes combined with the item and sometimes combined with the amount. We want them to always be combined with the amount. Fixable by making a list of all of them - high priority
+# Not making good use of when ent_type_ = ORG - lowest priority
+# Make a second pass on transactions in which the item is followed by a phrase and get them to work better - mostly fixed by adding modifies to phrases - lowest priority
+# Does not support tobacco in transaction rather than in quantity/commodity columns - high priority
 # TODO: Fix parsing of solo unicode fraction in d parameter in Money class
-# TODO: Output bad entries in a meaningful format
 # Performance notes: If set lookups take a long time, we can reimplement the set to give us O(1) performance for failed lookups
