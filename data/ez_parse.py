@@ -141,6 +141,20 @@ def get_transactions(df: pd.DataFrame):
     break_counter = 0
     transactions_context = {}
 
+    def add_errors_to_transactions():
+            # Do a pass on all transactions, making sure they all have money or commodity listed on them.
+            # Add errors to transactions if they are missing these.
+            # We have to indirect it through this list because editing a list you are looping through produces strange behaviour.
+            to_add_errors = []
+            for i, transaction in enumerate(transactions):
+                if any([x not in transaction for x in ("pennies_ster", "pounds_ster", "shillings_ster")]) and any([x not in transaction for x in ("pounds", "shillings", "pennies")]) and any(["Commodity" not in transaction, "Quantity" not in transaction]):
+                    to_add_errors.append(i)
+            for i in to_add_errors:
+                if "context" in transactions[i]:
+                    add_error(transactions[i], f"No prices or commodities found in transaction.", transactions[i]["context"])
+                else:
+                    add_error(transactions[i], f"No prices or commodities found in transaction.", "")
+
     # For all rows in the preprocessed df
     for entries, row in rows:
         # Remember specific things about the row
@@ -214,19 +228,30 @@ def get_transactions(df: pd.DataFrame):
             # For all entries in the row
             for b_entry in entries:
                 for entry in handle_multiple_prices(b_entry):
+                    # Skip entries with nothing in them
+                    if len(entry) == 1:
+                        continue
+
                     # Keep track of all these things on an entry level
                     transaction = {}
                     nouns = []
                     phrase_depth = 0
                     phrases = []
-                    cur_phrase = []
+                    cur_phrase = {"modifies": "", "phrase": []}
                     poss_amounts = []
                     errors = []
                     trans_in_row_counter += 1
-                    
+
                     # For token in entry
                     for i, ex in enumerate(entry):
                         word, info, pos = ex
+                        if i - 1 >= 0:
+                            prev_word, prev_info, prev_pos = entry[i-1]
+                        else:
+                            prev_word = None
+                            prev_info = None
+                            prev_pos = None
+                        
                         # print(word, info, pos)
                         # Leftover code to uncombine coordinating conjunctions that failed to combine
                         if pos == "CC" and len(word.split(" ")) > 1:
@@ -272,7 +297,7 @@ def get_transactions(df: pd.DataFrame):
                             nouns.append((word, info, pos))
                             # If something is an organization, don't set it as the item
                             if info != "ORG" or word.lower() in item_set:
-                                if info == "Person" and word.lower() not in item_set:
+                                if (info == "PERSON" or info == "DATE") and word.lower() not in item_set:
                                     nouns.append((word, info, pos))
                                 else:
                                     transaction["item"] = word
@@ -280,6 +305,10 @@ def get_transactions(df: pd.DataFrame):
                                     if search(r"\s+Per\s+", transaction["item"]):
                                         transaction["item"] = split(r"\s+Per\s+", transaction["item"])[0]
                                         # TODO: Add the per to phrases if it is not already in there here.
+
+                        # If the preprocesser thinks we have an interjection but it is in the item set, it is probably the item
+                        elif "UH" in pos and word.lower() in item_set:
+                            transaction["item"] = word
 
                         # If we see a verb gerund (noun) and there is no item in our transaction, it is probably a misclassification
                         elif "VBG" in pos and "item" not in transaction:
@@ -292,22 +321,28 @@ def get_transactions(df: pd.DataFrame):
                         # If we see a verb and there is no item in our transaction and the verb is capitalized for some strange reason (i.e. its not a verb), mark it as our item
                         elif "VB" in pos and "item" not in transaction and word[0].isupper():
                             transaction["item"] = word
-                        
+
+                        # Same thing as above but for adjective/adverb
+                        elif "JJ" in pos and "item" not in transaction and word.lower() in item_set:
+                            transaction["item"] = word
+
                         # If we see something appearing to be a verb in a short entry it is probably the item 
                         elif len(entry) <= 4 and "VB" in pos and "item" not in transaction:
                             transaction["item"] = word
                         
                         # When we see nouns that are the object of phrases, only mark them as the item if the phrase starts with "for" or "of"
                         # as those are likely to be telling us what the transaction is FOR (of is often inside for e.g. for <verb gerund> of <item>) where verb gerund is like making or storing, etc.
+                        # Only do this if the item is in the object index, though, as it might be a person.
+                        # TODO: Test the results of using isNoun() instead of using NN in pos 
                         elif "NN" in pos and phrase_depth > 0:
                             phrase_depth -= 1
                             nouns.append((word, info, pos))
                             if phrase_depth == 0:
-                                cur_phrase.append(word)
+                                cur_phrase["phrase"].append(word)
                                 phrases.append(cur_phrase)
-                                if cur_phrase[0] == "for" or cur_phrase[0] == "of":
+                                if (cur_phrase["phrase"][0] == "for" or cur_phrase["phrase"][0] == "of") and word in item_set:
                                     transaction["item"] = word
-                                cur_phrase = []
+                                cur_phrase = {"modifies": "", "phrase": []}
                         
                         # If we see a definite cardinal number or quantity, write it down as the amount
                         elif info == "CARDINAL":
@@ -335,15 +370,30 @@ def get_transactions(df: pd.DataFrame):
                         
                         # If we have something labelled specifically as quantity, write it down as amount
                         elif info == "QUANTITY" or info == "COMB.QUANTITY":
-                            transaction["amount"] = word
-                            # Remove the currently found item as it is definitely not right
-                            if "item" in transaction:
-                                del transaction["item"]
-                            if info == "COMB.QUANTITY":
-                                transaction["amount_is_combo"] = True
+                            # Make sure that there is a noun after the amount
+                            if i < len(entry) - 1:
+                                flag = False
+                                for w, e_m, tag in entry[i + 1:]:
+                                    # Allow verbs to be nouns for this purpose
+                                    if (isNoun((w, e_m, tag)) and e_m != "PERSON" and e_m != "DATE") or "VB" in tag or w.lower() in item_set:
+                                        flag = True
+                                        break
+                                # If we find a noun after the amount
+                                if flag:
+                                    transaction["amount"] = word
+                                    # Remove the currently found item as it is definitely not right
+                                    if "item" in transaction:
+                                        del transaction["item"]
+                                    if info == "COMB.QUANTITY":
+                                        transaction["amount_is_combo"] = True
+                                    else:
+                                        transaction["amount_is_combo"] = False
+                                else:
+                                    # If we don't find an amount, still write this down as a possible amount since it was marked as a quantity
+                                    poss_amounts.append(word)
                             else:
-                                transaction["amount_is_combo"] = False
-                        
+                                # Still append to poss_amounts even if this is the last thing in the transaction
+                                poss_amounts.append(word)
                         
                         # If we see a preposition that is not telling us the transaction type, mark the start of a phrase
                         elif pos == "IN" and info != "TRANS":
@@ -359,9 +409,11 @@ def get_transactions(df: pd.DataFrame):
                             row_context["is_ender"] = True
                             transaction["type"] = "Ender"
                         
-                        # Save all phrases contained in the entry for later
+                        # Save all phrases contained in the entry for later, along with which words they modify.
                         if phrase_depth > 0:
-                            cur_phrase.append(word)
+                            if prev_word is not None and phrase_depth == 1:
+                                cur_phrase["modifies"] = prev_word
+                            cur_phrase["phrase"].append(word)
                         
                     # Now we are done writing things down
 
@@ -375,7 +427,8 @@ def get_transactions(df: pd.DataFrame):
                         elif "item" in transaction and noun[0] == transaction["item"]:
                             pass
                         elif noun[1] == "PERSON":
-                            if "people" in transaction:
+                            # Don't put the person in the people list if they are already in there
+                            if "people" in transaction and transaction["people"] and noun[0] not in transaction["people"]:
                                 transaction["people"].append(noun[0])
                             else:
                                 transaction["people"] = [noun[0],]
@@ -429,6 +482,7 @@ def get_transactions(df: pd.DataFrame):
                                 transaction["pounds"] = currency["pounds"]
                                 transaction["shillings"] = currency["shillings"]
                                 transaction["pennies"] = currency["pennies"]
+                                transaction["farthings"] = currency["farthings"]
                                 transaction["money_obj"] = currency
                             else:
                                 # Save the amount of the transaction
@@ -436,11 +490,13 @@ def get_transactions(df: pd.DataFrame):
                                     transaction["pounds_ster"] = currency["pounds"]
                                     transaction["shillings_ster"] = currency["shillings"]
                                     transaction["pennies_ster"] = currency["pennies"]
+                                    transaction["farthings_ster"] = currency["farthings"]
                                     transaction["money_obj_ster"] = currency
                                 else:
                                     transaction["pounds"] = currency["pounds"]
                                     transaction["shillings"] = currency["shillings"]
                                     transaction["pennies"] = currency["pennies"]
+                                    transaction["farthings"] = currency["farthings"]
                                     transaction["money_obj"] = currency
                                 
                         except Exception as e:
@@ -459,11 +515,14 @@ def get_transactions(df: pd.DataFrame):
                     if "errors" in row_context:
                         add_error(transaction, "Error from row context: " + str(row_context["errors"]), entry)
                     
-                    # Remember everything from the row that we haven't remembered already, except farthings
+                    # Remember everything from the row that we haven't remembered already, except for money and commodities
                     for key, value in row_context.items():
-                        if key not in transaction:
-                            if "farthings" not in key:
-                                transaction[key] = value
+                        if "pounds" in key or "shillings" in key or "pennies" in key or "farthings" in key or key == "money_obj" or key == "Quantity" or key == "Commodity":
+                            pass
+                        else:
+                            if key not in transaction:
+                                if "farthings" not in key:
+                                    transaction[key] = value
 
 
                     # Break the transaction list when the account holder changes if a total has not occurred.
@@ -491,6 +550,7 @@ def get_transactions(df: pd.DataFrame):
                 transactions[-1]["pounds"] = currency["pounds"]
                 transactions[-1]["shillings"] = currency["shillings"]
                 transactions[-1]["pennies"] = currency["pennies"]
+                transactions[-1]["farthings"] = currency["farthings"]
                 transactions[-1]["money_obj"] = currency
                 currency = row_context["money_obj_ster"]
                 transactions[-1]["pounds_ster"] = currency["pounds"]
@@ -504,6 +564,7 @@ def get_transactions(df: pd.DataFrame):
                 transactions[-1]["pounds_ster"] = currency["pounds"]
                 transactions[-1]["shillings_ster"] = currency["shillings"]
                 transactions[-1]["pennies_ster"] = currency["pennies"]
+                transactions[-1]["farthings_ster"] = currency["farthings"]
                 transactions[-1]["money_obj_ster"] = currency
             
             # If just currency
@@ -512,14 +573,23 @@ def get_transactions(df: pd.DataFrame):
                 transactions[-1]["pounds"] = currency["pounds"]
                 transactions[-1]["shillings"] = currency["shillings"]
                 transactions[-1]["pennies"] = currency["pennies"]
+                transactions[-1]["farthings"] = currency["farthings"]
                 transactions[-1]["money_obj"] = currency
             
+            if "Commodity" in row_context:
+                transactions[-1]["Commodity"] = row_context["Commodity"]
+            if "Quantity" in row_context:
+                transactions[-1]["Quantity"] = row_context["Quantity"]
+
             if "fix_price" in transactions[-1]:
                 del transactions[-1]["fix_price"]
+
 
         # Yield transactions grouped by ends of lists of transactions
         # TODO: Get [Subtotal tobacco] to work
         if "is_ender" in row_context and row_context["is_ender"]:
+            # Make sure there are errors in transactions with no money or commodity.
+            add_errors_to_transactions()
             # Verify totaling on ender transasction
             verify_ender_totaling(row_context, transactions, row)
 
@@ -534,6 +604,8 @@ def get_transactions(df: pd.DataFrame):
         # TODO: Technically this can cause weird behavior in transactions_context, but we don't use it that much so idc, marked as todo in case it causes problems later if we use transactions_context
         elif break_transactions == True:
             if break_counter > len(transactions):
+                # Make sure there are errors in transactions with no money or commodity.
+                add_errors_to_transactions()
                 yield transactions
                 transactions = []
                 break_transactions = False
@@ -544,12 +616,18 @@ def get_transactions(df: pd.DataFrame):
             else:
                 new_transactions =  transactions[-break_counter:]
                 transactions = transactions[:-break_counter]
+                # Make sure there are errors in transactions with no money or commodity.
+                add_errors_to_transactions()
                 yield transactions
                 transactions = new_transactions
                 transactions_context = {}
                 break_transactions = False
                 break_counter = 0
     
+
+    # Make sure there are errors in transactions with no money or commodity.
+    add_errors_to_transactions()
+
     # Yield any leftover transactions
     yield transactions
 

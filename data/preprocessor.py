@@ -126,6 +126,11 @@ def preprocess(df: pd.DataFrame):
                     if "NN" not in token.tag_:
                         token.ent_type_ = ""
 
+                # If we see the sheriff or the parish collector mark them as people
+                if token.text.lower() == "sherriff" or token.text.lower() == "sheriff" or token.text.lower() == "parish" or token.text.lower() == "collector" or token.text.lower() == "parrish":
+                    token.ent_type_ = "PERSON"
+                    token.tag_ = "NNP"
+
                 # Allows us to start elif chain
                 if False:
                     pass
@@ -133,7 +138,7 @@ def preprocess(df: pd.DataFrame):
                 # Label tokens indicating record type as TRANS
                 elif token.text == "By" or token.text == "To":
                     new_entry.append((token.text, "TRANS", token.tag_))
-                
+ 
                 # Label end of list tokens as ENDER
                 elif token.text == "Total" or token.text == "Subtotal":
                     new_entry.append((token.text, "ENDER", token.tag_))
@@ -179,7 +184,11 @@ def preprocess(df: pd.DataFrame):
 
                 # Combine nouns into larger nouns
                 elif prev_token is not None and isNoun(token) and isNoun(prev_token):
-                    combine_tok_with_prev(new_entry, token, new_ent="COMB.NOUN", new_pos=token.tag_)
+                    # Don't do it if it is a verb gerund as that probably will be the start of a phrase describing the item, and not the item itself
+                    if token.tag_ == "VBG" and "NN" in prev_token[2]:
+                        new_entry.append((token.text, "NOUN.PHRASE", "IN"))
+                    else:
+                        combine_tok_with_prev(new_entry, token, new_ent="COMB.NOUN", new_pos=token.tag_)
                 
                 # If we see 10/ in the last token and : in this token, combine into a single price token of 10/:
                 elif token.text == ":" and prev_token[0].endswith("/"):
