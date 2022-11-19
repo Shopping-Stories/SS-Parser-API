@@ -45,12 +45,12 @@ def preprocess(df: pd.DataFrame):
             new_sent = []
             smaller_entry = smaller_entry.split(" ")
             for i, word in enumerate(smaller_entry):
-                word = word.replace(">", "").replace("<", "")
-                if word.startswith("[") and i-1 >= 0 and smaller_entry[i-1].startswith(word[1]):
+                word = word.replace(">", "").replace("<", "").replace("^", "")
+                if word.startswith("[") and i-1 >= 0 and smaller_entry[i-1].lower().startswith(word[1].lower()):
                     new_sent.pop()
                 elif is_exception(word, i, smaller_entry):
                     new_sent.pop()
-                new_sent.append(word.strip("[]<>").replace(">", "").replace("<", ""))
+                new_sent.append(word.strip("[]<>^").replace(">", "").replace("<", "").replace("^", ""))
             new_smaller_entries.append(" ".join(new_sent))
         
         parsed_entries_in_row = []
