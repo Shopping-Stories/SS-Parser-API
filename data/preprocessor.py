@@ -1,6 +1,6 @@
 import pandas as pd
 from parser_utils import get_col, add_to_by, isNoun
-from re import split, match, search
+from re import split, match, search, sub
 import spacy
 from itertools import chain
 
@@ -18,11 +18,14 @@ def preprocess(df: pd.DataFrame):
             continue
 
         # Remove "Ditto"
-        ditto = search("(DO|Do|DITTO|Ditto)\s*\[\w+\]", big_entry)
+        ditto = search(r"(DO|Do|DITTO|Ditto)\s*\[\w+\]", big_entry)
         if ditto:
             newRe = search("\[\w+\]", ditto.group())
             newStr = (newRe.group())[1:-1]
             big_entry = big_entry.replace(ditto.group(), newStr)
+
+        # Replace 1w with 1 w and 1M with 1 M and so on
+        big_entry = sub(r"(?<=\s)\d+([wMm])(?=\s\[)", lambda match: match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
         # Split the entry by "    " or \n or \t
         smaller_entries = split(r"(?<!\s)([\n\t]|    )(?!\s)", big_entry)
@@ -143,6 +146,11 @@ def preprocess(df: pd.DataFrame):
                 elif isProbablyPrice(token):
                     new_entry.append((token.text, "PRICE", token.tag_))
                 
+                # Check for 1 ⅔ style mixed numbers, combine them if found
+                # The regex makes extra super sure we don't have a price when we do this
+                elif prev_token is not None and token.text.isnumeric() and prev_token[0].isnumeric() and search(r"(?<!/|\d)\d+\s[\u00BC-\u00BE\u2150-\u215E]", " ".join((prev_token[0], token.text))):
+                    combine_tok_with_prev(new_entry, token)
+                
                 # Attempt to combine similar tokens into 1 token for easier parsing
                 elif prev_token is not None and token.ent_type_ != "" and new_entry and token.ent_type_ == prev_token[1] and token.tag_ == prev_token[2]:
                     # Only combine cardinals if they are prices
@@ -164,7 +172,14 @@ def preprocess(df: pd.DataFrame):
                 
                 # Combine Quantities into 1 larger Quantity Token
                 elif prev_token is not None and token.ent_type_ == "QUANTITY" and prev_token[1] == "QUANTITY":
-                    combine_tok_with_prev(new_entry, token, new_ent="COMB.QUANTITY")
+                    token = (token.text, token.ent_type_, token.tag_)
+                    while (prev_token is not None) and ("QUANTITY" in prev_token[1] or prev_token[2] == "CD" or prev_token[2] == "DT") and "PRICE" not in prev_token[1]:
+                        token = combine_tok_with_prev(new_entry, token, new_ent="COMB.QUANTITY", new_pos=token[2], toret=True)
+                        if new_entry:
+                            prev_token = new_entry[-1]
+                        else:
+                            prev_token = None
+                    new_entry.append(token)
                 
                 # Combine Dates into 1 larger date unless the date is probably a price misclassified as a date
                 elif prev_token is not None and token.ent_type_ == "DATE" and prev_token[1] == "DATE" and "NN" in prev_token[2] and not isProbablyPrice(token):

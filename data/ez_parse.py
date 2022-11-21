@@ -344,10 +344,21 @@ def get_transactions(df: pd.DataFrame):
                             if phrase_depth == 0:
                                 cur_phrase["phrase"].append(word)
                                 phrases.append(cur_phrase)
-                                if (cur_phrase["phrase"][0] == "for" or cur_phrase["phrase"][0] == "of") and word in item_set:
+                                if (cur_phrase["phrase"][0] == "for" or cur_phrase["phrase"][0] == "of") and word.lower() in item_set:
                                     transaction["item"] = word
                                 cur_phrase = {"modifies": "", "phrase": []}
                         
+                        # Same as above but for COMB.NOUNs with weird POS identification.
+                        elif "COMB.NOUN" == info and phrase_depth > 0:
+                            phrase_depth -= 1
+                            nouns.append((word, info, pos))
+                            if phrase_depth == 0:
+                                cur_phrase["phrase"].append(word)
+                                phrases.append(cur_phrase)
+                                if (cur_phrase["phrase"][0] == "for" or cur_phrase["phrase"][0] == "of") and word.lower() in item_set:
+                                    transaction["item"] = word
+                                cur_phrase = {"modifies": "", "phrase": []}
+
                         # If we see a definite cardinal number or quantity, write it down as the amount
                         elif info == "CARDINAL":
                             # Make sure that there is a noun after the amount
@@ -414,21 +425,34 @@ def get_transactions(df: pd.DataFrame):
                             transaction["type"] = "Ender"
                         
                         # Save all phrases contained in the entry for later, along with which words they modify.
+                        # If the thing the phrase modifies is in the item set and we have not id'd an item yet,
+                        # that is probably the item.
                         if phrase_depth > 0:
                             if prev_word is not None and phrase_depth == 1:
-                                cur_phrase["modifies"] = prev_word
+                                if "modifies" not in cur_phrase or cur_phrase["modifies"] == "":
+                                    cur_phrase["modifies"] = prev_word
+                                    if prev_word.lower() in item_set and "item" not in transaction:
+                                        transaction["item"] = prev_word
                             cur_phrase["phrase"].append(word)
                         
                     # Now we are done writing things down
 
-                    # Loop through the nouns in the entry, marking down people and dates as such, and remembering any other random nouns
-                    for noun in nouns:
-                        if "item" not in transaction and "type" not in transaction:
+                    # Make sure we have an item in our transaction
+                    if "item" not in transaction and "type" not in transaction:
+                        # Check if any of the nouns are probably the item
+                        for noun in nouns:
+                            if noun[0].lower() in item_set:
+                                transaction["item"] = noun[0]
+                        
+                        if "item" not in transaction:
                             # Failed to find item in entry even though we have nouns.
                             # The item is probably nothing, just money
                             print(f"Could not find item in entry {entry}.")
                             transaction["item"] = "Currency"
-                        elif "item" in transaction and noun[0] == transaction["item"]:
+
+                    # Loop through the nouns in the entry, marking down people and dates as such, and remembering any other random nouns
+                    for noun in nouns:
+                        if "item" in transaction and noun[0] == transaction["item"]:
                             pass
                         elif noun[1] == "PERSON":
                             # Don't put the person in the people list if they are already in there
