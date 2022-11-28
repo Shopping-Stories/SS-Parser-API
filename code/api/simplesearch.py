@@ -1,7 +1,9 @@
-import bson
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
+from .ssParser.parser import db
+from fastapi import APIRouter
 
+router = APIRouter()
 
 # simple search function for ShoppingStories project
 # "search" parameter is a string
@@ -14,10 +16,13 @@ from bson.json_util import dumps, loads
 # - in general, anticipating and accounting for all manner of generic search entries that don't necessarily
 #   match our database format, like the currency example
 
-def simple_search(search):
+@router.get("/search/{search}", tags=["search"])
+
+async def simple_search(search: str):
   # accessing db - replaced connection string with empty "getDatabase()" function
-  cluster = getDatabase()
-  db = cluster["shoppingStories"]
+  global db
+  cluster: MongoClient = db
+  # db = cluster["shoppingStories"]
   entries = db["entries"]
 
   # trim search entry whitespace
@@ -40,4 +45,7 @@ def simple_search(search):
       {"people.name": {"$regex": search, "$options": 'i'}},
       {"places.name": {"$regex": search, "$options": 'i'}}
   ]}))
-  return results;
+  return results
+
+if __name__ == "__main__":
+  print(simple_search("Hat"))
