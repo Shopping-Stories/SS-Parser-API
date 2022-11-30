@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
-from .ssParser.parser import db
+from .ssParser.database import db
 from fastapi import APIRouter
 
 router = APIRouter()

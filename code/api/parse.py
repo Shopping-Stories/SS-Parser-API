@@ -4,11 +4,10 @@
 from decimal import ROUND_CEILING
 from fastapi import APIRouter
 from json import loads
-from .ssParser.ss_parser import parse_file
 
 router = APIRouter()
 
 # Sample endpoint for basic parsing, try making request to /parse/C_1760_002_FINAL_2.xlsx
 @router.get("/parse/{fileloc}", tags=["parse"])
 async def return_basic_parse(fileloc: str):
-    return parse_file(fileloc)
+    return {"status_code": 200}
