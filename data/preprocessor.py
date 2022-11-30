@@ -3,6 +3,7 @@ from parser_utils import get_col, add_to_by, isNoun
 from re import split, match, search, sub
 import spacy
 from itertools import chain
+from indices import amount_set
 
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow
@@ -146,6 +147,10 @@ def preprocess(df: pd.DataFrame):
                 elif isProbablyPrice(token):
                     new_entry.append((token.text, "PRICE", token.tag_))
                 
+                # If we find something in the amount word index, combine it with the previous token and mark as amt unless there are no numbers to combine it with
+                elif prev_token is not None and token.text.lower() in amount_set and (prev_token[2] in {"DT", "CD"} or prev_token[1] == "CARDINAL" or prev_token[1] == "QUANTITY" or prev_token[1] == "COMB.QUANTITY" or prev_token[1] == "AMT" or prev_token[0] in amount_set or prev_token[0].isnumeric()):
+                    combine_tok_with_prev(new_entry, token, new_ent="AMT")
+
                 # Check for 1 ⅔ style mixed numbers, combine them if found
                 # The regex makes extra super sure we don't have a price when we do this
                 elif prev_token is not None and token.text.isnumeric() and prev_token[0].isnumeric() and search(r"(?<!/|\d)\d+\s[\u00BC-\u00BE\u2150-\u215E]", " ".join((prev_token[0], token.text))):

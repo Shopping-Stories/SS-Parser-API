@@ -11,7 +11,7 @@ from json import dump
 from typing import List
 from parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col
 from preprocessor import preprocess
-from object_index import item_set
+from indices import item_set
 
 # NOTE: All functions in this file have side effects which is why they are in this file and not in parser_utils.
 # parser_utils contains only functions with NO side effects.
@@ -284,6 +284,35 @@ def get_transactions(df: pd.DataFrame):
                         elif info == "LIBER":
                             transaction["type"] = "Liber"
                             transaction["liber_book"] = word.split(" ")[1]
+
+                        # If we see something from the amount index, search for a noun following it and if it exists, mark this as the real amount
+                        elif info == "AMT":
+                            # If it is in a phrase, use poss_amounts instead as if this is the only amount it will still get set the amount at the end
+                            if phrase_depth == 0:
+                                # Make sure that there is a noun after the amount
+                                if i < len(entry) - 1:
+                                    flag = False
+                                    for w, e_m, tag in entry[i + 1:]:
+                                        # Allow verbs to be nouns for this purpose
+                                        if (isNoun((w, e_m, tag))  and e_m != "DATE") or "VB" in tag or w.lower() in item_set:
+                                            flag = True
+                                            break
+                                    # If we find a noun after the amount
+                                    if flag:
+                                        transaction["amount"] = word
+                                        # Remove the currently found item as it is definitely not right
+                                        if "item" in transaction:
+                                            del transaction["item"]
+                                        if info == "COMB.QUANTITY":
+                                            transaction["amount_is_combo"] = True
+                                        else:
+                                            transaction["amount_is_combo"] = False
+                                    else:
+                                        poss_amounts.append(word)
+                                else:
+                                    poss_amounts.append(word)
+                            else:
+                                poss_amounts.append(word)
 
                         # Remember the price of the entry, marking if it is a complex price
                         elif info in ("PRICE", "COMB.PRICE"):
