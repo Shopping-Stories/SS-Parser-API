@@ -134,7 +134,7 @@ class Money:
 
     def __truediv__(self, other):
         if type(other) is Money:
-            return Money(tot_f=self.totalFarthings / other.totalFarthings)
+            return self.totalFarthings / other.totalFarthings
         else:
             return Money(tot_f=self.totalFarthings / other)
     

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import nltk
 from re import split, search
 from unicodedata import numeric
@@ -59,7 +59,7 @@ def isNoun(token) -> bool:
         return "VBG" in token.tag_ or "VBN" in token.tag_ or "NN" in token.tag_ or "UH" in token.tag_
 
 # Deal with there sometimes being multiple entries in one entry.
-def handle_multiple_prices(entry) -> list:
+def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str, str, str]]:
     # Search for the number of noun, price pairs, if more than one split around noun followed by price
     # Ignore people and dates because they are definitely not the item being purchased
     found_trans = []

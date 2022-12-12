@@ -5,7 +5,6 @@ from os import path
 import traceback
 from re import split, search
 from itertools import chain
-from pickle import dump
 from british_money import Money
 from json import dump
 from typing import List
@@ -18,7 +17,7 @@ from indices import item_set
 
 # Mark any rows with no currency as totaling contextless and
 # save all values in the currency columns in the row context
-def setup_row_currency(row_context: dict, row, entries, transactions_context: dict):
+def _setup_row_currency(row_context: dict, row, entries, transactions_context: dict):
     # If there is no currency money, mark as contextless transaction
     if all([get_col(row, x) == "-" for x in ["L Currency", "s Currency", "d Currency", "L Sterling", "s Sterling", "d Sterling"]]):
         row_context["currency_totaling_contextless"] = True
@@ -67,7 +66,7 @@ def setup_row_currency(row_context: dict, row, entries, transactions_context: di
 
 # Checks if there is values in all nullable columns listed in nullable_cols
 # If there is, save it, otherwise, don't.
-def remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
+def _remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
     for entry_name in nullable_cols:
         val = get_col(row, entry_name)
         if val == "-" or val == "" or str(val) == "nan":
@@ -83,7 +82,7 @@ def remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
 
 # Checks Commodity and Currency totaling on lists of transactions ended by [Total]
 # Writes down an error in the [Total] transaction if totals don't add up.
-def verify_ender_totaling(row_context: dict, transactions: list, row):
+def _verify_ender_totaling(row_context: dict, transactions: list, row):
     # Verify transactions add up if there are no errors
     if any(["errors" in x for x in transactions]):
         print("Skipping totaling due to errors.\n")
@@ -161,7 +160,7 @@ def get_transactions(df: pd.DataFrame):
         row_context = {}
 
         # Setup the currency values in the row
-        setup_row_currency(row_context, row, entries, transactions_context)
+        _setup_row_currency(row_context, row, entries, transactions_context)
         
         # Should not be possible to run this, just here to alert us of errors if they happen
         if "currency_type" not in row_context and "currency_totaling_contextless" not in row_context:
@@ -192,7 +191,7 @@ def get_transactions(df: pd.DataFrame):
 
         # For all nullable entries, do not remember them if they are null.
         nullable_entries = ["Marginalia", "Date Year", "_Month", "Day", "Folio Reference", "Quantity", "Commodity"]
-        remember_nullable_cols(row_context, nullable_entries, row)
+        _remember_nullable_cols(row_context, nullable_entries, row)
 
         # Keep track how how many transactions are in the row
         trans_in_row_counter = 0
@@ -649,7 +648,7 @@ def get_transactions(df: pd.DataFrame):
             # Make sure there are errors in transactions with no money or commodity.
             add_errors_to_transactions()
             # Verify totaling on ender transasction
-            verify_ender_totaling(row_context, transactions, row)
+            _verify_ender_totaling(row_context, transactions, row)
 
             # Yield our list of transactions
             yield transactions
@@ -705,8 +704,6 @@ def parse(df: pd.DataFrame):
         
 # Reads in an excel file and parses it, saving as csv for now
 def parse_file(filePath):
-    # print(f'dir is : {above}')
-
     df = pd.read_excel(filePath)
     
     n = 0
@@ -764,4 +761,3 @@ if __name__ == "__main__":
 # Make a second pass on transactions in which the item is followed by a phrase and get them to work better - mostly fixed by adding modifies to phrases - lowest priority
 # Does not support tobacco in transaction rather than in quantity/commodity columns - high priority
 # TODO: Fix parsing of solo unicode fraction in d parameter in Money class
-# Performance notes: If set lookups take a long time, we can reimplement the set to give us O(1) performance for failed lookups
