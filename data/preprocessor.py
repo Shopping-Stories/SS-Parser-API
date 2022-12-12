@@ -151,6 +151,9 @@ def preprocess(df: pd.DataFrame):
                 elif prev_token is not None and token.text.lower() in amount_set and (prev_token[2] in {"DT", "CD"} or prev_token[1] == "CARDINAL" or prev_token[1] == "QUANTITY" or prev_token[1] == "COMB.QUANTITY" or prev_token[1] == "AMT" or prev_token[0] in amount_set or prev_token[0].isnumeric()):
                     combine_tok_with_prev(new_entry, token, new_ent="AMT")
 
+                elif token.text.lower() in amount_set and "VB" in token.tag_:
+                    new_entry.append(("1 " + token.text, "AMT", "CARDINAL"))
+
                 # Check for 1 ⅔ style mixed numbers, combine them if found
                 # The regex makes extra super sure we don't have a price when we do this
                 elif prev_token is not None and token.text.isnumeric() and prev_token[0].isnumeric() and search(r"(?<!/|\d)\d+\s[\u00BC-\u00BE\u2150-\u215E]", " ".join((prev_token[0], token.text))):

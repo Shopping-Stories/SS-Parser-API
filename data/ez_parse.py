@@ -181,6 +181,15 @@ def get_transactions(df: pd.DataFrame):
 
         # Remember account holder, data, folio reference, etc.
         acct_name = " ".join([get_col(row, x).strip() for x in ("Prefix", "Account First Name", "Account Last Name", "Suffix") if get_col(row, x) != "-"])
+        if "[" in acct_name:
+            acct_name = split(r"\s+", acct_name)
+            n_acct_name = []
+            for word in acct_name:
+                if "[" in word:
+                    n_acct_name.pop()
+                n_acct_name.append(word.strip("[]"))
+            acct_name = " ".join(n_acct_name)
+        
         row_context["account_name"] = acct_name
 
         row_context["reel"] = get_col(row, "Reel")
