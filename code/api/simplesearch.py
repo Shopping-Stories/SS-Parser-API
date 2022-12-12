@@ -1,7 +1,8 @@
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
-from .ssParser.parser import db
+from .ssParser.database import db
 from fastapi import APIRouter
+from .api_types import EntryList
 
 router = APIRouter()
 
@@ -16,9 +17,8 @@ router = APIRouter()
 # - in general, anticipating and accounting for all manner of generic search entries that don't necessarily
 #   match our database format, like the currency example
 
-@router.get("/search/{search}", tags=["search"])
-
-async def simple_search(search: str):
+@router.get("/search/{search}", tags=["search"], response_model=EntryList)
+def simple_search(search: str):
   # accessing db - replaced connection string with empty "getDatabase()" function
   global db
   cluster: MongoClient = db
@@ -29,23 +29,16 @@ async def simple_search(search: str):
   search = search.strip()
 
   # searches all string fields in "entries" collection
-  results = dumps(entries.find({"$or": [
-      {"accountHolder.prefix": {"$regex": search, "$options": 'i'}},
-      {"accountHolder.accountFirstName": {"$regex": search, "$options": 'i'}},
-      {"accountHolder.accountLastName": {"$regex": search, "$options": 'i'}},
-      {"accountHolder.suffix": {"$regex": search, "$options": 'i'}},
-      {"accountHolder.profession": {"$regex": search, "$options": 'i'}},
-      {"accountHolder.location": {"$regex": search, "$options": 'i'}},
-      {"accountHolder.reference": {"$regex": search, "$options": 'i'}},
-      {"meta.owner": {"$regex": search, "$options": 'i'}},
-      {"meta.store": {"$regex": search, "$options": 'i'}},
-      {"itemEntries.itemsOrServices.item": {"$regex": search, "$options": 'i'}},
-      {"itemEntries.itemsOrServices.category": {"$regex": search, "$options": 'i'}},
-      {"itemEntries.itemsOrServices.subcategory": {"$regex": search, "$options": 'i'}},
-      {"people.name": {"$regex": search, "$options": 'i'}},
-      {"places.name": {"$regex": search, "$options": 'i'}}
-  ]}))
-  return results
+  # Format of people has changed so we can't search by that as easily now.
+  results = entries.find({"$or": [
+      {"account_name": {"$regex": search, "$options": 'i'}},
+      {"store_owner": {"$regex": search, "$options": 'i'}},
+      {"item": {"$regex": search, "$options": 'i'}},
+      # {"people.name": {"$regex": search, "$options": 'i'}},
+      # {"places.name": {"$regex": search, "$options": 'i'}}
+  ]})
+
+  return EntryList.parse_obj({entries: results})
 
 if __name__ == "__main__":
   print(simple_search("Hat"))
