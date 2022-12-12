@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 import uvicorn
-from api import parse, simplesearch, stringlist
+from api import simplesearch, stringlist
+from api.ssParser import entry_upload
 
 incoming = FastAPI()
 
-incoming.include_router(parse.router)
 incoming.include_router(simplesearch.router)
 incoming.include_router(stringlist.router)
+incoming.include_router(entry_upload.router)
 
 @incoming.get("/")
 async def main():
