@@ -196,8 +196,11 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
     parsed_entry.update({new_key: object})
 
 
-@router.post("/create_entry/", response_model=Message)
+@router.post("/create_entry/", tags=["Parser Management"], response_model=Message)
 def insert_parsed_entry(parsed_entry: ParserOutput):
+    """
+    Creates a new database entry from the parser output.
+    """
     parsed_entry = parsed_entry.dict()
     try:
         # Ensure no keys evaluate to None.

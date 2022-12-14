@@ -19,6 +19,9 @@ router = APIRouter()
 
 @router.get("/search/{search}", tags=["search"], response_model=EntryList)
 def simple_search(search: str):
+  """
+  simple search function for ShoppingStories project
+  """
   # accessing db - replaced connection string with empty "getDatabase()" function
   global db
   cluster: MongoClient = db

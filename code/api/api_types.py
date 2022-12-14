@@ -54,3 +54,6 @@ class EntryList(BaseModel):
 
 class StringList(BaseModel):
     strings: List[str]
+
+class IncomingFile(BaseModel):
+    file: str
