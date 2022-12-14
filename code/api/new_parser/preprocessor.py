@@ -1,9 +1,9 @@
 import pandas as pd
-from parser_utils import get_col, add_to_by, isNoun
+from .parser_utils import get_col, add_to_by, isNoun
 from re import split, match, search, sub
 import spacy
 from itertools import chain
-from indices import amount_set
+from .indices import amount_set
 
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow

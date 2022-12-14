@@ -5,12 +5,12 @@ from os import path
 import traceback
 from re import split, search
 from itertools import chain
-from british_money import Money
+from .british_money import Money
 from json import dump
 from typing import List
-from parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col
-from preprocessor import preprocess
-from indices import item_set
+from .parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col
+from .preprocessor import preprocess
+from .indices import item_set
 
 # NOTE: All functions in this file have side effects which is why they are in this file and not in parser_utils.
 # parser_utils contains only functions with NO side effects.
