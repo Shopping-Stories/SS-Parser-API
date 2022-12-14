@@ -115,7 +115,11 @@ class Money:
                         except TypeError:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}.")
                     else:
-                        pennies = int(d.strip("[]"))
+                        if (len(d) == 1) and (numeric(d.strip("[]")) < 1):
+                            pennies = 0
+                            farthings = int(numeric(d.strip("[]")) * 4)
+                        else:    
+                            pennies = int(d.strip("[]"))
 
             self.totalFarthings = farthings + 4 * pennies + 4 * 12 * shillings + 4 * 12 * 20 * pounds
 
