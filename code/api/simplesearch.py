@@ -17,31 +17,43 @@ router = APIRouter()
 # - in general, anticipating and accounting for all manner of generic search entries that don't necessarily
 #   match our database format, like the currency example
 
+
 @router.get("/search/{search}", tags=["search"], response_model=EntryList)
 def simple_search(search: str):
-  """
-  simple search function for ShoppingStories project
-  """
-  # accessing db - replaced connection string with empty "getDatabase()" function
-  global db
-  cluster: MongoClient = db
-  # db = cluster["shoppingStories"]
-  entries = db["entries"]
+    """
+    simple search function for ShoppingStories project
+    """
+    # accessing db - replaced connection string with empty "getDatabase()" function
+    global db
+    cluster: MongoClient = db
+    # db = cluster["shoppingStories"]
+    entries = db["entries"]
 
-  # trim search entry whitespace
-  search = search.strip()
+    # trim search entry whitespace
+    search = search.strip()
 
-  # searches all string fields in "entries" collection
-  # Format of people has changed so we can't search by that as easily now.
-  results = entries.find({"$or": [
-      {"account_name": {"$regex": search, "$options": 'i'}},
-      {"store_owner": {"$regex": search, "$options": 'i'}},
-      {"item": {"$regex": search, "$options": 'i'}},
-      # {"people.name": {"$regex": search, "$options": 'i'}},
-      # {"places.name": {"$regex": search, "$options": 'i'}}
-  ]})
+    # searches all string fields in "entries" collection
+    # Format of people has changed so we can't search by that as easily now.
+    results = entries.find({"$or": [
+        {"account_name": {"$regex": search, "$options": 'i'}},
+        {"store_owner": {"$regex": search, "$options": 'i'}},
+        {"item": {"$regex": search, "$options": 'i'}},
+        # {"people.name": {"$regex": search, "$options": 'i'}},
+        # {"places.name": {"$regex": search, "$options": 'i'}}
+    ]})
 
-  return EntryList.parse_obj({entries: results})
+    ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
+
+    def bson_objectid_to_str(old_entry: dict):
+        entry = {x: old_entry[x] for x in old_entry}
+        for id in ids:
+            if id in entry:
+                entry[id] = str(entry[id])
+        
+        return entry
+
+    return EntryList.parse_obj({"entries": [bson_objectid_to_str(x) for x in results]})
+
 
 if __name__ == "__main__":
-  print(simple_search("Hat"))
+    print(simple_search("Hat"))
