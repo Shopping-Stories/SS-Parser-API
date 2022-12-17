@@ -46,8 +46,9 @@ class DatabaseEntry(BaseModel):
     mentions: Optional[List[str]]
     itemID: Optional[str]
     peopleID: Optional[str]
-    people: List[str]
+    people: Optional[List[str]]
     accountHolderID: Optional[str]
+    entryID: Optional[str] = Field(alias="_id")
 
 class EntryList(BaseModel):
     entries: List[DatabaseEntry]
@@ -57,3 +58,6 @@ class StringList(BaseModel):
 
 class IncomingFile(BaseModel):
     file: str
+
+class IncomingFileUrls(BaseModel):
+    urls: List[str]
