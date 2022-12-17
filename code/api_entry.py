@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from api import simplesearch, stringlist, excelUploader
+from api import simplesearch, stringlist, excelUploader, new_entry_manager
 from api.ssParser import entry_upload
 
 incoming = FastAPI()
@@ -9,6 +9,7 @@ incoming.include_router(simplesearch.router)
 incoming.include_router(stringlist.router)
 incoming.include_router(entry_upload.router)
 incoming.include_router(excelUploader.router)
+incoming.include_router(new_entry_manager.router)
 
 @incoming.get("/")
 async def main():

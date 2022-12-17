@@ -57,3 +57,6 @@ class StringList(BaseModel):
 
 class IncomingFile(BaseModel):
     file: str
+
+class IncomingFileUrls(BaseModel):
+    urls: List[str]
