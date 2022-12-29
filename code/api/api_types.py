@@ -8,7 +8,7 @@ class Currency(BaseModel):
     pounds: int
     shillings: int
     pennies: int
-    farthings: int
+    farthings: int = 0
 
 class Ledger(BaseModel):
     reel: str
