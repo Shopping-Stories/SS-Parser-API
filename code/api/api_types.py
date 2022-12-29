@@ -17,7 +17,7 @@ class Ledger(BaseModel):
     entry_id: str
 
 class DatabaseEntry(BaseModel):
-    amount: Optional[str]
+    amount: Optional[str] = "1"
     amount_is_combo: Optional[bool]
     item: Optional[str]
     price: Optional[str]
