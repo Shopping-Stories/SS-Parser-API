@@ -1,4 +1,3 @@
-import pymongo
 from .ssParser.database import db
 from .api_types import Message, StringList
 from fastapi import APIRouter
@@ -50,4 +49,4 @@ def getStrings(name: str) -> List[str]:
     global db
     collection = db["stringLists"]
     strlist = collection.find_one({"name": name}, {"strings": 1, "_id": 0})
-    return StringList.parse_obj({"strings": strlist})
+    return StringList.parse_obj({"strings": strlist["strings"]})

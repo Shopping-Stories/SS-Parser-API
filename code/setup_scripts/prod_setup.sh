@@ -4,6 +4,7 @@ python3 -m venv ../parserEnv
 source ../parserEnv/bin/activate
 pip install --upgrade pip
 pip install -r ../requirements.txt
+sudo chmod 777 ./nginx.conf
 python ./setup.py
 sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring
 # curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \

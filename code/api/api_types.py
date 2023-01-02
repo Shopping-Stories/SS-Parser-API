@@ -12,7 +12,7 @@ class Currency(BaseModel):
     pounds: int
     shillings: int
     pennies: int
-    farthings: int
+    farthings: int = 0
 
 class Ledger(BaseModel):
     reel: str
@@ -21,7 +21,7 @@ class Ledger(BaseModel):
     entry_id: str
 
 class DatabaseEntry(BaseModel):
-    amount: Optional[str]
+    amount: Optional[str] = "1"
     amount_is_combo: Optional[bool]
     item: Optional[str]
     price: Optional[str]
@@ -50,8 +50,9 @@ class DatabaseEntry(BaseModel):
     mentions: Optional[List[str]]
     itemID: Optional[str]
     peopleID: Optional[str]
-    people: List[str]
+    people: Optional[List[str]]
     accountHolderID: Optional[str]
+    entryID: Optional[str] = Field(alias="_id")
 
 class EntryList(BaseModel):
     entries: List[DatabaseEntry]
@@ -61,3 +62,6 @@ class StringList(BaseModel):
 
 class IncomingFile(BaseModel):
     file: str
+
+class IncomingFileUrls(BaseModel):
+    urls: List[str]
