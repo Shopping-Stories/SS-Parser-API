@@ -13,7 +13,7 @@ url_prefix = "https://shoppingstories.s3.amazonaws.com/"
 @router.get("/get_ready_URLs", tags=["Parser Management"], response_model=StringList)
 def get_ready_files():
     """
-    Returns a list of file URLs to json that are ready to be displayed and parsed/edited by the front end.
+    Returns a list of file URLs to json that are ready to be displayed and edited by the front end.
     If an error occurs, the first string in the string list retuned will have ERROR at the front of it.
     This method will block until URLs are returned. Please note that these files may become unavailable before you try to access them and this needs to be checked for.
     """
