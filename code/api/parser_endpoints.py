@@ -84,12 +84,12 @@ def debug_upload_file_and_parse(name: str, bg_tasks: BackgroundTasks) -> Message
     return Message(message="Successfully uploaded file to s3.")
 
 
-@router.post("/upload/{name}", tags=["Parser Management"], response_model=Message)
-def upload_file(name: str, inc_file: IncomingFile) -> Message:
+@router.post("/upload/", tags=["Parser Management"], response_model=Message)
+def upload_file(inc_file: IncomingFile) -> Message:
     """
     Uploads bytes data from data into s3 bucket as filename name. File is assumed to be base64 encoded.
     """
-
+    name = inc_file.name
     data = b64decode(inc_file.file)
     file = BytesIO(data)
     s3_cli = client('s3')
