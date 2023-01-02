@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from api import simplesearch, stringlist, parser_endpoints, excelUploader, new_entry_manager
+from api import simplesearch, stringlist, parser_endpoints, new_entry_manager
 from api.ssParser import entry_upload
 
 incoming = FastAPI()
