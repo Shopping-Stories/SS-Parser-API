@@ -1,6 +1,7 @@
 from .new_parser import parse_folder
 from os import makedirs, listdir, remove
 from os.path import join, dirname, basename
+from ..new_entry_manager import preparsed_lock
 import traceback
 import datetime
 from threading import Lock
@@ -69,21 +70,28 @@ def check_progress():
     except Exception:
         return (1, [])
 
+# Uploads parser results
 def upload_results(client):
     acquired = _parsing_lock.acquire(blocking=True)
     if not acquired:
         return
     
+    acquired = preparsed_lock.acquire(blocking=True)
+    if not acquired:
+        return
+
     filenames = None
 
     try:
         filenames = listdir(dump_folder)
     except Exception:
         _parsing_lock.release()
+        preparsed_lock.release()
         return
     
     if filenames is None:
         _parsing_lock.release()
+        preparsed_lock.release()
         return
     
     succeeded = []
@@ -107,3 +115,4 @@ def upload_results(client):
             pass
 
     _parsing_lock.release()
+    preparsed_lock.release()

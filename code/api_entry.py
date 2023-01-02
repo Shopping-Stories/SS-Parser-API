@@ -9,7 +9,6 @@ incoming.include_router(simplesearch.router)
 incoming.include_router(stringlist.router)
 incoming.include_router(entry_upload.router)
 incoming.include_router(parser_endpoints.router)
-incoming.include_router(excelUploader.router)
 incoming.include_router(new_entry_manager.router)
 
 @incoming.get("/")

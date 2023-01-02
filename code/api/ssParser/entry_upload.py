@@ -199,6 +199,7 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
     parsed_entry.update({new_key: object})
 
 
+# TODO: Ignore duplicates when inserting
 @router.post("/create_entry/", tags=["Parser Management"], response_model=Message)
 def insert_parsed_entry(parsed_entry: ParserOutput):
     """

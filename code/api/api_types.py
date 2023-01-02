@@ -3,6 +3,7 @@ from typing import List, Dict, Optional, Union
 
 class Message(BaseModel):
     message: str
+    error: bool = False
 
 class ParserProgress(BaseModel):
     progress: float
@@ -60,8 +61,20 @@ class EntryList(BaseModel):
 class StringList(BaseModel):
     strings: List[str]
 
+
 class IncomingFile(BaseModel):
     file: str
+    name: str
+
+class IncomingFiles(BaseModel):
+    files: List[IncomingFile]
 
 class IncomingFileUrls(BaseModel):
     urls: List[str]
+
+class FailedFile(BaseModel):
+    name: str
+    reason: str
+
+class FailedFiles(BaseModel):
+    files: List[FailedFile]
