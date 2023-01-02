@@ -4,6 +4,10 @@ from typing import List, Dict, Optional, Union
 class Message(BaseModel):
     message: str
 
+class ParserProgress(BaseModel):
+    progress: float
+    filenames: List[str]
+
 class Currency(BaseModel):
     pounds: int
     shillings: int

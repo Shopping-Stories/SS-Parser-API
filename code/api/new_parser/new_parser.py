@@ -15,6 +15,12 @@ from .indices import item_set
 # NOTE: All functions in this file have side effects which is why they are in this file and not in parser_utils.
 # parser_utils contains only functions with NO side effects.
 
+debug = False
+
+def print_debug(string: str = ""):
+    if debug:
+        print(string)
+
 # Mark any rows with no currency as totaling contextless and
 # save all values in the currency columns in the row context
 def _setup_row_currency(row_context: dict, row, entries, transactions_context: dict):
@@ -85,7 +91,7 @@ def _remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
 def _verify_ender_totaling(row_context: dict, transactions: list, row):
     # Verify transactions add up if there are no errors
     if any(["errors" in x for x in transactions]):
-        print("Skipping totaling due to errors.\n")
+        print_debug("Skipping totaling due to errors.\n")
     
     # If there are no errors in the transactions
     else:
@@ -101,7 +107,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
             if total_commodity != row_context["Quantity"]:
                 # Add error if commodity totaling fails
                 endl = "\n"
-                print(f"Error: Commodity totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_commodity}, and expected total was {row_context['Quantity']}")
+                print_debug(f"Error: Commodity totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_commodity}, and expected total was {row_context['Quantity']}")
                 add_error(transactions[-1], f"Commodity totaling failed, total was {total_commodity}, expected was {row_context['Quantity']}", get_col(row, "Entry"))
         
         # If currency totaling successful do nothing
@@ -111,7 +117,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
             # Otherwise add error
             else:
                 endl = "\n"
-                print(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotals were {total_money_curr} and {total_money_ster}, and expected totals were {row_context['money_obj']} and {row_context['money_obj_ster']}")
+                print_debug(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotals were {total_money_curr} and {total_money_ster}, and expected totals were {row_context['money_obj']} and {row_context['money_obj_ster']}")
                 add_error(transactions[-1], f"Currency totaling failed, totals were {total_money_curr} and {total_money_ster}, expected were {row_context['money_obj']} and {row_context['money_obj_ster']}", get_col(row, "Entry"))
         elif row_context["currency_type"] == "Sterling":
             if total_money_ster == row_context["money_obj_ster"]:
@@ -119,7 +125,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
             # Otherwise add error
             else:
                 endl = "\n"
-                print(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_money_ster}, and expected total was {row_context['money_obj_ster']}")
+                print_debug(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_money_ster}, and expected total was {row_context['money_obj_ster']}")
                 add_error(transactions[-1], f"Currency totaling failed, total was {total_money_ster}, expected was {row_context['money_obj_ster']}", get_col(row, "Entry"))
         elif row_context["currency_type"] == "Currency":
             if total_money_curr == row_context["money_obj"]:
@@ -127,7 +133,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
             # Otherwise add error
             else:
                 endl = "\n"
-                print(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_money_curr}, and expected total was {row_context['money_obj']}")
+                print_debug(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_money_curr}, and expected total was {row_context['money_obj']}")
                 add_error(transactions[-1], f"Currency totaling failed, total was {total_money_curr}, expected was {row_context['money_obj']}", get_col(row, "Entry"))
 
 # Again, generator because slow.
@@ -164,7 +170,7 @@ def get_transactions(df: pd.DataFrame):
         
         # Should not be possible to run this, just here to alert us of errors if they happen
         if "currency_type" not in row_context and "currency_totaling_contextless" not in row_context:
-            print("Error: unreachable code being run")
+            print_debug("Error: unreachable code being run")
             row_context["currency_totaling_contextless"] = False
 
         # Detect if we need to do commodity totaling
@@ -260,7 +266,7 @@ def get_transactions(df: pd.DataFrame):
                             prev_info = None
                             prev_pos = None
                         
-                        # print(word, info, pos)
+                        # print_debug(word, info, pos)
                         # Leftover code to uncombine coordinating conjunctions that failed to combine
                         if pos == "CC" and len(word.split(" ")) > 1:
                             word = " ".join(word.split(" ")[:-1])
@@ -274,7 +280,7 @@ def get_transactions(df: pd.DataFrame):
                             elif word == "By":
                                 row_context["debit_or_credit"] = "Cr"
                             else:
-                                print(f"Error, unrecognized transaction type: {word} in {entry}")
+                                print_debug(f"Error, unrecognized transaction type: {word} in {entry}")
                         
                         # Remember if the entry is a cash transaction
                         elif info == "CASH":
@@ -484,7 +490,7 @@ def get_transactions(df: pd.DataFrame):
                         if "item" not in transaction:
                             # Failed to find item in entry even though we have nouns.
                             # The item is probably nothing, just money
-                            print(f"Could not find item in entry {entry}.")
+                            print_debug(f"Could not find item in entry {entry}.")
                             transaction["item"] = "Currency"
 
                     # Loop through the nouns in the entry, marking down people and dates as such, and remembering any other random nouns
@@ -521,12 +527,12 @@ def get_transactions(df: pd.DataFrame):
 
                     # If there is not an item in the transaction and it is not a special type (e.g. Liber or Cash), error out.
                     if "item" not in transaction and "type" not in transaction:
-                        print(f"Error, failed to find item in {entry}")
+                        print_debug(f"Error, failed to find item in {entry}")
                         errors.append(f"Error, failed to find item in {entry}")
                     
                     # If there is no price in the row and there is no price in the entries, error out if there is also no commodity
                     if "price" not in transaction and row_context["currency_totaling_contextless"] == True and row_context["commodity_totaling_contextless"] == True:
-                        print(f"Error, failed to find price in transaction {entry}.")
+                        print_debug(f"Error, failed to find price in transaction {entry}.")
                         errors.append(f"Error, failed to find price in transaction {entry}.")
                     
                     # If there is just a price in the transaction, save the amount of the transaction
@@ -540,7 +546,7 @@ def get_transactions(df: pd.DataFrame):
                                         amount = parse_numbers(transaction["amount"])
                                         currency *= amount
                                 else:
-                                    print(f"Error, failed to find amount in transaction with bulk price, transaction is: {entry}.")             
+                                    print_debug(f"Error, failed to find amount in transaction with bulk price, transaction is: {entry}.")             
                             
                             # If we are in a totaling contextless transaction, make sure we still put values for pounds, shillings, and pennies. We assume that it uses colony currency  
                             if "currency_type" not in row_context:
@@ -604,7 +610,7 @@ def get_transactions(df: pd.DataFrame):
         
         # Print out any errors in row context for debugging
         if "errors" in row_context:
-            print(f"Error in row: {row_context['errors']}\nFull row context was {row_context}")
+            print_debug(f"Error in row: {row_context['errors']}\nFull row context was {row_context}")
 
         # Fix prices on singular entry rows
         # Should not be able to raise errors
@@ -678,7 +684,7 @@ def get_transactions(df: pd.DataFrame):
                 break_counter = 0
                 transactions_context = {}
             elif break_counter == 0:
-                print("Error, weird break counter, this line of code should not be able to happen")
+                print_debug("Error, weird break counter, this line of code should not be able to happen")
             else:
                 new_transactions =  transactions[-break_counter:]
                 transactions = transactions[:-break_counter]
@@ -706,8 +712,8 @@ def parse(df: pd.DataFrame):
         todump.append([{key: val for key, val in x.items() if key != "money_obj" and key != "money_obj_ster"} for x in transaction])
         for row in transaction:
             pass
-            # print(row)
-            # print()
+            # print_debug(row)
+            # print_debug()
     return todump
     
         
@@ -743,11 +749,11 @@ def parse_folder(folder):
             file = open(path.join(folder, filename) + ".json", 'w')
             dump(out, file)
             file.close()
-            print(f"Finished file {filename}")
-            print()
+            print_debug(f"Finished file {filename}")
+            print_debug()
         except Exception as e:
-            print(f"Parsing file {filename} failed. Exception dumped.")
-            print()
+            print_debug(f"Parsing file {filename} failed. Exception dumped.")
+            print_debug()
             file = open(path.join(folder, filename) + ".exception", 'w')
             file.write(str(e) + "\n" + traceback.format_exc())
             file.close()

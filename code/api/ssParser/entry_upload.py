@@ -5,6 +5,9 @@ from ..api_types import Message
 from typing import List, Dict, Any, Optional, Union
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
+from json import load
+from os import listdir
+from os.path import join, dirname
 
 # add collections
 entries_collection = db.entries
@@ -179,7 +182,7 @@ def _create_people_rel(parsed_entry: Dict[str, Any]):
 def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
     for key in keys:
         if key not in parsed_entry:
-            print("does not contain all keys\n")
+            # print("does not contain all keys\n")
             return
 
     object: Dict[str, Any] = dict.fromkeys(keys)
@@ -243,6 +246,33 @@ def insert_parsed_entry(parsed_entry: ParserOutput):
     
     except Exception as e:
         return Message(message=format_exc())
+
+def parse_file_exclude_errors(filename):
+    data = None
+    with open(filename, 'r') as file:
+        data = load(file)
+    
+    if data is None:
+        return
+    
+    for translist in data:
+        for transaction in translist:
+            if "errors" in transaction:
+                continue
+            insert_parsed_entry(ParserOutput.parse_obj(transaction))
+
+
+@router.get("/upload_example_data", tags=["Parser Management"], response_model=Message)
+def parse_folder_exclude_errors():
+    folder = join(dirname(__file__), "outs")
+    files = listdir(folder)
+    for file in files:
+        if ".json" in file:
+            file = join(folder, file)
+            parse_file_exclude_errors(file)
+
+    return Message(message="Successfully uploaded example data.")
+
 
 # print(test_id) # prints entryID to terminal
 

@@ -295,8 +295,8 @@ def preprocess(df: pd.DataFrame):
         
         # If there is weird stuff, we know we probably have a bad entry and we will pass it through as such.
         if any([x[2] == "XX" for x in chain(*parsed_entries_in_row)]):
-            print(f"Error, Bad entry: {big_entry}")
-            print(parsed_entries_in_row)
+            # print(f"Error, Bad entry: {big_entry}")
+            # print(parsed_entries_in_row)
             if parsed_entries_in_row:
                 parsed_entries_in_row[0] = "BAD_ENTRY"
                 parsed_entries_in_row.append(big_entry)

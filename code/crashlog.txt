@@ -1,0 +1,12 @@
+
+Crash log for 2022-12-14 16:29:40.463320
+Traceback (most recent call last):
+  File "C:\Users\1king\Senior Design Repos\shoppingstories-parser\code\api\new_parser\parser_manager.py", line 22, in start_parse
+    client.download_file("shoppingstories", filename, file)
+  File "C:\Users\1king\Senior Design Repos\shoppingstories-parser\code\parserEnv\lib\site-packages\boto3\s3\inject.py", line 190, in download_file
+    return transfer.download_file(
+  File "C:\Users\1king\Senior Design Repos\shoppingstories-parser\code\parserEnv\lib\site-packages\boto3\s3\transfer.py", line 313, in download_file
+    raise ValueError('Filename must be a string')
+ValueError: Filename must be a string
+
+ParseMe/gafdg.txt
