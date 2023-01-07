@@ -3,7 +3,7 @@ from bson.objectid import ObjectId
 from traceback import format_exc
 from ..api_types import Message
 from typing import List, Dict, Any, Optional, Union
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel, Field
 from json import load
 from os import listdir
@@ -122,6 +122,8 @@ class ParserOutput(BaseModel):
     liber_book: Optional[str]
     mentions: Optional[List[str]]
 
+class POutputList(BaseModel):
+    entries: List[ParserOutput]
 
 # functions
 # exact search for account_holder in people, add accountHolderID to entries
@@ -198,13 +200,8 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
 
     parsed_entry.update({new_key: object})
 
-
-# TODO: Ignore duplicates when inserting
-@router.post("/create_entry/", tags=["Parser Management"], response_model=Message)
-def insert_parsed_entry(parsed_entry: ParserOutput):
-    """
-    Creates a new database entry from the parser output.
-    """
+# Helper function to make database formatted entries
+def _make_db_entry(parsed_entry: ParserOutput):
     parsed_entry = parsed_entry.dict()
     try:
         # Ensure no keys evaluate to None.
@@ -239,14 +236,53 @@ def insert_parsed_entry(parsed_entry: ParserOutput):
         _create_object(parsed_entry, sterling_keys, "sterling")
         _create_object(parsed_entry, ledger_keys, "ledger")
 
-        # add dict to database
-        # print(test_parser) # prints final entry to terminal
-        test_id = entries_collection.insert_one(parsed_entry).inserted_id
+        return parsed_entry
 
-        return Message(message=f"Successfully inserted entry. New entry has id {test_id}")
-    
     except Exception as e:
-        return Message(message=format_exc())
+        return "ERROR: " + format_exc()
+
+# TODO: Ignore duplicates when inserting
+@router.post("/create_entry/", tags=["Database Management"], response_model=Message)
+def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
+    """
+    Creates a new database entry from the parser output.
+    Sets error flag and has ERROR at the front of the message if any errors occur.
+    """
+
+    entry = _make_db_entry(parsed_entry)
+
+    if isinstance(entry, str):
+        return Message(message=entry, error=True)
+
+    # add dict to database
+    # print(test_parser) # prints final entry to terminal
+    test_id = entries_collection.insert_one(entry).inserted_id
+
+    return Message(message=f"Successfully inserted entry. New entry has id {test_id}")
+    
+
+@router.post("/create_entries/", tags=["Database Management"], response_model=Message)
+def insert_parsed_entries(parsed_entry: POutputList, background_tasks: BackgroundTasks):
+    """
+    Creates multiple new database entries from a list of parser output entries.
+    Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
+    """
+    new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
+    
+    # If any errors present, return error.
+    if any([isinstance(x, str) for x in new_entries]):
+        return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
+
+    try:
+        # Add all to database
+        result = entries_collection.insert_many(new_entries)
+    except Exception as e:
+        # Return any errors that may happen
+        return Message(message="ERROR: " + format_exc, error=True)
+    
+    # If nothing went wrong, return successful message.
+    return Message(message="Successfully inserted entries.")
+
 
 def parse_file_exclude_errors(filename):
     data = None
