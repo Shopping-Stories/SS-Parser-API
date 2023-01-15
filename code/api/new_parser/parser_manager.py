@@ -8,13 +8,17 @@ from threading import Lock
 
 dump_folder = join(dirname(__file__), "ParseMe")
 
+isparsing = False
+
 _parsing_lock = Lock()
 
 def start_parse(client):
     acquired = _parsing_lock.acquire(blocking=False)
     if not acquired:
         return
-    
+
+    isparsing = True
+
     out = client.list_objects_v2(Bucket="shoppingstories", Prefix="ParseMe")
     filenames = [x["Key"] for x in out["Contents"] if x["Key"] != "ParseMe/"]
     
@@ -54,6 +58,9 @@ def start_parse(client):
 def check_progress():
     try:
         filenames = listdir(dump_folder)
+        if not filenames:
+            if isparsing:
+                return 0 
         tot_excel = 0
         tot_finished = 0
         toret = []
@@ -81,6 +88,7 @@ def upload_results(client):
     if not acquired:
         return
 
+    isparsing = False
     filenames = None
 
     try:
