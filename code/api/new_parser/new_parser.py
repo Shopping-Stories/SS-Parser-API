@@ -11,9 +11,11 @@ from typing import List
 from .parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col
 from .preprocessor import preprocess
 from .indices import item_set
+import logging
 
 # NOTE: All functions in this file have side effects which is why they are in this file and not in parser_utils.
 # parser_utils contains only functions with NO side effects.
+
 
 debug = False
 
@@ -140,6 +142,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
 # Parse the results of preprocess into json transactions
 # Get the data into machine processable format ASAP
 def get_transactions(df: pd.DataFrame):
+    logging.info("Getting transactions")
     rows = preprocess(df)
     transactions = []
     break_transactions = False
@@ -706,6 +709,7 @@ def get_transactions(df: pd.DataFrame):
 
 # Chains all the parsing functions together to actually parse df.
 def parse(df: pd.DataFrame):
+    logging.info("Parsing")
     out = get_transactions(df)
     todump = []
     for transaction in out:
@@ -719,6 +723,7 @@ def parse(df: pd.DataFrame):
         
 # Reads in an excel file and parses it, saving as csv for now
 def parse_file(filePath):
+    logging.info(f"Parsing file: {filePath}")
     df = pd.read_excel(filePath)
     
     n = 0
@@ -741,6 +746,7 @@ def parse_file(filePath):
 
 
 def parse_folder(folder):
+    logging.info(f"Parsing folder: {folder}")
     filenames = listdir(folder)
     filenames = [x for x in filenames if x.split(".")[-1] in ["xls", "xlsx"]]
     for filename in filenames:

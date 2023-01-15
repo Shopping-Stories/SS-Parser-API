@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from api import simplesearch, stringlist, parser_endpoints, new_entry_manager
 from api.ssParser import entry_upload
+import logging
+
+logging.basicConfig(filename="parsing.log", encoding="utf-8", level=logging.INFO)
 
 incoming = FastAPI()
 

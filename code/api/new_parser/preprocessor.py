@@ -4,11 +4,13 @@ from re import split, match, search, sub
 import spacy
 from itertools import chain
 from .indices import amount_set
+import logging
 
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow
 # TODO: Fix <ink>
 def preprocess(df: pd.DataFrame):
+    logging.info("Preprocessing.")
     parsed_entries = []
     # For row in df
     for key, row in df.iterrows():

@@ -5,6 +5,8 @@ from ..new_entry_manager import preparsed_lock
 import traceback
 import datetime
 from threading import Lock
+import logging
+
 
 dump_folder = join(dirname(__file__), "ParseMe")
 
@@ -15,6 +17,7 @@ _parsing_lock = Lock()
 def start_parse(client):
     acquired = _parsing_lock.acquire(blocking=False)
     if not acquired:
+        logging.info("Parser lock unacquired")
         return
 
     isparsing = True
@@ -23,10 +26,12 @@ def start_parse(client):
     filenames = [x["Key"] for x in out["Contents"] if x["Key"] != "ParseMe/"]
     
     makedirs(dump_folder, exist_ok=True)
-    
+    logging.info("makedirs done")
+
     todelete = []
 
     for filename in filenames:
+        logging.info(f"doing filename {str(filename)}")
         filename = filename.__str__()
         newfilename = join(dump_folder, filename.removeprefix("ParseMe/"))
         worked = True
@@ -34,6 +39,7 @@ def start_parse(client):
             with open(newfilename, 'wb') as file:
                 client.download_fileobj("shoppingstories", filename, file)
         except Exception:
+            logging.warning(f"filename {filename} failed! Exception: {traceback.format_exc()}")
             worked = False
             file = open("crashlog.txt", 'w+')
             file.write("\n")
@@ -46,11 +52,14 @@ def start_parse(client):
             continue
 
         if worked:
+            logging.info("file worked.")
             todelete.append(filename)
     
     client.delete_objects(Bucket="shoppingstories", Delete={"Objects": [{"Key": key} for key in todelete], "Quiet": True})
 
+    logging.info("Starting parse")
     parse_folder(dump_folder)
+    logging.info("finished parse.")
     _parsing_lock.release()
 
     upload_results(client)
@@ -82,23 +91,29 @@ def check_progress():
 def upload_results(client):
     acquired = _parsing_lock.acquire(blocking=True)
     if not acquired:
+        logging.info("Parsing lock acquisition failed upload_results")
         return
     
     acquired = preparsed_lock.acquire(blocking=True)
     if not acquired:
+        logging.info("Preparsing lock acquisition failed upload_results")
         return
 
+    logging.info("Entered upload results")
     isparsing = False
     filenames = None
 
     try:
         filenames = listdir(dump_folder)
+        logging.info(f"Found files {filenames}")
     except Exception:
+        logging.warning("Exception in listdir.")
         _parsing_lock.release()
         preparsed_lock.release()
         return
     
     if filenames is None:
+        logging.warning("No files found to upload.")
         _parsing_lock.release()
         preparsed_lock.release()
         return
