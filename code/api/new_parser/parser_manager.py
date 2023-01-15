@@ -23,6 +23,7 @@ def start_parse(client):
     todelete = []
 
     for filename in filenames:
+        filename = filename.__str__()
         newfilename = join(dump_folder, filename.removeprefix("ParseMe/"))
         worked = True
         try:
