@@ -26,13 +26,14 @@ def createDmetasForAllEntries():
 # thoughts: maybe call this somewhere in the parser AFTER document has been
 #   created and inserted into the database
 @router.get("/createDmetas/{_id}", tags=["search"])
-def createDmetas(_id: bson.objectid.ObjectId):
+def createDmetas(id: str):
   """
   creates searchable fields in a document for use with ShoppingStories project's fuzzy search
   """
   global db
   entries = db['entries']
   dmeta = DMetaphone()
+  _id = bson.objectid.ObjectId(id)
 
   # locate document if it has 'item' field
   entry = entries.find_one({"$and":[{'_id': _id},{'item': {"$exists": True}}]})
