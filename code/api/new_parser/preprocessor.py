@@ -1,17 +1,33 @@
 import pandas as pd
-from .parser_utils import get_col, add_to_by, isNoun
+from .parser_utils import get_col, get_col_name, add_to_by, isNoun
 from re import split, match, search, sub
 import spacy
 from itertools import chain
 from .indices import amount_set
 import logging
 
+# Modifies the df to copy marginalia values down into rows for which they are null
+def fix_marginalia(df: pd.DataFrame):
+    new_rows = []
+    nrows = df.shape[0]
+    marg_name = get_col_name(df, "Marginalia")
+    last_marg = ""
+    for i in range(nrows):
+        if (val := df.at[i, marg_name]) != "-" and (val != "") and (val is not None):
+            last_marg = df.at[i, marg_name]
+        else:
+            if last_marg != "":
+                df.at[i, marg_name] = last_marg
+
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow
-# TODO: Fix <ink>
 def preprocess(df: pd.DataFrame):
     logging.info("Preprocessing.")
     parsed_entries = []
+    
+    # Fix the marginalia issues present in the underlying spreadsheets
+    fix_marginalia(df)
+
     # For row in df
     for key, row in df.iterrows():
         

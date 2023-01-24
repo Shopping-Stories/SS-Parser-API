@@ -333,6 +333,9 @@ def get_transactions(df: pd.DataFrame):
 
                         # Remember the price of the entry, marking if it is a complex price
                         elif info in ("PRICE", "COMB.PRICE"):
+                            # If there is an existing price with a / in it it might be an amount, so write that down as a poss amount.
+                            if "price" in transaction and "/" in transaction["price"]: 
+                                poss_amounts.append(transaction["price"])
                             transaction["price"] = word
                             transaction["price_is_combo"] = False
                             if info == "COMB.PRICE":
@@ -767,7 +770,7 @@ def parse_folder(folder):
     
 # If we are executed directly from command line, parse the file given in the first argument to the program
 if __name__ == "__main__":
-    if argv[1] in ("1758", "1763", "Amelia", "Mahlon"):
+    if argv[1] in ("..\..\..\data\Amelia", "..\..\..\data\Mahlon"):
         parse_folder(argv[1])
     else:
         out = parse_file(argv[1])

@@ -130,3 +130,41 @@ def get_col(df, colname: str):
             elif colname == "Marginalia":
                 return get_col(df, "Marginialia")
             raise KeyError(f"Column with name {colname} not in df")
+
+# Returns the name in the df corresponding to the name we give it, allows for column names to vary
+# Column names include: "L Currency", "L Sterling", "Colony Currency", "Folio Year", "EntryID", etc.
+def get_col_name(df, colname: str):
+        colname2 = colname[:]
+        if colname2[0] != "[":
+            colname2 = "[" + colname2 + "]"
+        else:
+            colname2 = colname.strip("[]")
+        if colname2 in df:
+            return colname2
+        elif colname in df:
+            return colname
+        else:
+            if colname == "Folio Year":
+                if "Year" in df:
+                    return get_col(df, "Year")
+                else:
+                    return df[colname]
+            elif colname == "Date Year":
+                if "Year.1" in df:
+                    return get_col(df, "Year.1")
+                else:
+                    return get_col(df, "Year")
+            elif colname == "Colony Currency":
+                if "Colony" in df:
+                    return get_col(df, "Colony")
+                else:
+                    return df[colname]
+            elif len(col := colname.split(" ")) > 1:
+                if col[1] == "Sterling":
+                    return get_col(df, col[0])
+                elif col[1] == "Currency":
+                    return get_col(df, col[0] + ".1")
+                raise KeyError(f"Column with name {colname} not in df")
+            elif colname == "Marginalia":
+                return get_col(df, "Marginialia")
+            raise KeyError(f"Column with name {colname} not in df")

@@ -3,6 +3,7 @@ from boto3 import client
 from io import BytesIO
 from .api_types import *
 from .new_parser.parser_manager import start_parse, check_progress
+from .new_parser.new_parser import parse_file, parse_folder
 import traceback
 from base64 import b64decode
 
@@ -86,6 +87,14 @@ def debug_upload_file_and_parse(name: str, bg_tasks: BackgroundTasks) -> Message
 
     return Message(message="Successfully uploaded file to s3.")
 
+@router.get("/test_parser", tags=["Parser Management"], response_model=Message)
+def test_parsing(bg_tasks: BackgroundTasks) -> Message:
+    """
+    Tests parser on a hardcoded file for dev purposes.
+    """
+    filelocation = "..\\data\\Mahlon\\C_1760_110_FINAL_.xlsx"
+    bg_tasks.add_task(parse_file, filelocation)
+    return Message(message="Started parser.")
 
 @router.post("/upload/", tags=["Parser Management"], response_model=Message)
 def upload_file(inc_file: IncomingFile) -> Message:
