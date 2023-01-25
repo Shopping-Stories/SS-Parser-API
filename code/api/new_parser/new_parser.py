@@ -20,6 +20,7 @@ import logging
 debug = False
 
 def print_debug(string: str = ""):
+    logging.info(string)
     if debug:
         print(string)
 
@@ -85,6 +86,9 @@ def _remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
                     row_context[entry_name] = parse_numbers(get_col(row, entry_name))
                 except Exception as e:
                     add_error(row_context, "Error: Quantity parsing failed in: " + str(e), get_col(row, "Entry"))
+            elif entry_name == "Marginalia":
+                # Marginalia sometimes has funky spacing so remove that
+                row_context[entry_name] = get_col(row, entry_name).strip()
             else:
                 row_context[entry_name] = get_col(row, entry_name)
 
@@ -652,15 +656,18 @@ def get_transactions(df: pd.DataFrame):
                 transactions[-1]["pennies"] = currency["pennies"]
                 transactions[-1]["farthings"] = currency["farthings"]
                 transactions[-1]["money_obj"] = currency
-            
-            # TODO: Add checks for commodity totaling contextless and move this outside this if statement
+
+            # Remove fix_price markings    
+            if "fix_price" in transactions[-1]:
+                del transactions[-1]["fix_price"]
+
+        # Fix commodities on singular entry rows
+        if transactions and trans_in_row_counter == 1:
             if "Commodity" in row_context:
                 transactions[-1]["Commodity"] = row_context["Commodity"]
             if "Quantity" in row_context:
                 transactions[-1]["Quantity"] = row_context["Quantity"]
 
-            if "fix_price" in transactions[-1]:
-                del transactions[-1]["fix_price"]
 
 
         # Yield transactions grouped by ends of lists of transactions
@@ -723,8 +730,25 @@ def parse(df: pd.DataFrame):
             # print_debug()
     return todump
     
-        
-# Reads in an excel file and parses it, saving as csv for now
+
+# Runs parse_folder but on a single file
+def parse_file_and_dump(folder, filename):
+    logging.info(f"Parsing file: {filename} in folder {folder}.")
+    try:
+        out = parse_file(path.join(folder, filename))
+        file = open(path.join(folder, filename) + ".json", 'w')
+        dump(out, file)
+        file.close()
+        print_debug(f"Finished file {filename}")
+        print_debug()
+    except Exception as e:
+        print_debug(f"Parsing file {filename} failed. Exception dumped.")
+        print_debug()
+        file = open(path.join(folder, filename) + ".exception", 'w')
+        file.write(str(e) + "\n" + traceback.format_exc())
+        file.close()
+
+# Reads in an excel file and parses it
 def parse_file(filePath):
     logging.info(f"Parsing file: {filePath}")
     df = pd.read_excel(filePath)

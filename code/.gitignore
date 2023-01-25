@@ -3,3 +3,4 @@ parserEnv/
 out.json
 *.pyc
 __pycache__
+parsing.log

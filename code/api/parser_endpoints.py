@@ -3,7 +3,7 @@ from boto3 import client
 from io import BytesIO
 from .api_types import *
 from .new_parser.parser_manager import start_parse, check_progress
-from .new_parser.new_parser import parse_file, parse_folder
+from .new_parser.new_parser import parse_file_and_dump, parse_folder
 import traceback
 from base64 import b64decode
 
@@ -92,9 +92,10 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     """
     Tests parser on a hardcoded file for dev purposes.
     """
-    filelocation = "..\\data\\Mahlon"
-    task = parse_folder
-    bg_tasks.add_task(task, filelocation)
+    folder = "..\\data\\Mahlon\\"
+    file = "C_1760_081_FINAL_.xlsx"
+    task = parse_file_and_dump
+    bg_tasks.add_task(task, folder, file)
     return Message(message="Started parser.")
 
 @router.post("/upload/", tags=["Parser Management"], response_model=Message)
