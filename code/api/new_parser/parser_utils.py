@@ -146,25 +146,25 @@ def get_col_name(df, colname: str):
         else:
             if colname == "Folio Year":
                 if "Year" in df:
-                    return get_col(df, "Year")
+                    return get_col_name(df, "Year")
                 else:
                     return df[colname]
             elif colname == "Date Year":
                 if "Year.1" in df:
-                    return get_col(df, "Year.1")
+                    return get_col_name(df, "Year.1")
                 else:
-                    return get_col(df, "Year")
+                    return get_col_name(df, "Year")
             elif colname == "Colony Currency":
                 if "Colony" in df:
-                    return get_col(df, "Colony")
+                    return get_col_name(df, "Colony")
                 else:
                     return df[colname]
             elif len(col := colname.split(" ")) > 1:
                 if col[1] == "Sterling":
-                    return get_col(df, col[0])
+                    return get_col_name(df, col[0])
                 elif col[1] == "Currency":
-                    return get_col(df, col[0] + ".1")
+                    return get_col_name(df, col[0] + ".1")
                 raise KeyError(f"Column with name {colname} not in df")
             elif colname == "Marginalia":
-                return get_col(df, "Marginialia")
+                return get_col_name(df, "Marginialia")
             raise KeyError(f"Column with name {colname} not in df")

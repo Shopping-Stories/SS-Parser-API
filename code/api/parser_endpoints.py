@@ -92,8 +92,9 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     """
     Tests parser on a hardcoded file for dev purposes.
     """
-    filelocation = "..\\data\\Mahlon\\C_1760_110_FINAL_.xlsx"
-    bg_tasks.add_task(parse_file, filelocation)
+    filelocation = "..\\data\\Mahlon"
+    task = parse_folder
+    bg_tasks.add_task(task, filelocation)
     return Message(message="Started parser.")
 
 @router.post("/upload/", tags=["Parser Management"], response_model=Message)
