@@ -514,7 +514,7 @@ def get_transactions(df: pd.DataFrame):
                             else:
                                 transaction["people"] = [noun[0],]
                         elif noun[1] == "DATE":
-                            if "date" in transaction:
+                            if "date" in transaction and transaction["date"] != noun[0]:
                                 transaction["date"] += " " + noun[0]
                             else:
                                 transaction["date"] = noun[0]
