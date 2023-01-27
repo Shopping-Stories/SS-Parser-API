@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from json import load
 from os import listdir
 from os.path import join, dirname
+from ..fuzzysearch import createDmetasForEntries
 
 # add collections
 entries_collection = db.entries
@@ -276,6 +277,8 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     try:
         # Add all to database
         result = entries_collection.insert_many(new_entries)
+        # Create search terms for new entries
+        background_tasks.add_task(createDmetasForEntries, result.inserted_ids)
     except Exception as e:
         # Return any errors that may happen
         return Message(message="ERROR: " + format_exc, error=True)
