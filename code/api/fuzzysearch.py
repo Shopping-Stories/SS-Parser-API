@@ -19,6 +19,13 @@ def createDmetasForAllEntries():
   for x in ids:
     createDmetas(x['_id'])
 
+# creates and inserts necessary dmeta tokenizations for listed entries
+# input 'entrylist' is a list of document _id fields in string format
+# ex. ["639b8552fcc5de9ec26b12ba", "639b8552fcc5de9ec26b12bc"]
+def createDmetasForEntries(entrylist: list):
+  for x in entrylist:
+    createDmetas(x)
+
 # create "dmeta" (fuzzy.DMetaphone) tokenizations of searchable fields in document
 # this is what search terms will be compared to to determine matches
 # input is an ObjectId corresponding to the document to create dmeta fields for
