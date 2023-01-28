@@ -19,6 +19,12 @@ def fix_marginalia(df: pd.DataFrame):
             if last_marg != "":
                 df.at[i, marg_name] = last_marg
 
+def remove_xx(tag, replacement):
+    if tag == "XX":
+        return replacement
+    else:
+        return tag
+
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow
 def preprocess(df: pd.DataFrame):
@@ -36,16 +42,20 @@ def preprocess(df: pd.DataFrame):
         if big_entry == "-" or big_entry == "" or big_entry is None or str(big_entry) == "nan":
             continue
 
+        # Remove } from the text as it messes everything up
+        big_entry = big_entry.replace("}", "")
+
         # Remove "Ditto"
-        ditto = search(r"(DO|Do|DITTO|Ditto)\s*\[\w+\]", big_entry)
+        ditto = search(r"(DO|Do|DITTO|Ditto)\.*\s*\[\w+\]", big_entry)
         if ditto:
             newRe = search("\[\w+\]", ditto.group())
             newStr = (newRe.group())[1:-1]
             big_entry = big_entry.replace(ditto.group(), newStr)
 
         # Replace 1w with 1 w and 1M with 1 M and so on
-        big_entry = sub(r"(?<=\s)\d+([wMm])(?=\s\[)", lambda match: match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
+        big_entry = sub(r"(?<=\s)\d+([wMm]|(wt))(?=\s\[)", lambda match: match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
+
         # Split the entry by "    " or \n or \t
         smaller_entries = split(r"(?<!\s)([\n\t]|    )(?!\s)", big_entry)
         smaller_entries = [x for x in smaller_entries if match(r"[\n\t]|    ", x) is None]
@@ -54,7 +64,7 @@ def preprocess(df: pd.DataFrame):
 
         # Exceptions to the normal rule of not deleting words before [something] unless it starts with the same letter as something
         def is_exception(word, i, smaller_entry):
-            if word == "[pound]" or word == "[pounds]" and i - 1 > 0 and smaller_entry[i - 1] == "w":
+            if word == "[pound]" or word == "[pounds]" and i - 1 > 0 and (smaller_entry[i - 1] == "w" or smaller_entry[i - 1] == "wt"):
                 return True
             elif word == "[thousand]" or word == "[thousands]" and i - 1 > 0 and smaller_entry[i - 1] in ["M", "m"]:
                 return True
@@ -72,7 +82,7 @@ def preprocess(df: pd.DataFrame):
                     new_sent.pop()
                 elif is_exception(word, i, smaller_entry):
                     new_sent.pop()
-                new_sent.append(word.strip("[]<>^").replace(">", "").replace("<", "").replace("^", ""))
+                new_sent.append(word.strip("[]<>^").replace(">", "").replace("<", "").replace("^", "").replace("[", "").replace("]", ""))
             new_smaller_entries.append(" ".join(new_sent))
         
         parsed_entries_in_row = []
@@ -102,6 +112,9 @@ def preprocess(df: pd.DataFrame):
                 if new_pos is None:
                     new_pos = old_pos
                 
+                if new_ent == "PRICE" and new_pos == "XX":
+                    new_pos = "CD"
+
                 if space:
                     new_word = (old_text + " " + token_text, new_ent, new_pos)
                 else:
@@ -163,7 +176,7 @@ def preprocess(df: pd.DataFrame):
                 
                 # Label prices as PRICE
                 elif isProbablyPrice(token):
-                    new_entry.append((token.text, "PRICE", token.tag_))
+                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
                 
                 # If we find something in the amount word index, combine it with the previous token and mark as amt unless there are no numbers to combine it with
                 elif prev_token is not None and token.text.lower() in amount_set and (prev_token[2] in {"DT", "CD"} or prev_token[1] == "CARDINAL" or prev_token[1] == "QUANTITY" or prev_token[1] == "COMB.QUANTITY" or prev_token[1] == "AMT" or prev_token[0] in amount_set or prev_token[0].isnumeric()):
@@ -186,7 +199,7 @@ def preprocess(df: pd.DataFrame):
                             combine_tok_with_prev(new_entry, token, new_ent="COMB.PRICE")
                         elif token.ent_type_ == "CARDINAL" and match(price_regex, token.text):
                             # Is probably a price
-                            new_entry.append((token.text, "PRICE", token.tag_))
+                            new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
                         else:
                             new_entry.append((token.text, token.ent_type_, token.tag_))
                     # Label Liber things as LIBER when combining
@@ -270,15 +283,15 @@ def preprocess(df: pd.DataFrame):
                 
                 # If a cardinal number is probably a price but is not at the end, mark as price
                 elif token.ent_type_ == "CARDINAL" and match(price_regex, token.text):
-                    new_entry.append((token.text, "PRICE", token.tag_))
+                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
                 
                 # Label Money ent type as price
                 elif token.ent_type_ == "MONEY":
-                    new_entry.append((token.text, "PRICE", token.tag_))
+                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
 
                 # If we have a cardinal number that appears to be a price, mark it as such.
                 elif prev_token is not None and prev_token[0] != "at" and token.tag_ == "CD" and match(price_regex, token.text):
-                    new_entry.append((token.text, "PRICE", token.tag_))
+                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
 
                 # Otherwise just add token to stack
                 else:
