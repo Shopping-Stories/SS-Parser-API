@@ -53,7 +53,7 @@ def preprocess(df: pd.DataFrame):
             big_entry = big_entry.replace(ditto.group(), newStr)
 
         # Replace 1w with 1 w and 1M with 1 M and so on
-        big_entry = sub(r"(?<=\s)\d+([wMm]|(wt))(?=\s\[)", lambda match: match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
+        big_entry = sub(r"(?<=\s)\d+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
 
         # Split the entry by "    " or \n or \t
@@ -64,7 +64,7 @@ def preprocess(df: pd.DataFrame):
 
         # Exceptions to the normal rule of not deleting words before [something] unless it starts with the same letter as something
         def is_exception(word, i, smaller_entry):
-            if word == "[pound]" or word == "[pounds]" and i - 1 > 0 and (smaller_entry[i - 1] == "w" or smaller_entry[i - 1] == "wt"):
+            if (word.strip("[]<>^") in {"pound", "pounds"}) and i - 1 > 0 and (smaller_entry[i - 1] == "w" or smaller_entry[i - 1] == "wt"):
                 return True
             elif word == "[thousand]" or word == "[thousands]" and i - 1 > 0 and smaller_entry[i - 1] in ["M", "m"]:
                 return True
@@ -78,10 +78,15 @@ def preprocess(df: pd.DataFrame):
             smaller_entry = smaller_entry.split(" ")
             for i, word in enumerate(smaller_entry):
                 word = word.replace(">", "").replace("<", "").replace("^", "")
+                if "wt." == word[-3:]:
+                    word = word.replace("wt.", "wt")
+                    smaller_entry[i] = word
                 if word.startswith("[") and i-1 >= 0 and smaller_entry[i-1].lower().startswith(word[1].lower()):
                     new_sent.pop()
                 elif is_exception(word, i, smaller_entry):
                     new_sent.pop()
+                elif word.strip("[]<>^") == ".":
+                    continue
                 new_sent.append(word.strip("[]<>^").replace(">", "").replace("<", "").replace("^", "").replace("[", "").replace("]", ""))
             new_smaller_entries.append(" ".join(new_sent))
         
