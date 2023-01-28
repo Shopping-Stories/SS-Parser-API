@@ -28,6 +28,8 @@ sudo cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
 sudo chmod 777 /var/log/nginx/error.log
 sudo chmod +x /usr/sbin/nginx
 sudo chmod 777 /var/log/nginx/access.log
+sudo bash -c "source ../parserEnv/bin/activate && pip cache purge"
+pip cache purge
 sudo service nginx stop ||  true
 sudo service nginx start
 cd ..
