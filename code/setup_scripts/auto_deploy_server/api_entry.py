@@ -1,28 +1,43 @@
 from fastapi import FastAPI, Request
-from subprocess import Popen
+from subprocess import run
+import logging
+
+logging.basicConfig(filename="adlogs.log", encoding='utf-8', level=logging.INFO)
 
 incoming = FastAPI()
 
 @incoming.get("/")
-async def gmain():
-    Popen("./redeploy.sh", shell=True)
+def gmain():
+    a = run("./redeploy.sh", shell=True, capture_output=True, encoding="utf-8")
+    logging.info("Ran Redeploy: ")
+    logging.info(a.stdout)
+    logging.info(a.stderr)
     return {"message": "Redeploying..."}
 
 @incoming.post("/")
-async def pmain():
-    Popen("./redeploy.sh", shell=True)
+def pmain():
+    a = run("./redeploy.sh", shell=True, capture_output=True, encoding="utf-8")
+    logging.info("Ran Redeploy: ")
+    logging.info(a.stdout)
+    logging.info(a.stderr)
     return {"message": "Redeploying..."}
 
 @incoming.get("/website")
-async def gweb():
-    Popen("./redeploy_website.sh", shell=True)
+def gweb():
+    a = run("./redeploy_website.sh", shell=True, capture_output=True, encoding="utf-8")
+    logging.info("Redeployed website: ")
+    logging.info(a.stdout)
+    logging.info(a.stderr)
     return {"message": "Redeploying..."}
 
 @incoming.post("/website")
 async def pweb(request: Request):
     json = await request.json()
-    if "ref" in json and "preprod" in json["ref"]: 
-        Popen("./redeploy_website.sh", shell=True)
+    if "ref" in json and "preprod" in json["ref"]:
+        a = run("./redeploy_website.sh", shell=True, capture_output=True, encoding="utf-8")
+        logging.info("Redeployed website")
+        logging.info(a.stdout)
+        logging.info(a.stderr)
         return {"message": "Redeploying..."}
     else:
         return {"message": "Not redeploying, not preprod branch."}
