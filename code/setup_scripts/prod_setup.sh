@@ -19,6 +19,7 @@ sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring
 #     | sudo tee /etc/apt/preferences.d/99nginx
 sudo apt update
 # sudo apt -y install nginx
+# sudo apt -y install cargo
 sudo mkdir -p /usr/local/nginx/conf || true
 sudo mkdir -p /etc/nginx || true
 sudo mkdir -p  /usr/local/etc/nginx || true

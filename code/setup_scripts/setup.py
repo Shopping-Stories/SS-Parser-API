@@ -1,6 +1,6 @@
-import nltk
+# import nltk
 from os import path
-nltk.download("all")
+# nltk.download("all")
 
 file = open("nginx.conf")
 newfile = []

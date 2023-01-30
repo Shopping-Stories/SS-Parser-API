@@ -1,5 +1,4 @@
 from typing import List, Tuple
-import nltk
 from re import split, search
 from unicodedata import numeric
 
@@ -9,11 +8,11 @@ def add_to_by(entries: List[str]):
     smaller_entries = entries
     new_entries = []
     for j, smaller_entry in enumerate(smaller_entries):
-        lower_tok = nltk.word_tokenize(smaller_entry.lower())
+        lower_tok = split(r"\s+", smaller_entry.lower())
         if "to" not in lower_tok and "by" not in lower_tok and j-1 >= 0:
-            if "to" in nltk.word_tokenize(new_entries[j-1].lower()):
+            if "to" in split(r"\s+", new_entries[j-1].lower()):
                 smaller_entry = "To " + smaller_entry
-            elif "by" in nltk.word_tokenize(new_entries[j-1].lower()):
+            elif "by" in split(r"\s+", new_entries[j-1].lower()):
                 smaller_entry = "By " + smaller_entry
         new_entries.append(smaller_entry)
     return new_entries
