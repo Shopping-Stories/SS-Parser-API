@@ -1,6 +1,6 @@
 #!/bin/bash
 cd setup_scripts
-python3 -m venv ../parserEnv
+python3.10 -m venv ../parserEnv
 source ../parserEnv/bin/activate
 pip install --upgrade pip
 pip install -r ../requirements.txt
