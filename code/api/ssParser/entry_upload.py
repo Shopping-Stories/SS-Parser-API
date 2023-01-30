@@ -101,6 +101,7 @@ class ParserOutput(BaseModel):
     farthings_ster: Optional[int]
     Marginalia: Optional[str]
     farthings: Optional[int]
+    store: Optional[str]
     currency_type: Optional[str]
     currency_totaling_contextless: Optional[bool]
     commodity_totaling_contextless: Optional[bool]

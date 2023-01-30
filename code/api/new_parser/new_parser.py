@@ -210,6 +210,7 @@ def get_transactions(df: pd.DataFrame):
         row_context["folio_year"] = get_col(row, "Year")
         row_context["folio_page"] = get_col(row, "Folio Page")
         row_context["entry_id"] = get_col(row, "EntryID")
+        row_context["store"] = get_col(row, "Store")
 
         # For all nullable entries, do not remember them if they are null.
         nullable_entries = ["Marginalia", "Date Year", "_Month", "Day", "Folio Reference", "Quantity", "Commodity"]

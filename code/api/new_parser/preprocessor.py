@@ -1,13 +1,20 @@
 import pandas as pd
 from .parser_utils import get_col, get_col_name, add_to_by, isNoun
-from re import split, match, search, sub
+from re import split, match, search, sub, finditer, Match
 import spacy
 from itertools import chain
 from .indices import amount_set
 import logging
 
+            
+# Regex for the price
+price_regex = r"((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))"
+
+# Regex for tobacco marks
+mark_regex = r"\[TM:\s+(\d+)\s+([^\]\s]+)\]"
+
 # Modifies the df to copy marginalia values down into rows for which they are null
-def fix_marginalia(df: pd.DataFrame):
+def _fix_marginalia(df: pd.DataFrame):
     new_rows = []
     nrows = df.shape[0]
     marg_name = get_col_name(df, "Marginalia")
@@ -19,11 +26,48 @@ def fix_marginalia(df: pd.DataFrame):
             if last_marg != "":
                 df.at[i, marg_name] = last_marg
 
-def remove_xx(tag, replacement):
+# Simple function to remove the XX tag as it usually indicates a parser error
+def _remove_xx(tag, replacement):
     if tag == "XX":
         return replacement
     else:
         return tag
+
+# Handles entries of the form:
+# By 2 hogshead tobacco on occoquan
+# [TM: 0780 BH] N 1  1116. .130. .986
+#               N 2  1025. .100. .925
+#                                1911
+#                                 200
+#                                1711 at 11/: & 4/: for 2 Casks
+def _handle_multiline_tobacco(tob_match: list[Match], entry: str):
+    # Regex to match the final line of trasactions similar to the above
+    final_line_regex = r"\n\s+(\d+)\s+at\s+((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))\s+([^\n]+)"
+    final = search(final_line_regex, entry)
+    if final:
+        new_str = " "
+        new_str += f"final_weight: {final.group(1)} "
+        new_str += f"unit_price: {final.group(2)} "
+        new_str += final.group(11)
+        entry = entry.replace(final.group(), new_str)
+    else:
+        entry += " no_final_tobacco"
+    for m in tob_match:
+        new_str = " "
+        new_str += f"tobacco_note: {m.group(4)} "
+        new_str += f"total_weight: {m.group(5)} "
+        new_str += f"tare_weight: {m.group(6)} "
+        new_str += f"tobacco_weight: {m.group(7)}"
+        entry = entry.replace(m.group(), new_str)
+
+    entry = sub(r"\s+", " ", entry)
+    entry = sub(r"(&|[aA]nd)\s+", "", entry)
+    
+    return entry
+
+# Handles tobacco marks i.e. [TM: 0780 BH],
+def _get_tobacco_mark_replacement(mark: Match) -> str:
+    return f"tobacco_mark_number: {mark.group(1)} tobacco_mark_text: {mark.group(2)}"
 
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow
@@ -32,7 +76,7 @@ def preprocess(df: pd.DataFrame):
     parsed_entries = []
     
     # Fix the marginalia issues present in the underlying spreadsheets
-    fix_marginalia(df)
+    _fix_marginalia(df)
 
     # For row in df
     for key, row in df.iterrows():
@@ -42,8 +86,21 @@ def preprocess(df: pd.DataFrame):
         if big_entry == "-" or big_entry == "" or big_entry is None or str(big_entry) == "nan":
             continue
 
+        if match(r"\s*\d+[a-zA-Z]+\s*", str(get_col(row, "EntryID"))):
+            continue
+
         # Remove } from the text as it messes everything up
         big_entry = big_entry.replace("}", "")
+
+        # # Replace all tobacco marks with easily parseable tokens
+        # big_entry = sub(mark_regex, _get_tobacco_mark_replacement, big_entry)
+
+        # # Check for multiline tobacco entries and use special parsing rules if we find one
+        # tob_match = [x for x in finditer(r"(\s+)((N|N[oO]|N[oO]\.)\s+)?(\d+)\s+(\d+)\.\s+\.(\d+)\.\s+\.(\d+)\s+\n", big_entry)]
+        # if tob_match:
+        #     if (all([get_col(row, x).strip() in {"-", "", None} for x in ("L Sterling", "s Sterling", "d Sterling", "L Currency", "s Currency", "d Currency")])):
+        #         pass
+        #     big_entry = _handle_multiline_tobacco(tob_match, big_entry)
 
         # Remove "Ditto"
         ditto = search(r"(DO|Do|DITTO|Ditto)\.*\s*\[\w+\]", big_entry)
@@ -138,10 +195,8 @@ def preprocess(df: pd.DataFrame):
                     return entry[-1] == token and (match(r"\d+[Lsdp]", token[0]) or match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", token[0]))
                 else:
                     return entry[-1] == token and (match(r"\d+[Lsdp]", token.text) or match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", token.text))
-            
-            # Regex for the price
-            price_regex = r"((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))"
-           
+
+
             # Token stack
             new_entry = []
 
@@ -181,7 +236,7 @@ def preprocess(df: pd.DataFrame):
                 
                 # Label prices as PRICE
                 elif isProbablyPrice(token):
-                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
+                    new_entry.append((token.text, "PRICE", _remove_xx(token.tag_, "CD")))
                 
                 # If we find something in the amount word index, combine it with the previous token and mark as amt unless there are no numbers to combine it with
                 elif prev_token is not None and token.text.lower() in amount_set and (prev_token[2] in {"DT", "CD"} or prev_token[1] == "CARDINAL" or prev_token[1] == "QUANTITY" or prev_token[1] == "COMB.QUANTITY" or prev_token[1] == "AMT" or prev_token[0] in amount_set or prev_token[0].isnumeric()):
@@ -204,7 +259,7 @@ def preprocess(df: pd.DataFrame):
                             combine_tok_with_prev(new_entry, token, new_ent="COMB.PRICE")
                         elif token.ent_type_ == "CARDINAL" and match(price_regex, token.text):
                             # Is probably a price
-                            new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
+                            new_entry.append((token.text, "PRICE", _remove_xx(token.tag_, "CD")))
                         else:
                             new_entry.append((token.text, token.ent_type_, token.tag_))
                     # Label Liber things as LIBER when combining
@@ -288,15 +343,15 @@ def preprocess(df: pd.DataFrame):
                 
                 # If a cardinal number is probably a price but is not at the end, mark as price
                 elif token.ent_type_ == "CARDINAL" and match(price_regex, token.text):
-                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
+                    new_entry.append((token.text, "PRICE", _remove_xx(token.tag_, "CD")))
                 
                 # Label Money ent type as price
                 elif token.ent_type_ == "MONEY":
-                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
+                    new_entry.append((token.text, "PRICE", _remove_xx(token.tag_, "CD")))
 
                 # If we have a cardinal number that appears to be a price, mark it as such.
                 elif prev_token is not None and prev_token[0] != "at" and token.tag_ == "CD" and match(price_regex, token.text):
-                    new_entry.append((token.text, "PRICE", remove_xx(token.tag_, "CD")))
+                    new_entry.append((token.text, "PRICE", _remove_xx(token.tag_, "CD")))
 
                 # Otherwise just add token to stack
                 else:

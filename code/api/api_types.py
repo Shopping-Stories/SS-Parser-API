@@ -32,6 +32,7 @@ class DatabaseEntry(BaseModel):
     currency: Optional[Currency]
     sterling: Optional[Currency]
     ledger: Optional[Ledger]
+    store: Optional[str]
     Marginalia: Optional[str]
     currency_type: Optional[str]
     currency_totaling_contextless: Optional[bool]

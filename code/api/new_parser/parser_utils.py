@@ -126,9 +126,15 @@ def get_col(df, colname: str):
                     return get_col(df, col[0])
                 elif col[1] == "Currency":
                     return get_col(df, col[0] + ".1")
+                elif colname == "Store Location":
+                    return get_col(df, "Store_Location")
+                elif " " in colname:
+                    return get_col(df, colname.replace(" ", "_"))
                 raise KeyError(f"Column with name {colname} not in df")
             elif colname == "Marginalia":
                 return get_col(df, "Marginialia")
+            elif colname == "Store":
+                return get_col(df, "Store Location")
             raise KeyError(f"Column with name {colname} not in df")
 
 # Returns the name in the df corresponding to the name we give it, allows for column names to vary
@@ -164,7 +170,13 @@ def get_col_name(df, colname: str):
                     return get_col_name(df, col[0])
                 elif col[1] == "Currency":
                     return get_col_name(df, col[0] + ".1")
+                elif colname == "Store Location":
+                    return get_col_name(df, "Store_Location")
                 raise KeyError(f"Column with name {colname} not in df")
+            elif " " in colname:
+                return get_col_name(df, colname.replace(" ", "_"))
             elif colname == "Marginalia":
                 return get_col_name(df, "Marginialia")
+            elif colname == "Store":
+                return get_col_name(df, "Store Location")
             raise KeyError(f"Column with name {colname} not in df")

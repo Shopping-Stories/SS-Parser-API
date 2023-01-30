@@ -4,3 +4,7 @@ out.json
 *.pyc
 __pycache__
 parsing.log
+*.zip
+api/ssParser/outs
+.DS_STORE
+*.DS_STORE
