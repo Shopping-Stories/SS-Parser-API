@@ -1,7 +1,6 @@
 #!/bin/bash
 sudo pkill node || true
-cd ..
-cd shopping-stories/website
+cd /home/admin/shopping-stories/website
 sudo git checkout preprod
 sudo git reset --hard
 sudo git pull
