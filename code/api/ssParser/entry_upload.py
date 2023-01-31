@@ -125,17 +125,21 @@ class ParserOutput(BaseModel):
 class POutputList(BaseModel):
     entries: List[ParserOutput]
 
-# functions
-# exact search for account_holder in people, add accountHolderID to entries
-# checks if already in db, adds to db if not, makes relationship regardless
 
 router = APIRouter()
 
-
+# exact search for account_holder in people, add accountHolderID to entries
+# checks if already in db, adds to db if not, makes relationship regardless
 def _create_account_holder_rel(parsed_entry: Dict[str, Any]):
-    if people_collection.count_documents({"name": parsed_entry["account_name"]}, limit=1):
+    if people_collection.count_documents({"name": {
+        "$regex": parsed_entry["account_name"],
+        "$options": 'i'
+        }}, limit=1):
         people_id = (people_collection.find_one(
-            {"name": parsed_entry["account_name"]}, {"_id"}))
+            {"name": {
+                "$regex": parsed_entry["account_name"],
+                "$options": 'i'
+            }}, {"_id"}))
 
         parsed_entry.update({"accountHolderID": people_id["_id"]})
 
@@ -167,8 +171,14 @@ def _create_item_rel(parsed_entry: Dict[str, Any]):
 def _create_people_rel(parsed_entry: Dict[str, Any]):
     parsed_entry.update({"peopleID": []})
     for person in parsed_entry["people"]:
-        if people_collection.count_documents({"name": person}, limit=1):
-            people_id = (people_collection.find_one({"name": person}, {"_id"}))
+        if people_collection.count_documents({"name": {
+            "$regex": person,
+            "$options": 'i'
+        }}, limit=1):
+            people_id = (people_collection.find_one({"name": {
+                "$regex": person,
+                "$options": 'i'
+            }}, {"_id"}))
 
             parsed_entry["peopleID"].append(people_id["_id"])
 
@@ -200,6 +210,64 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
 
     parsed_entry.update({new_key: object})
 
+
+# creates relationship between people that were mentioned in the same entry, skips duplicates
+def _create_people_to_people_rel(parsed_entry: Dict[str, Any]):
+    for person1 in parsed_entry["peopleID"]:
+        for person2 in parsed_entry["peopleID"]:
+            if person1 != person2:
+                newRelFlag = True
+                person1Data = people_collection.find_one({'_id': person1})
+                if "related" in person1Data:
+                    for related in person1Data["related"]:
+                        if related == person2:
+                            newRelFlag = False
+                            break
+                if newRelFlag == True:
+                    people_collection.update_one({'_id': person1}, {'$push': {'related': person2}}) 
+
+
+# creates relationship between people and account holders that were mentioned in the same entry, skips duplicates
+def _create_people_to_account_holder_rel(parsed_entry: Dict[str, Any]):
+    accHol = parsed_entry["accountHolderID"]
+    for person in parsed_entry["peopleID"]:
+        if person != accHol:
+            # add person to account holder's realted field
+            newRelFlag = True
+            accHolData = people_collection.find_one({'_id': accHol})
+            if "related" in accHolData:
+                for related in accHolData["related"]:
+                    if related == person:
+                        newRelFlag = False
+                        break
+            if newRelFlag == True:
+                people_collection.update_one({'_id': accHol}, {'$push': {'related': person}}) 
+
+            # add account holder to person's related field
+            newRelFlag = True
+            personData = people_collection.find_one({'_id': person})
+            if "related" in personData:
+                for related in personData["related"]:
+                    if related == accHol:
+                        newRelFlag = False
+                        break
+            if newRelFlag == True:
+                people_collection.update_one({'_id': person}, {'$push': {'related': accHol}}) 
+
+
+# creates relationship between similar items in the database, skips duplicates
+# substring will relate to all items containing it, larger 
+def _create_item_to_item_rel(parsed_entry: Dict[str, Any]):
+    relatedItems = item_collection.find({"item": {
+        "$regex": '.*' + parsed_entry["item"] + '.*', # edit regex?
+        "$options": 'i'
+    }})
+    for item in relatedItems:
+        if parsed_entry["itemID"] != item["_id"]:
+            item_collection.update_one({'_id': item["_id"]}, {'$push': {'related': parsed_entry["itemID"]}}) 
+            item_collection.update_one({'_id': parsed_entry["itemID"]}, {'$push': {'related': item["_id"]}}) 
+
+
 # Helper function to make database formatted entries
 def _make_db_entry(parsed_entry: ParserOutput):
     parsed_entry = parsed_entry.dict()
@@ -224,6 +292,14 @@ def _make_db_entry(parsed_entry: ParserOutput):
             _create_item_rel(parsed_entry)
         if "people" in parsed_entry:
             _create_people_rel(parsed_entry)
+
+        # extra relationships within collections
+        if len(parsed_entry["peopleID"]) > 1:
+            _create_people_to_people_rel(parsed_entry)
+        if "accountHolderID" in parsed_entry and "peopleID" in parsed_entry:
+            _create_people_to_account_holder_rel(parsed_entry)
+        if "itemID" in parsed_entry:
+            _create_item_to_item_rel(parsed_entry)
 
         # create objects to group together similar data
         # define keys, change key values to change which variables are grouped
@@ -253,7 +329,7 @@ def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
 
     if isinstance(entry, str):
         return Message(message=entry, error=True)
-
+    
     # add dict to database
     # print(test_parser) # prints final entry to terminal
     test_id = entries_collection.insert_one(entry).inserted_id
@@ -314,17 +390,5 @@ def parse_folder_exclude_errors():
 # print(test_id) # prints entryID to terminal
 
 # NEED
-# format currency
-# fuzzy search for items
-# accountHolder relationship
-# parent/child data placeholders people & items
-# items relationship
 # tobaccoMarks relationship
 # places relarionship
-# people relationship
-# combine items and categories
-
-# partital item search for parent/child ---- in progress
-# if db.items_collection.count_documents({"item": {$regex: item}}) > 0:
-
-#{_id: ObjectId('')}
