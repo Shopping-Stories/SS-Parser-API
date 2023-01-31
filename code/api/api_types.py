@@ -39,8 +39,8 @@ class DatabaseEntry(BaseModel):
     commodity_totaling_contextless: Optional[bool]
     account_name: Optional[str]
     store_owner: Optional[str]
-    date_year: Optional[str] = Field(alias="Date Year")
-    month: Optional[str] = Field(alias="_Month")
+    date_year: Optional[str]
+    month: Optional[str]
     Day: Optional[str]
     debit_or_credit: Optional[str]
     context: Optional[List[List[str]]]
