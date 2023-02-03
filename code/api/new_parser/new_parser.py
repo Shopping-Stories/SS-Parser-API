@@ -837,10 +837,11 @@ def parse_folder(folder):
             print_debug(f"Finished file {filename}")
             print_debug()
         except Exception as e:
-            print_debug(f"Parsing file {filename} failed. Exception dumped.")
+            text = traceback.format_exc()
+            print_debug(f"Parsing file {filename} failed. Exception dumped. {text}")
             print_debug()
             file = open(path.join(folder, filename) + ".exception", 'w')
-            file.write(str(e) + "\n" + traceback.format_exc())
+            file.write(str(e) + "\n" + text)
             file.close()
 
     

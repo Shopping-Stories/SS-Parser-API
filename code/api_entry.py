@@ -4,8 +4,10 @@ import uvicorn
 from api import simplesearch, stringlist, parser_endpoints, new_entry_manager
 from api.ssParser import entry_upload
 import logging
+# import sys
 
 logging.basicConfig(filename="parsing.log", encoding="utf-8", level=logging.INFO)
+# logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 incoming = FastAPI()
 
@@ -24,7 +26,7 @@ incoming.add_middleware(
 
 @incoming.get("/")
 async def main():
-    return {"message": "The api is still working..."}
+    return {"message": "The api is still working. API Version 1.0"}
 
 if __name__ == "__main__":
     uvicorn.run("api_entry:incoming", port=5050, log_level='info')
