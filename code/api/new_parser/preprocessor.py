@@ -66,7 +66,7 @@ def _handle_multiline_tobacco(tob_match: list[Match], entry: str):
 
     # If we see a location for the tobacco, flag it as such
     location_regex = r"on\s+(\w+)"
-    entry = sub(location_regex, lambda x: " tobacco_location" + x.group(1) + " ", entry)
+    entry = sub(location_regex, lambda x: " tobacco_location " + x.group(1) + " ", entry)
 
     # Regex to match the final line of trasactions similar to the above
     final_line_regex = r"\n\s+(\d+)\s+at\s+((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))\s+([^\n]+)"
