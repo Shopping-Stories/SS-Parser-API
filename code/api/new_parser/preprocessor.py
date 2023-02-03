@@ -11,11 +11,10 @@ import logging
 price_regex = r"((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))"
 
 # Regex for tobacco marks
-mark_regex = r"\[TM:\s+(\d+)\s+([^\]\s]+)\]"
+mark_regex = r"\[TM:\s+(\d+)\s*(\w+)\]"
 
 # Modifies the df to copy marginalia values down into rows for which they are null
 def _fix_marginalia(df: pd.DataFrame):
-    new_rows = []
     nrows = df.shape[0]
     marg_name = get_col_name(df, "Marginalia")
     last_marg = ""
@@ -33,6 +32,23 @@ def _remove_xx(tag, replacement):
     else:
         return tag
 
+# Exceptions to the normal rule of not deleting words before [something] unless it starts with the same letter as something
+def is_exception(word, i, smaller_entry):
+    if (word.strip("[]<>^") in {"pound", "pounds"}) and i - 1 > 0 and (smaller_entry[i - 1] == "w" or smaller_entry[i - 1] == "wt"):
+        return True
+    elif word == "[thousand]" or word == "[thousands]" and i - 1 > 0 and smaller_entry[i - 1] in ["M", "m"]:
+        return True
+    else:
+        return False
+
+def handle_bracket_replacements(match: Match) -> str:
+    if match.group(1)[0].lower() == match.group(2)[0].lower():
+        return match.group(2)
+    elif is_exception(f"[{match.group(2)}]", 1, [match.group(1), match.group(2)]):
+        return match.group(2)
+    else:
+        return match.group(1) + " " + match.group(2)
+
 # Handles entries of the form:
 # By 2 hogshead tobacco on occoquan
 # [TM: 0780 BH] N 1  1116. .130. .986
@@ -40,37 +56,56 @@ def _remove_xx(tag, replacement):
 #                                1911
 #                                 200
 #                                1711 at 11/: & 4/: for 2 Casks
+# Except that the [TM: 0780 BH] is already replaced with its replacement when we get here so we don't have to worry about it
 def _handle_multiline_tobacco(tob_match: list[Match], entry: str):
+    # Clean up brackets in entry
+    replace_regex = r"(\w+)[^\S\r\n]*\[\s*(\w+)\s*\]"
+    entry = sub(replace_regex, handle_bracket_replacements, entry)
+    remove_brackets_regex = r"\[\s*(\w+)\s*\]"
+    entry = sub(remove_brackets_regex, lambda x: x.group(1), entry)
+
+    # If we see a location for the tobacco, flag it as such
+    location_regex = r"on\s+(\w+)"
+    entry = sub(location_regex, lambda x: " tobacco_location" + x.group(1) + " ", entry)
+
     # Regex to match the final line of trasactions similar to the above
     final_line_regex = r"\n\s+(\d+)\s+at\s+((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))\s+([^\n]+)"
     final = search(final_line_regex, entry)
     if final:
         new_str = " "
-        new_str += f"final_weight: {final.group(1)} "
-        new_str += f"unit_price: {final.group(2)} "
+        new_str += f"final_weight {final.group(1)} "
+        new_str += f"unit_price {final.group(2)} "
         new_str += final.group(11)
         entry = entry.replace(final.group(), new_str)
     else:
         entry += " no_final_tobacco"
+    
     for m in tob_match:
         new_str = " "
-        new_str += f"tobacco_note: {m.group(4)} "
-        new_str += f"total_weight: {m.group(5)} "
-        new_str += f"tare_weight: {m.group(6)} "
-        new_str += f"tobacco_weight: {m.group(7)}"
+        new_str += f"tobacco_note {m.group(3)} "
+        new_str += f"total_weight {m.group(4)} "
+        new_str += f"tare_weight {m.group(5)} "
+        new_str += f"tobacco_weight {m.group(6)} "
         entry = entry.replace(m.group(), new_str)
 
-    entry = sub(r"\s+", " ", entry)
+    entry = sub(r"\s+|\n", " ", entry)
     entry = sub(r"(&|[aA]nd)\s+", "", entry)
     
     return entry
 
 # Handles tobacco marks i.e. [TM: 0780 BH],
 def _get_tobacco_mark_replacement(mark: Match) -> str:
-    return f"tobacco_mark_number: {mark.group(1)} tobacco_mark_text: {mark.group(2)}"
+    return f"tobacco_mark_number {mark.group(1)} tobacco_mark_text {mark.group(2)}"
 
 # Initial processing and labelling of transaction parts e.g. nouns, keywords, etc.
 # Note that this is a generator due to it being slow
+# Goal of this function is to create a list for every row that contains a list of important data from the entry
+# This is done via first tokenizing and then tagging every word in the entry, then combining all tokens with similar enough tags or according to
+# other rules. Conceptually, we want to tag an entry like the following:
+# By 6 yd bed sheets for Jeff 6:/
+# Should become something like this:
+# [("By", "TRANS", ""), ("6 yd", "AMT", "CARDINAL"), ("bed sheets", "", "NN"), ("for", "", "IN"), ("Jeff", "PERSON", "NNP"), ("6:/", "PRICE", "CD")]
+# This allows us to do a much higher level parse in the next step.
 def preprocess(df: pd.DataFrame):
     logging.info("Preprocessing.")
     parsed_entries = []
@@ -92,15 +127,19 @@ def preprocess(df: pd.DataFrame):
         # Remove } from the text as it messes everything up
         big_entry = big_entry.replace("}", "")
 
-        # # Replace all tobacco marks with easily parseable tokens
-        # big_entry = sub(mark_regex, _get_tobacco_mark_replacement, big_entry)
+        # Replace all tobacco marks with easily parseable tokens
+        big_entry = sub(mark_regex, _get_tobacco_mark_replacement, big_entry)
 
-        # # Check for multiline tobacco entries and use special parsing rules if we find one
-        # tob_match = [x for x in finditer(r"(\s+)((N|N[oO]|N[oO]\.)\s+)?(\d+)\s+(\d+)\.\s+\.(\d+)\.\s+\.(\d+)\s+\n", big_entry)]
-        # if tob_match:
-        #     if (all([get_col(row, x).strip() in {"-", "", None} for x in ("L Sterling", "s Sterling", "d Sterling", "L Currency", "s Currency", "d Currency")])):
-        #         pass
-        #     big_entry = _handle_multiline_tobacco(tob_match, big_entry)
+        # Check for multiline tobacco entries and use special parsing rules if we find one
+        tob_match = [x for x in finditer(r"((N|N[oO]|N[oO]\.|Note)\s+)?(\d+)\s+(\d+)\.\s+\.(\d+)\.\s+\.(\d+)(\s+)?\n?", big_entry)]
+        if tob_match:
+            if (all([get_col(row, x).strip() in {"-", "", None} for x in ("L Sterling", "s Sterling", "d Sterling", "L Currency", "s Currency", "d Currency")])):
+                pass
+            big_entry = _handle_multiline_tobacco(tob_match, big_entry)
+            
+            # Make sure there is not enough leftover whitespace to cause us to automatically split this transaction into multiple later on
+            big_entry = sub(r"(\s\s+)|\n", " ", big_entry)
+            print(big_entry)
 
         # Remove "Ditto"
         ditto = search(r"(DO|Do|DITTO|Ditto)\.*\s*\[\w+\]", big_entry)
@@ -118,15 +157,6 @@ def preprocess(df: pd.DataFrame):
         smaller_entries = [x for x in smaller_entries if match(r"[\n\t]|    ", x) is None]
         smaller_entries = add_to_by(smaller_entries)
         new_smaller_entries = []
-
-        # Exceptions to the normal rule of not deleting words before [something] unless it starts with the same letter as something
-        def is_exception(word, i, smaller_entry):
-            if (word.strip("[]<>^") in {"pound", "pounds"}) and i - 1 > 0 and (smaller_entry[i - 1] == "w" or smaller_entry[i - 1] == "wt"):
-                return True
-            elif word == "[thousand]" or word == "[thousands]" and i - 1 > 0 and smaller_entry[i - 1] in ["M", "m"]:
-                return True
-            else:
-                return False
 
         # Remove words before words with [] if they follow our rules
         # Remove <>[] from words
@@ -147,6 +177,7 @@ def preprocess(df: pd.DataFrame):
                 new_sent.append(word.strip("[]<>^").replace(">", "").replace("<", "").replace("^", "").replace("[", "").replace("]", ""))
             new_smaller_entries.append(" ".join(new_sent))
         
+
         parsed_entries_in_row = []
         # For entry in row
         for entry in new_smaller_entries:
@@ -154,7 +185,7 @@ def preprocess(df: pd.DataFrame):
             entry = nlp(entry)
 
             entry = [x for x in entry if x.tag_ != "_SP"]
-            
+
             # Sometimes spacy thinks folio is an incomplete word
             for x in entry:
                 if x.text == "folio":
@@ -225,7 +256,40 @@ def preprocess(df: pd.DataFrame):
                 # Allows us to start elif chain
                 if False:
                     pass
+
+                # Handle special markers from tobacco marks, applying these ent_type and tag to the token following them
+                elif token.text == "tobacco_mark_number":
+                    new_entry.append(("", "TM#", "TMs"))
                 
+                elif token.text == "tobacco_mark_text":
+                    new_entry.append(("", "TM.TEXT", "TMs"))
+
+                # Handle special markers from multiline tobacco entries, applying these ent_type and tag to the token following them
+                elif token.text == "tobacco_note":
+                    new_entry.append(("", "TB_N", "MLTBE"))
+                
+                elif token.text == "total_weight":
+                    new_entry.append(("", "TB_GW", "MLTBE"))
+
+                elif token.text == "tare_weight":
+                    new_entry.append(("", "TB_TW", "MLTBE"))
+
+                elif token.text == "tobacco_weight":
+                    new_entry.append(("", "TB_W", "MLTBE"))
+
+                # In case we can't find the tobacco totaling line, mark this entry to be combined with the next entry later.
+                elif token.text == "no_final_tobacco":
+                    new_entry.append(("", "TB_NF", "MLTBE"))
+
+                elif token.text == "final_weight":
+                    new_entry.append(("", "TB_FW", "MLTBE"))
+                
+                elif token.text == "unit_price":
+                    new_entry.append(("", "TB_UP", "MLTBE"))
+                
+                elif token.text == "tobacco_location":
+                    new_entry.append(("", "TB_LOC", "MLTBE"))
+
                 # Label tokens indicating record type as TRANS
                 elif token.text == "By" or token.text == "To":
                     new_entry.append((token.text, "TRANS", token.tag_))
@@ -269,6 +333,10 @@ def preprocess(df: pd.DataFrame):
                     else:
                         combine_tok_with_prev(new_entry, token)
                 
+                # Apply the special markings to tobacco marks and multiline tobacco entires, markings were setup in the previous token.
+                elif prev_token is not None and prev_token[2] in {"TMs", "MLTBE"} and prev_token[0] == "":
+                    combine_tok_with_prev(new_entry, token, space=False)
+
                 # Combine Quantities into 1 larger Quantity Token
                 elif prev_token is not None and token.ent_type_ == "QUANTITY" and prev_token[1] == "QUANTITY":
                     token = (token.text, token.ent_type_, token.tag_)

@@ -233,17 +233,17 @@ def get_transactions(df: pd.DataFrame):
             transactions.append(transaction)
 
         # TODO: Ignore tobacco mark rows and column total rows for now, delete this later
-        elif "TM" in get_col(row, "Entry") or search(r"\sN\s\d", get_col(row, "Entry")):
-            add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
-            transaction = {}
-            add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
-            trans_in_row_counter += 1
-            # Break the transaction list when the account holder changes if a total has not occurred.
-            if transactions and "account_name" in transaction and "account_name" in transactions[-1] and transaction["account_name"] != transactions[-1]["account_name"]:
-                break_transactions = True
-            if break_transactions:
-                break_counter += 1
-            transactions.append(transaction)
+        # elif "TM" in get_col(row, "Entry") or search(r"\sN\s\d", get_col(row, "Entry")):
+        #     add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
+        #     transaction = {}
+        #     add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
+        #     trans_in_row_counter += 1
+        #     # Break the transaction list when the account holder changes if a total has not occurred.
+        #     if transactions and "account_name" in transaction and "account_name" in transactions[-1] and transaction["account_name"] != transactions[-1]["account_name"]:
+        #         break_transactions = True
+        #     if break_transactions:
+        #         break_counter += 1
+        #     transactions.append(transaction)
         
         # If row has a good entry
         else:
@@ -262,6 +262,9 @@ def get_transactions(df: pd.DataFrame):
                     cur_phrase = {"modifies": "", "phrase": []}
                     poss_amounts = []
                     errors = []
+                    tobacco_marks = []
+                    cur_tobacco_entry = {}
+                    tobacco_entries = []
                     trans_in_row_counter += 1
 
                     # For token in entry
@@ -290,6 +293,54 @@ def get_transactions(df: pd.DataFrame):
                             else:
                                 print_debug(f"Error, unrecognized transaction type: {word} in {entry}")
                         
+                        # Handle multiline tobacco entries
+                        elif pos == "MLTBE":
+                            # Remember tobacco locations at row level
+                            if info == "TB_LOC":
+                                transaction["tobacco_location"] = word
+
+                            elif info == "TB_N":
+                                cur_tobacco_entry["number"] = word
+                                transaction["item"] = "Tobacco"
+
+                            elif info == "TB_GW":
+                                cur_tobacco_entry["gross_weight"] = word
+                            
+                            elif info == "PRICE":
+                                 transaction["price"] = word
+
+                            elif info == "TB_TW":
+                                cur_tobacco_entry["tare_weight"] = word
+
+                            # When we get to the tobacco weight, append the tobacco entry to the row context.
+                            elif info == "TB_W":
+                                cur_tobacco_entry["weight"] = word
+
+                                tobacco_entries.append(cur_tobacco_entry)
+                                transaction["tobacco_entries"] = tobacco_entries
+                                                                
+                                # If the math doesn't work out
+                                if int(gross := cur_tobacco_entry["gross_weight"]) - int(tare := cur_tobacco_entry["tare_weight"]) != int(tobacco := cur_tobacco_entry["weight"]):
+                                    add_error(transaction, f"Error: Tobacco entry weights don't add up. Gross {gross} - Tare {tare} != tobacco {tobacco}", entry)
+                                
+                                cur_tobacco_entry = {}
+
+                            # If we see that we can't find the final tobacco weight
+                            elif info == "TB_NF":
+                                add_error(transaction, f"Error: Cannot find final tobacco weight in this tobacco transaction, likely indicates multiple tobacco transactions rolled into 1 in a later transaction", entry)
+                            
+                            # Remember tobacco weight as amount, and unit price as price
+                            elif info == "TB_FW":
+                                transaction["amount"] = word
+
+                            elif info == "TB_UP":
+                                transaction["price"] = word
+
+                        # Handle tobacco marks
+                        elif info == "TM.TEXT":
+                            # The previous token is guaranteed to be the mark number if this one is the mark text
+                            tobacco_marks.append({"mark_number": prev_word, "mark_text": word})
+
                         # Remember if the entry is a cash transaction
                         elif info == "CASH":
                             transaction["type"] = "Cash"
@@ -490,7 +541,7 @@ def get_transactions(df: pd.DataFrame):
                             cur_phrase["phrase"].append(word)
                         
                     # Now we are done writing things down
-
+                    
                     # Make sure we have an item in our transaction
                     if "item" not in transaction and "type" not in transaction:
                         # Check if any of the nouns are probably the item

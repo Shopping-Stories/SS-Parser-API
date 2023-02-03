@@ -6,6 +6,7 @@ from itertools import chain
 # Class to make dealing with money easier, implements arithmetic with money as well as dict-style accessing of attributes
 # e.g. if type(a) is Money, a["pounds"] == a["Pounds"] == a["L"] is the amount of pounds in the transaction
 class Money:
+    # Attempts to figure out what is going on with weird money strings
     def __init__(self, moneystr=None, l=0, s=0, d=0, f=0, tot_f=None, context=None) -> None:
         
         farthings = 0
@@ -35,7 +36,7 @@ class Money:
                         if len(moneystr) > 1:
                             farthings = int(numeric(moneystr[1]) * 4)
                     else:
-                        raise ValueError(f"This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
+                        raise ValueError(f"Money parsing failure. This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
                     
 
                 elif match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", moneystr.strip()):
@@ -123,6 +124,7 @@ class Money:
 
             self.totalFarthings = farthings + 4 * pennies + 4 * 12 * shillings + 4 * 12 * 20 * pounds
 
+    # Python things to let up add these objects together and treat them like dicts and such.
     def __add__(self, other):
         if type(other) is not Money and other == 0:
             return self
