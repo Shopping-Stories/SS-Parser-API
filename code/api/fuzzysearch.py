@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from fuzzy import DMetaphone
+from jellyfish import metaphone as meta
 import bson
 from .ssParser.database import db
 from fastapi import APIRouter
@@ -7,56 +7,52 @@ from .api_types import EntryList
 
 router = APIRouter()
 
-# creates necessary dmeta tokenizations for ALL entries in database in one go.
+# creates necessary metaphone tokenizations for ALL entries in database in one go.
 # it can take a few minutes to process a few hundred documents
 #
 # IN PRACTICE THIS SHOULD NEVER HAVE TO BE CALLED !!!
 # therefore i am not routing it to anything API-wise so it isn't accidentally accessed
-def createDmetasForAllEntries():
+def createMetasForAllEntries():
   global db
   entries = db['entries']
   ids = entries.find()
   for x in ids:
-    createDmetas(x['_id'])
+    createMetas(x['_id'])
 
-# creates and inserts necessary dmeta tokenizations for listed entries
+# creates and inserts necessary metphone tokenizations for listed entries
 # input 'entrylist' is a list of document _id fields in string format
 # ex. ["639b8552fcc5de9ec26b12ba", "639b8552fcc5de9ec26b12bc"]
-def createDmetasForEntries(entrylist: list):
+def createMetasForEntries(entrylist: list):
   for x in entrylist:
-    createDmetas(x)
+    createMetas(x)
 
-# create "dmeta" (fuzzy.DMetaphone) tokenizations of searchable fields in document
+# create metaphone tokenizations of searchable fields in document
 # this is what search terms will be compared to to determine matches
-# input is an ObjectId corresponding to the document to create dmeta fields for
-# 
-# thoughts: maybe call this somewhere in the parser AFTER document has been
-#   created and inserted into the database
-@router.get("/createDmetas/{_id}", tags=["search"])
-def createDmetas(id: str):
+# input is an ObjectId corresponding to the document to create metaphone fields for
+@router.get("/createMetas/{_id}", tags=["search"])
+def createMetas(id: str):
   """
   creates searchable fields in a document for use with ShoppingStories project's fuzzy search
   """
   global db
   entries = db['entries']
-  dmeta = DMetaphone()
   _id = bson.objectid.ObjectId(id)
 
   # locate document if it has 'item' field
   entry = entries.find_one({"$and":[{'_id': _id},{'item': {"$exists": True}}]})
-  # if it has 'item' field, process dmetas for it and add to db
+  # if it has 'item' field, process metaphones for it and add to db
   if(entry != None):
     item_name = entry['item'].split(" ")
     for x in item_name:
       if(x.lower() == "mr"):
         x = "mister"
-      entries.update_one({'_id': _id}, {"$addToSet": {"item_dmetas": str(dmeta(x))}})
-      entries.update_one({'_id': _id}, {"$addToSet": {"all_dmetas": str(dmeta(x))}})
+      entries.update_one({'_id': _id}, {"$addToSet": {"item_metas": str(meta(x))}})
+      entries.update_one({'_id': _id}, {"$addToSet": {"all_metas": str(meta(x))}})
   
-  # process dmetas if it has a "people" field (which would be an array)
+  # process metaphones if it has a "people" field (which would be an array)
   entry = entries.find_one({"$and":[{'_id': _id}, {"people": {"$exists": True} }]})
   people = []
-  people_dmetas = []
+  people_metas = []
   if(entry != None):
     for person in entry['people']:
       person = person.strip()
@@ -66,26 +62,26 @@ def createDmetas(id: str):
     for x in people:
       if(x.lower() == "mr"):
         x = "mister"
-      entries.update_one({'_id': _id}, {"$addToSet": {"people_dmetas": str(dmeta(x))}})
-      entries.update_one({'_id': _id}, {"$addToSet": {"all_dmetas": str(dmeta(x))}})
+      entries.update_one({'_id': _id}, {"$addToSet": {"people_metas": str(meta(x))}})
+      entries.update_one({'_id': _id}, {"$addToSet": {"all_metas": str(meta(x))}})
 
   # locate document regardless of if it has items or people,
   # all documents to date have 'account_name' and 'store_owner' fields
   entry = entries.find_one({'_id': _id})
-  # process dmetas for account_name and store_owner and add to db
+  # process metaphones for account_name and store_owner and add to db
   account_name = entry['account_name'].split(" ")
   for x in account_name:
     if(x.lower() == "mr"):
       x = "mister"
-    entries.update_one({'_id': _id}, {"$addToSet": {"account_name_dmetas": str(dmeta(x))}})
-    entries.update_one({'_id': _id}, {"$addToSet": {"all_dmetas": str(dmeta(x))}})
+    entries.update_one({'_id': _id}, {"$addToSet": {"account_name_metas": str(meta(x))}})
+    entries.update_one({'_id': _id}, {"$addToSet": {"all_metas": str(meta(x))}})
 
   store_owner = entry['store_owner'].split(" ")
   for x in store_owner:
     if(x.lower() == "mr"):
       x = "mister"
-    entries.update_one({'_id': _id}, {"$addToSet": {"store_owner_dmetas": str(dmeta(x))}})
-    entries.update_one({'_id': _id}, {"$addToSet": {"all_dmetas": str(dmeta(x))}})
+    entries.update_one({'_id': _id}, {"$addToSet": {"store_owner_metas": str(meta(x))}})
+    entries.update_one({'_id': _id}, {"$addToSet": {"all_metas": str(meta(x))}})
 
 
 @router.get("/fuzzysearch/{search}", tags=["search"], response_model=EntryList)
@@ -95,21 +91,20 @@ def fuzzy_search(search: str):
   """
   global db
   entries = db['entries']
-  dmeta = DMetaphone()
 
   # split search terms, removing all whitespace
   search = search.strip()
   search = search.split(" ")
   search_terms = [i for i in search if i]
 
-  # generate list of dmeta variations of search terms to compare to dmeta variations in db
-  dmeta_terms = []
+  # generate list of metaphone variations of search terms to compare to metaphone variations in db
+  meta_terms = []
   for i in search_terms:
     if(i.lower() == "mr"):
       i = "mister"
-    dmeta_terms.append(str(dmeta(i)))
+    meta_terms.append(str(meta(i)))
 
-  results = entries.find({"all_dmetas": {"$all": dmeta_terms}})
+  results = entries.find({"all_metas": {"$all": meta_terms}})
 
   ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
 

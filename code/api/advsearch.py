@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from fuzzy import DMetaphone
+from jellyfish import metaphone as meta
 import bson
 from .ssParser.database import db
 from fastapi import APIRouter
@@ -12,7 +12,6 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   """
   advanced search for items for shoppingStories project
   """
-  dmeta = DMetaphone()
   items = db['items']
   categories = db['categories']
   entries = db['entries']
@@ -30,16 +29,16 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   for i in catids:
     _ids.append(i['_id'])
 
-  contents = [{"$or": [{"itemID": {"$in": _ids}}, {"item_dmetas": {"$in": [str(dmeta(item))]}}]}]
+  contents = [{"$or": [{"itemID": {"$in": _ids}}, {"item_metas": {"$in": [str(meta(item))]}}]}]
 
   if(amt!=""):
     contents.append({"amount": {"$regex": amt, "$options": 'i'}})
   if(acc_name!=""):
-    contents.append({"account_name_dmetas": str(dmeta(acc_name))})
+    contents.append({"account_name_metas": str(meta(acc_name))})
   if(person!=""):
-    contents.append({"all_dmetas": str(dmeta(person))})
+    contents.append({"all_metas": str(meta(person))})
   if(co!=""):
-    contents.append({"store_owner_dmetas": str(dmeta(co))})
+    contents.append({"store_owner_metas": str(meta(co))})
   if(year!=""):
     contents.append({"ledger.folio_year": {"$regex": year}})
   if(page!=-1):
