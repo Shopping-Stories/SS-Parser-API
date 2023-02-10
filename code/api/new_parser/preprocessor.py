@@ -125,16 +125,18 @@ def _handle_multiline_tobacco(tob_match: list[Match], entry: str):
         entry += " no_final_tobacco"
     
     for m in tob_match:
+        # print(m)
         new_str = " "
         new_str += f"tobacco_note {m.group(3)} "
         new_str += f"total_weight {m.group(4)} "
         new_str += f"tare_weight {m.group(5)} "
         new_str += f"tobacco_weight {m.group(6)} "
-        entry = entry.replace(m.group(), new_str)
+        entry = entry.replace(m.group().strip(), new_str)
+        # print(new_str, ",", entry, ",", repr(m.group()))
 
     entry = sub(r"\s+|\n", " ", entry)
     entry = sub(r"(&|[aA]nd)\s+", "", entry)
-    
+    # print(entry)
     return entry
 
 # Handles tobacco marks i.e. [TM: 0780 BH],
@@ -176,6 +178,7 @@ def preprocess(df: pd.DataFrame):
         # Replace all tobacco marks with easily parseable tokens
         big_entry = sub(mark_regex, _get_tobacco_mark_replacement, big_entry)
 
+        # print(big_entry)
         # Check for multiline tobacco entries and use special parsing rules if we find one
         tob_match = [x for x in finditer(r"((N|N[oO]|N[oO]\.|Note)\s+)?(\d+)\s+(\d+)\.\s+\.(\d+)\.\s+\.(\d+)(\s+)?\n?", big_entry)]
         if tob_match:
@@ -184,10 +187,10 @@ def preprocess(df: pd.DataFrame):
             big_entry = _handle_multiline_tobacco(tob_match, big_entry)
             
             # Make sure there is not enough leftover whitespace to cause us to automatically split this transaction into multiple later on
-            print(big_entry)
+            # print(big_entry)
             big_entry = sub(r"(\s\s+)|\n", " ", big_entry)
-            print(big_entry)
-            print()
+            # print(big_entry)
+            # print()
 
         # Remove "Ditto"
         ditto = search(r"(DO|Do|DITTO|Ditto)\.*\s*\[\w+\]", big_entry)
@@ -199,6 +202,9 @@ def preprocess(df: pd.DataFrame):
         # Replace 1w with 1 w and 1M with 1 M and so on
         big_entry = sub(r"(?<=\s)\d+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
+        # If we see tobacco notes, remove spaces so we don't split entry.
+        if search(r"N\s+\d+\s+\d+", big_entry):
+            big_entry = sub(r"\s+", " ", big_entry)
         
         # Split the entry by "    " or \n or \t
         smaller_entries = split(r"(?<!\s)([\n\t]|    )(?!\s)", big_entry)
@@ -339,6 +345,19 @@ def preprocess(df: pd.DataFrame):
                 
                 elif token.text == "tobacco_location":
                     new_entry.append(("", "TB_LOC", "MLTBE"))
+
+                # Handle random tobacco notes like N 15  39
+                elif token.text == "N" and next_token is not None and next_token.text.isnumeric():
+                    new_entry.append(("", "TB_NOTE", "SLTBE"))
+
+                elif prev_token is not None and prev_token[2] == "SLTBE":
+                    if prev_token[0] == "":
+                        combine_tok_with_prev(new_entry, token, space=False)
+                    else:
+                        if next_token is not None and next_token.text in ["pound", "pounds"]:
+                            combine_tok_with_prev(new_entry, token)
+                        else:
+                            combine_tok_with_prev(new_entry, token, new_pos="SLTBE_F")
 
                 # Label tokens indicating record type as TRANS
                 elif token.text == "By" or token.text == "To":

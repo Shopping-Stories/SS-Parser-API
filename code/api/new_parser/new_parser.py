@@ -215,7 +215,7 @@ def get_transactions(df: pd.DataFrame):
         row_context["store_owner"] = get_col(row, "Owner")
         row_context["folio_year"] = get_col(row, "Year")
         row_context["folio_page"] = get_col(row, "Folio Page")
-        row_context["entry_id"] = get_col(row, "EntryID")
+        row_context["entry_id"] = str(get_col(row, "EntryID"))
         row_context["store"] = get_col(row, "Store")
         row_context["genmat"] = (int(str(get_col(row, "GenMat"))), get_col(row, "EntryID"))
         row_context["currency_colony"] = get_col(row, "Colony")
@@ -352,7 +352,7 @@ def get_transactions(df: pd.DataFrame):
                                 cur_tobacco_entry = {}
 
                             # If we see that we can't find the final tobacco weight
-                            elif info == "TB_NF":
+                            elif info == "TB_NF" and "Quantity" not in row_context:
                                 add_error(transaction, f"Error: Cannot find final tobacco weight in this tobacco transaction, likely indicates multiple tobacco transactions rolled into 1 in a later transaction", entry)
                             
                             # Remember tobacco weight as amount, and unit price as price
@@ -362,6 +362,17 @@ def get_transactions(df: pd.DataFrame):
                             elif info == "TB_UP":
                                 transaction["price"] = word
 
+                        # Handle random tobacco notes
+                        elif pos == "SLTBE_F":
+                            m = search(r"(\d+)\s+(\d+)", word)
+                            cur_tobacco_entry["number"] = m.group(1)
+                            cur_tobacco_entry["weight"] = m.group(2)
+                            tobacco_entries.append(cur_tobacco_entry)
+                            transaction["tobacco_entries"] = tobacco_entries
+                            cur_tobacco_entry = {}
+                            transaction["item"] = "Tobacco"
+                            transaction["amount_unreliable"] = True
+                        
                         # Handle tobacco marks
                         elif info == "TM.TEXT":
                             # The previous token is guaranteed to be the mark number if this one is the mark text
@@ -385,7 +396,7 @@ def get_transactions(df: pd.DataFrame):
                         # In case of not being able to find nouns for the coordinating conjunction
                         elif pos == "CC.DENIED":
                             # If this is a tobacco entry and the next 
-                            if transaction["item"].lower() == "tobacco" and info == "CC.TOB":
+                            if "item" in transaction and transaction["item"].lower() == "tobacco" and info == "CC.TOB":
                                 addPriceToItem = True
                             # Mark as error if we can't figure out how to use the Coordinating Conjunction
                             else:
@@ -631,18 +642,24 @@ def get_transactions(df: pd.DataFrame):
                         
                         if "item" not in transaction:
                             # Failed to find item in entry even though we have nouns.
-                            # The item is probably nothing, just money
-                            print_debug(f"Could not find item in entry {entry}.")
-                            transaction["item"] = "Currency"
+                            if "Quantity" in row_context and "Commodity" in row_context:
+                                # Item is probably whatever the commodity is
+                                transaction["item"] = row_context["Commodity"]
+                            else:
+                                # The item is probably nothing, just money
+                                print_debug(f"Could not find item in entry {entry}.")
+                                transaction["item"] = "Currency"
 
                     # Loop through the nouns in the entry, marking down people and dates as such, and remembering any other random nouns
+                    # transaction["nouns"] = nouns
                     for noun in nouns:
                         if "item" in transaction and noun[0] == transaction["item"]:
                             pass
                         elif noun[1] == "PERSON":
                             # Don't put the person in the people list if they are already in there
-                            if "people" in transaction and transaction["people"] and noun[0] not in transaction["people"]:
-                                transaction["people"].append(noun[0])
+                            if "people" in transaction:
+                                if noun[0] not in transaction["people"]:
+                                    transaction["people"].append(noun[0])
                             else:
                                 transaction["people"] = [noun[0],]
                         elif noun[1] == "DATE":
@@ -677,7 +694,7 @@ def get_transactions(df: pd.DataFrame):
                     
                     # If there is no price in the row and there is no price in the entries, error out if there is also no commodity
                     if "price" not in transaction and row_context["currency_totaling_contextless"] == True and row_context["commodity_totaling_contextless"] == True:
-                        if transaction["item"] != "Tobacco":
+                        if "item" in transaction and transaction["item"] != "Tobacco":
                             print_debug(f"Error, failed to find price in transaction {entry}.")
                             errors.append(f"Error, failed to find price in transaction {entry}.")
                     
@@ -750,6 +767,10 @@ def get_transactions(df: pd.DataFrame):
                     
                     # Save the entry for debug
                     transaction["context"] = entry
+
+                    if "amount_unreliable" in transaction:
+                        if "amount" in transaction:
+                            del transaction["amount"]
 
                     # Append the transaction to the list
                     transactions.append(transaction)
