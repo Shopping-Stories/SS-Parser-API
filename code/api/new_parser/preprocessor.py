@@ -14,16 +14,57 @@ price_regex = r"((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))"
 mark_regex = r"\[TM:\s+(\d+)\s*(\w+)\]"
 
 # Modifies the df to copy marginalia values down into rows for which they are null
-def _fix_marginalia(df: pd.DataFrame):
+# Also does the same for date year, month, and day.
+def _fix_marginalia_dates(df: pd.DataFrame):
     nrows = df.shape[0]
     marg_name = get_col_name(df, "Marginalia")
+    year_name = get_col_name(df, "Date Year")
+    month_name = get_col_name(df, "_Month")
+    day_name = get_col_name(df, "Day")
+    dr_cr_name = get_col_name(df, "Dr/Cr")
+    last_date = {"year": None, "month": None, "day": None}
     last_marg = ""
+
+    in_cr = False
+
+    def isNull(val: str):
+        return val is None or val == "-" or val == "" or str(val) == "nan"
+
     for i in range(nrows):
-        if (val := df.at[i, marg_name]) != "-" and (val != "") and (val is not None):
-            last_marg = df.at[i, marg_name]
+        # Fix marginalia
+        if not isNull(val := df.at[i, marg_name]):
+            last_marg = val
         else:
             if last_marg != "":
                 df.at[i, marg_name] = last_marg
+
+        # If in cr, set in_cr to true and reset last date
+        if not in_cr and df.at[i, dr_cr_name] == "Cr":
+            in_cr = True
+            last_date["year"] = None
+            last_date["month"] = None
+            last_date["day"] = None
+
+        # Fix dates
+        # If date is not null, remember it
+        if not isNull(year := df.at[i, year_name]):
+            last_date["year"] = year
+            last_date["month"] = None
+            last_date["day"] = None
+            # Sometimes year is defined but no month or day is defined
+            if not isNull(month := df.at[i, month_name]):
+                last_date["month"] = month
+            if not isNull(day := df.at[i, day_name]):
+                last_date["day"] = day
+
+        # When date is undefined, use the last date we saw
+        else:
+            if last_date["year"] != None:
+                df.at[i, year_name] = last_date["year"]
+                if  last_date["month"] != None:
+                    df.at[i, month_name] = last_date["month"]
+                if last_date["day"] != None:
+                    df.at[i, day_name] = last_date["day"]
 
 # Simple function to remove the XX tag as it usually indicates a parser error
 def _remove_xx(tag, replacement):
@@ -70,8 +111,11 @@ def _handle_multiline_tobacco(tob_match: list[Match], entry: str):
 
     # Regex to match the final line of trasactions similar to the above
     final_line_regex = r"\n\s+(\d+)\s+at\s+((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))\s+([^\n]+)"
-    final = search(final_line_regex, entry)
+    final = [x for x in finditer(final_line_regex, entry)]
     if final:
+        # Only do this for the actual final line, not if another line looks similar to the final line
+        final = final[-1]
+        
         new_str = " "
         new_str += f"final_weight {final.group(1)} "
         new_str += f"unit_price {final.group(2)} "
@@ -111,8 +155,10 @@ def preprocess(df: pd.DataFrame):
     parsed_entries = []
     
     # Fix the marginalia issues present in the underlying spreadsheets
-    _fix_marginalia(df)
+    # Fix missing dates by imputing with previous data
+    _fix_marginalia_dates(df)
 
+    
     # For row in df
     for key, row in df.iterrows():
         
@@ -138,8 +184,10 @@ def preprocess(df: pd.DataFrame):
             big_entry = _handle_multiline_tobacco(tob_match, big_entry)
             
             # Make sure there is not enough leftover whitespace to cause us to automatically split this transaction into multiple later on
+            print(big_entry)
             big_entry = sub(r"(\s\s+)|\n", " ", big_entry)
             print(big_entry)
+            print()
 
         # Remove "Ditto"
         ditto = search(r"(DO|Do|DITTO|Ditto)\.*\s*\[\w+\]", big_entry)
@@ -151,7 +199,7 @@ def preprocess(df: pd.DataFrame):
         # Replace 1w with 1 w and 1M with 1 M and so on
         big_entry = sub(r"(?<=\s)\d+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
-
+        
         # Split the entry by "    " or \n or \t
         smaller_entries = split(r"(?<!\s)([\n\t]|    )(?!\s)", big_entry)
         smaller_entries = [x for x in smaller_entries if match(r"[\n\t]|    ", x) is None]
@@ -164,6 +212,8 @@ def preprocess(df: pd.DataFrame):
             new_sent = []
             smaller_entry = smaller_entry.split(" ")
             for i, word in enumerate(smaller_entry):
+                if word.startswith("<") and word.endswith(">") and not word[1].isnumeric():
+                    continue
                 word = word.replace(">", "").replace("<", "").replace("^", "")
                 if "wt." == word[-3:]:
                     word = word.replace("wt.", "wt")
@@ -407,7 +457,11 @@ def preprocess(df: pd.DataFrame):
                 
                 # If the coordinating conjunction cannot find nouns on either side of it, mark as CC.DENIED so we don't try and combine it later
                 elif token.tag_ == "CC":
-                    new_entry.append((token.text, "CC", "CC.DENIED"))
+                    # If there is what appears to be a price following the CC, allow certain entries to use that as extra money added on later
+                    if next_token is not None and match(r"((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))?)", next_token.text):
+                        new_entry.append((token.text, "CC.TOB", "CC.DENIED"))
+                    else:
+                        new_entry.append((token.text, "CC", "CC.DENIED"))
                 
                 # If a cardinal number is probably a price but is not at the end, mark as price
                 elif token.ent_type_ == "CARDINAL" and match(price_regex, token.text):

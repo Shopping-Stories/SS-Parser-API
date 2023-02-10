@@ -62,19 +62,56 @@ def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str,
     # Search for the number of noun, price pairs, if more than one split around noun followed by price
     # Ignore people and dates because they are definitely not the item being purchased
     found_trans = []
+    mltbe = False
     cur_entry = []
     found_noun_last = False
+    found_price_last = False
+    app_until_to_by = False
+    # print("Handling multiple prices: ")
+    # print(entry)
     for word, info, pos in entry:
         cur_entry.append((word, info, pos))
+        # If we have a multiline tobacco entry, pass it all through as one entry.
+        if pos == "MLTBE":
+            mltbe = True
+        
+        if mltbe:
+            continue
+
+        # Allow prices to be followed by per [person] or price per [person]
+        if app_until_to_by:
+            if word in {"To", "By"} or info == "DATE":
+                cur_entry.append((word, info, pos))
+                app_until_to_by = False
+            elif info == "PERSON":
+                found_trans[-1].append((word, info, pos))
+                app_until_to_by = False
+            else:
+                found_trans[-1].append((word, info, pos))
+
+        if found_price_last and (word.lower() in {"per", "[per]"} or info == "PRICE"):
+            if info == "PRICE":
+                found_trans[-1].append((word, info, pos))
+            app_until_to_by = True
+            found_trans[-1].append((word, info, pos))
+        
+        elif found_price_last:
+            found_price_last = False
+            cur_entry.append((word, info, pos))
+
         if info == "PRICE" and found_noun_last:
             found_noun_last = False
+            found_price_last = True
             found_trans.append(cur_entry)
             cur_entry = []
         if "NN" in pos and info not in ["PERSON", "DATE"]:
             found_noun_last = True
+        
     if found_trans == []:
         found_trans.append(cur_entry)
 
+    # print(found_trans)
+    # print()
     return found_trans
     
 def add_error(map, error, error_context):
