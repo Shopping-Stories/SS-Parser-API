@@ -30,16 +30,16 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   for i in catids:
     _ids.append(i['_id'])
 
-  contents = [{"$or": [{"itemID": {"$in": _ids}}, {"item_metas": {"$in": [str(meta(item))]}}]}]
+  contents = [{"$or": [{"itemID": {"$in": _ids}}, {"item_metas": {"$regex": str(meta(item)), "$options": 'i'}}]}]
 
   if(amt!=""):
     contents.append({"amount": {"$regex": amt, "$options": 'i'}})
   if(acc_name!=""):
-    contents.append({"account_name_metas": str(meta(acc_name))})
+    contents.append({"account_name_metas": {"$regex": str(meta(acc_name)), "$options": 'i'}})
   if(person!=""):
-    contents.append({"all_metas": str(meta(person))})
+    contents.append({"all_metas": {"$regex": str(meta(person)), "$options": 'i'}})
   if(co!=""):
-    contents.append({"store_owner_metas": str(meta(co))})
+    contents.append({"store_owner_metas": {"$regex": str(meta(co)), "$options": 'i'}})
   if(year!=""):
     contents.append({"ledger.folio_year": {"$regex": year}})
   if(page!=-1):

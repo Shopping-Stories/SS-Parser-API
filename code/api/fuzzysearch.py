@@ -104,7 +104,12 @@ def fuzzy_search(search: str):
       i = "mister"
     meta_terms.append(str(meta(i)))
 
-  results = entries.find({"all_metas": {"$all": meta_terms}})
+  query = []
+
+  for i in meta_terms:
+    query.append({"all_metas": {"$regex": i, "$options": 'i'}})
+
+  results = entries.find({"$and": query})
 
   ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
 
