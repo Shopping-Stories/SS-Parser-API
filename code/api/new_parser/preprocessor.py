@@ -205,6 +205,9 @@ def preprocess(df: pd.DataFrame):
         # If we see tobacco notes, remove spaces so we don't split entry.
         if search(r"N\s+\d+\s+\d+", big_entry):
             big_entry = sub(r"\s+", " ", big_entry)
+
+        # Remove mini subtotals
+        big_entry = sub(r"[\u00a3]?\s?(\d+)?\s?\.\.\s?\d+\s?\.\.\s?\d+\s?[\u00BC-\u00BE\u2150-\u215E]?", " ", big_entry)
         
         # Split the entry by "    " or \n or \t
         smaller_entries = split(r"(?<!\s)([\n\t]|    )(?!\s)", big_entry)

@@ -3,7 +3,7 @@ from sys import argv
 from os import listdir
 from os import path
 import traceback
-from re import split, search
+from re import split, search, sub
 from itertools import chain
 from .british_money import Money
 from json import dump
@@ -919,8 +919,15 @@ def _final_pass(entry: dict):
             # Replace a/an/the with 1
             if entry["amount"].lower().split(" ")[0] in {"a", "an", "the"}:
                 entry["amount"] = "1 " + " ".join(entry["amount"].lower().split(" ")[1:])
-    
-    # TODO: Add amount fraction to decimal here.
+            
+            # Convert fractional amounts to decimal
+            try:
+                entry["amount"] = sub(r"(\d+)?\s*([\u00BC-\u00BE\u2150-\u215E])", lambda x: str(int(x.group(1) if x.group(1) != None else 0) + numeric(x.group(2))), entry["amount"])
+            except:
+                if "errors" in entry:
+                    entry["errors"].append("Failed to convert fraction to decimal.")
+                else:
+                    entry["errors"] = ["Failed to convert fraction to decimal.", ]
 
     return entry
 
