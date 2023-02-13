@@ -398,20 +398,26 @@ def parse_folder_exclude_errors():
 @router.post("/delete_entry/", tags=["Database Management"], response_model=Message)
 def remove_entry(entry_id: str):
     """
-    Removes a specified entry from the database.
+    Removes a specified entry from the database (specified by ID).
     Sets error flag and has ERROR at the front of the message if any errors occur.
     """
 
     if entries_collection.find_one({'_id': ObjectId(entry_id)}):
         entries_collection.delete_one({'_id': ObjectId(entry_id)})
+        return Message(message="Successfully deleted entry.")
     else:
         return Message(message=f"ERROR: Entry {entry_id} not found.", error=True)
-
-    return Message(message="Successfully deleted entry.")
 
 
 @router.post("/edit_entry/", tags=["Database Management"], response_model=Message)
 def edit_entry(entry_id: str, new_values: ParserOutput):
+    """
+    Edits an entry (specified by ID) in the database, intakes edited data in parser output format. 
+    Sets error flag and has ERROR at the front of the message if any errors occur. 
+    """
+
+    if entries_collection.find_one({'_id': ObjectId(entry_id)}) == None:
+        return Message(message=f"ERROR: Entry {entry_id} not found.", error=True)
 
     new_values = new_values.dict()
 
@@ -451,6 +457,13 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
 
 @router.post("/edit_item/", tags=["Database Management"], response_model=Message)
 def edit_item(item_id: str, new_values: ItemInput):
+    """
+    Edits an item (specified by ID) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
+    """
+
+    if item_collection.find_one({'_id': ObjectId(item_id)}) == None:
+        return Message(message=f"ERROR: Item {item_id} not found.", error=True)
 
     new_values = new_values.dict()
 
@@ -470,6 +483,13 @@ def edit_item(item_id: str, new_values: ItemInput):
 
 @router.post("/edit_person/", tags=["Database Management"], response_model=Message)
 def edit_person(person_id: str, new_values: PeopleInput):
+    """
+    Edits a person (specified by ID) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
+    """
+
+    if people_collection.find_one({'_id': ObjectId(person_id)}) == None:
+        return Message(message=f"ERROR: Person {person_id} not found.", error=True)
 
     new_values = new_values.dict()
 
@@ -489,6 +509,10 @@ def edit_person(person_id: str, new_values: PeopleInput):
 
 @router.post("/add_people_relationship/", tags=["Database Management"], response_model=Message)
 def add_relationship(person1_name: str, person2_name: str):
+    """
+    Creates a relationship between two people (both specified by name) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No relationships will be updated if any error occurs.
+    """
 
     person1_data = people_collection.find_one({'name': person1_name})
     person2_data = people_collection.find_one({'name': person2_name})
@@ -502,12 +526,14 @@ def add_relationship(person1_name: str, person2_name: str):
     person2_id = person2_data['_id'] 
 
     if person1_id != person2_id:
-        for related in person1_data['related']:
-            if related == person2_id:
-                return Message(message=f"ERROR: Relationship already exists.", error=True)
-        for related in person2_data['related']:
-            if related == person1_id:
-                return Message(message=f"ERROR: Relationship already exists.", error=True)
+        if "related" in person1_data:
+            for related in person1_data['related']:
+                if related == person2_id:
+                    return Message(message=f"ERROR: Relationship already exists.", error=True)
+        if "related" in person2_data:
+            for related in person2_data['related']:
+                if related == person1_id:
+                    return Message(message=f"ERROR: Relationship already exists.", error=True)
         people_collection.update_one({'_id': person1_id}, {'$push': {'related': person2_id}}) 
         people_collection.update_one({'_id': person2_id}, {'$push': {'related': person1_id}})
     else: 
@@ -525,4 +551,4 @@ def add_relationship(person1_name: str, person2_name: str):
 
 # NEED
 # tobaccoMarks relationship
-# places relarionship
+# places relationship
