@@ -13,6 +13,7 @@ from .preprocessor import preprocess
 from .indices import item_set, drink_set
 from unicodedata import numeric
 import logging
+from itertools import combinations
 
 # NOTE: All functions in this file have side effects which is why they are in this file and not in parser_utils.
 # parser_utils contains only functions with NO side effects.
@@ -217,8 +218,8 @@ def get_transactions(df: pd.DataFrame):
         row_context["folio_page"] = get_col(row, "Folio Page")
         row_context["entry_id"] = str(get_col(row, "EntryID"))
         row_context["store"] = get_col(row, "Store")
-        row_context["genmat"] = (int(str(get_col(row, "GenMat"))), get_col(row, "EntryID"))
-        row_context["currency_colony"] = get_col(row, "Colony")
+        row_context["genmat"] = (int(float(str(get_col(row, "GenMat")))), get_col(row, "EntryID"))
+        row_context["currency_colony"] = get_col(row, "Colony Currency")
         row_context["original_entry"] = get_col(row, "Entry")
 
         # For all nullable entries, do not remember them if they are null.
@@ -365,13 +366,16 @@ def get_transactions(df: pd.DataFrame):
                         # Handle random tobacco notes
                         elif pos == "SLTBE_F":
                             m = search(r"(\d+)\s+(\d+)", word)
-                            cur_tobacco_entry["number"] = m.group(1)
-                            cur_tobacco_entry["weight"] = m.group(2)
-                            tobacco_entries.append(cur_tobacco_entry)
-                            transaction["tobacco_entries"] = tobacco_entries
-                            cur_tobacco_entry = {}
-                            transaction["item"] = "Tobacco"
-                            transaction["amount_unreliable"] = True
+                            if m is None:
+                                add_error(transaction, "Complex note confused parser.", word)
+                            else:
+                                cur_tobacco_entry["number"] = m.group(1)
+                                cur_tobacco_entry["weight"] = m.group(2)
+                                tobacco_entries.append(cur_tobacco_entry)
+                                transaction["tobacco_entries"] = tobacco_entries
+                                cur_tobacco_entry = {}
+                                transaction["item"] = "Tobacco"
+                                transaction["amount_unreliable"] = True
                         
                         # Handle tobacco marks
                         elif info == "TM.TEXT":
@@ -468,7 +472,7 @@ def get_transactions(df: pd.DataFrame):
                                 if ((info == "PERSON" or info == "DATE") and word.lower() not in item_set) or ("item" in transaction and transaction["item"].lower() == "tobacco"):
                                     nouns.append((word, info, pos))
                                 else:
-                                    if "JJ" in prev_pos:
+                                    if prev_pos is not None and "JJ" in prev_pos:
                                         transaction["item"] = f"{prev_word} {word}"
                                     else:
                                         transaction["item"] = word
@@ -479,14 +483,14 @@ def get_transactions(df: pd.DataFrame):
 
                         # If the preprocesser thinks we have an interjection but it is in the item set, it is probably the item
                         elif "UH" in pos and word.lower() in item_set:
-                            if "JJ" in prev_pos:
+                            if prev_pos is not None and "JJ" in prev_pos:
                                 transaction["item"] = f"{prev_word} {word}"
                             else:
                                 transaction["item"] = word
 
                         # If we see a verb gerund (noun) and there is no item in our transaction, it is probably a misclassification
                         elif "VBG" in pos and "item" not in transaction:
-                            if "JJ" in prev_pos:
+                            if prev_pos is not None and "JJ" in prev_pos:
                                 transaction["item"] = f"{prev_word} {word}"
                             else:
                                 transaction["item"] = word
@@ -497,21 +501,21 @@ def get_transactions(df: pd.DataFrame):
                         
                         # If we see a verb and there is no item in our transaction and the verb is capitalized for some strange reason (i.e. its not a verb), mark it as our item
                         elif "VB" in pos and "item" not in transaction and word[0].isupper():
-                            if "JJ" in prev_pos:
+                            if prev_pos is not None and "JJ" in prev_pos:
                                 transaction["item"] = f"{prev_word} {word}"
                             else:
                                 transaction["item"] = word
 
                         # If we see a verb in the transaction and it is in the object index, it is actually the item.
                         elif "VB" in pos and word.lower() in item_set:
-                            if "JJ" in prev_pos:
+                            if prev_pos is not None and "JJ" in prev_pos:
                                 transaction["item"] = f"{prev_word} {word}"
                             else:
                                 transaction["item"] = word
 
                         # Same thing as above but for adjective/adverb
                         elif "JJ" in pos and "item" not in transaction and word.lower() in item_set:
-                            if "JJ" in prev_pos:
+                            if prev_pos is not None and "JJ" in prev_pos:
                                 transaction["item"] = f"{prev_word} {word}"
                             else:
                                 transaction["item"] = word
@@ -751,10 +755,14 @@ def get_transactions(df: pd.DataFrame):
                     
                     # Remember everything from the row that we haven't remembered already, except for money and commodities
                     for key, value in row_context.items():
-                        if "pounds" in key or "shillings" in key or "pennies" in key or "farthings" in key or key == "money_obj" or key == "Quantity" or key == "Commodity":
+                        if "pounds" in key or "shillings" in key or "pennies" in key or "farthings" in key or key == "Quantity" or key == "Commodity":
                             pass
                         else:
-                            if key not in transaction:
+                            if key == "money_obj":
+                                transaction["original_money_obj"] = value
+                            elif key == "money_obj_ster":
+                                transaction["original_money_obj_ster"] = value
+                            elif key not in transaction:
                                 if "farthings" not in key:
                                     transaction[key] = value
 
@@ -888,7 +896,7 @@ def get_transactions(df: pd.DataFrame):
     yield transactions
 
 # Performs a clean up on parser output, destroys the dict you give it
-def _final_pass(entry: dict):
+def _clean_pass(entry: dict):
     if "item" in entry:
         # Replace ballance with balance
         if entry["item"].lower() == "ballance":
@@ -938,10 +946,95 @@ def parse(df: pd.DataFrame):
     out = get_transactions(df)
     todump = []
     for transaction in out:
-        todump.append([_final_pass({key: val for key, val in x.items() if key != "money_obj" and key != "money_obj_ster"}) for x in transaction])
-        # for row in transaction:
-        #     print_debug(row)
-        #     print_debug()
+        # Do some basic cleanup
+        toOut = [_clean_pass({key: val for key, val in x.items() if key != "money_obj" and key != "money_obj_ster"}) for x in transaction]
+
+        # Group all entrys with the same id together in order to attempt to backsolve currency types on entries with both currency and sterling
+        entry_id_to_index = {}
+        both_entries = set()
+        for i, entry in enumerate(toOut):
+            if "entry_id" in entry:
+                if entry["entry_id"] in entry_id_to_index:
+                    entry_id_to_index[entry["entry_id"]].append(i)
+                else:
+                    entry_id_to_index[entry["entry_id"]] = [i,]
+                
+                if "currency_type" in entry:
+                    if entry["currency_type"] == "Both":
+                        both_entries.add(entry["entry_id"])
+
+        # For all entries with same id, do the currency backsolving by instpecting all possible price sum combinations
+        for eid in both_entries:
+            indices = entry_id_to_index[eid]
+            try:
+                to_backsolve = set([(x, Money(toOut[x]["price"])) for x in indices if "price" in toOut[x]])
+                
+                # Don't try to backsolve if there is only 1 entry.
+                if len(to_backsolve) < 2:
+                    raise AssertionError()
+                
+                # print(to_backsolve)
+                
+                ster_sum = toOut[indices[0]]["original_money_obj_ster"]
+                curr_sum = toOut[indices[0]]["original_money_obj"]
+                # print(ster_sum)
+                # print(curr_sum)
+
+                valid_currrency_sums = []
+                valid_sterling_sums = []
+                for i in range(1, (len(to_backsolve) // 2) + 1):
+                    for combo in combinations(to_backsolve, i):
+                        combo = set(combo)
+                        complement = to_backsolve.difference(combo)
+                        combo_sum = sum(x[1] for x in combo)
+                        complement_sum = sum(x[1] for x in complement)
+                        # print(combo, combo_sum, ster_sum, combo_sum == ster_sum, curr_sum, combo_sum == curr_sum)
+                        # print(complement, complement_sum, curr_sum, complement_sum == curr_sum, ster_sum, complement_sum == ster_sum)
+                        if combo_sum == ster_sum and complement_sum == curr_sum:
+                            if combo not in valid_sterling_sums and complement not in valid_currrency_sums:
+                                valid_sterling_sums.append(combo)
+                                valid_currrency_sums.append(complement)
+                        elif combo_sum == curr_sum and complement_sum == ster_sum:
+                            if combo not in valid_currrency_sums and complement not in valid_sterling_sums:
+                                valid_sterling_sums.append(complement)
+                                valid_currrency_sums.append(combo)
+                
+                if len(valid_currrency_sums) == 1 and len(valid_sterling_sums) == 1:
+                    for i, price in valid_currrency_sums[0]:
+                        toOut[i]["currency_type"] = "Currency"
+                    for i, price in valid_sterling_sums[0]:
+                        toOut[i]["currency_type"] = "Sterling"
+                else:
+                    # print("Curr sums: ")
+                    # print(valid_currrency_sums)
+                    # print("Ster sums: ")
+                    # print(valid_sterling_sums)
+                    # print()
+                    raise OSError("blah")
+            
+            except OSError:
+                for index in indices:
+                    if "tobacco_entries" in toOut[index] and toOut[index]["tobacco_entries"]:
+                        pass
+                    elif "errors" in toOut[index]:
+                        toOut[index]["errors"].append("Failed to separate sterling from currency.")
+                    else:
+                        toOut[index]["errors"] = ["Failed to separate sterling from currency.", ]
+            
+            except AssertionError:
+                pass
+
+            except:
+                for index in indices:
+                    if "tobacco_entries" in toOut[index] and toOut[index]["tobacco_entries"]:
+                        pass
+                    elif "errors" in toOut[index]:
+                        toOut[index]["errors"].append("Could not separate sterling from currency due to internal price parsing error. " + traceback.format_exc())
+                    else:
+                        toOut[index]["errors"] = ["Could not separate sterling from currency due to internal price parsing error. " + traceback.format_exc(), ]
+        
+        todump.append([{key: val for key, val in x.items() if key != "original_money_obj" and key != "original_money_obj_ster"} for x in toOut])
+
     return todump
     
 

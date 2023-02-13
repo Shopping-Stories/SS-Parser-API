@@ -250,6 +250,9 @@ class Money:
             raise ValueError(f"Error: other {other} must be of type money")
         return self.totalFracCurrency <= other.totalFracCurrency
 
+    def __hash__(self) -> int:
+        return self.totalFracCurrency
+
     def get_lsdf(self):
         tot_f = abs(self.totalFracCurrency)
         l = tot_f // (12 * 12 * 20)

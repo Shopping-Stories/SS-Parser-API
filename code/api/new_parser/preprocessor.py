@@ -360,7 +360,9 @@ def preprocess(df: pd.DataFrame):
                         if next_token is not None and next_token.text in ["pound", "pounds"]:
                             combine_tok_with_prev(new_entry, token)
                         else:
+                            # print(next_token.text, new_entry[-1][0])
                             combine_tok_with_prev(new_entry, token, new_pos="SLTBE_F")
+                            # print(next_token.text, new_entry[-1][0])
 
                 # Label tokens indicating record type as TRANS
                 elif token.text == "By" or token.text == "To":
