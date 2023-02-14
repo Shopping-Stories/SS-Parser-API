@@ -85,6 +85,13 @@ if __name__ == "__main__":
 class POutputList(BaseModel):
     entries: List[ParserOutput]
 
+class ItemInput(BaseModel):
+    item: Optional[str]
+    related: Optional[List[str]]
+
+class PeopleInput(BaseModel):
+    name: Optional[str]
+    related: Optional[List[str]]
 
 router = APIRouter()
 
@@ -254,8 +261,9 @@ def _make_db_entry(parsed_entry: ParserOutput):
             _create_people_rel(parsed_entry)
 
         # extra relationships within collections
-        if len(parsed_entry["peopleID"]) > 1:
-            _create_people_to_people_rel(parsed_entry)
+        if "peopleID" in parsed_entry:
+            if len(parsed_entry["peopleID"]) > 1:
+                _create_people_to_people_rel(parsed_entry)
         if "accountHolderID" in parsed_entry and "peopleID" in parsed_entry:
             _create_people_to_account_holder_rel(parsed_entry)
         if "itemID" in parsed_entry:
@@ -349,8 +357,160 @@ def parse_folder_exclude_errors():
     return Message(message="Successfully uploaded example data.")
 
 
+@router.post("/delete_entry/", tags=["Database Management"], response_model=Message)
+def remove_entry(entry_id: str):
+    """
+    Removes a specified entry from the database (specified by ID).
+    Sets error flag and has ERROR at the front of the message if any errors occur.
+    """
+
+    if entries_collection.find_one({'_id': ObjectId(entry_id)}):
+        entries_collection.delete_one({'_id': ObjectId(entry_id)})
+        return Message(message="Successfully deleted entry.")
+    else:
+        return Message(message=f"ERROR: Entry {entry_id} not found.", error=True)
+
+
+@router.post("/edit_entry/", tags=["Database Management"], response_model=Message)
+def edit_entry(entry_id: str, new_values: ParserOutput):
+    """
+    Edits an entry (specified by ID) in the database, intakes edited data in parser output format. 
+    Sets error flag and has ERROR at the front of the message if any errors occur. 
+    """
+
+    if entries_collection.find_one({'_id': ObjectId(entry_id)}) == None:
+        return Message(message=f"ERROR: Entry {entry_id} not found.", error=True)
+
+    new_values = new_values.dict()
+
+    todel = []
+    for key in new_values:
+        if new_values[key] == None:
+            todel.append(key)
+
+    for key in todel:
+        del new_values[key]
+
+    # ensure that keys exist, then create relationships
+    if "account_name" in new_values:
+        entries_collection.update_one({'_id': ObjectId(entry_id)}, {"$unset": {"accountHolderID": ""}})
+        _create_account_holder_rel(new_values)
+    if "item" in new_values:
+        entries_collection.update_one({'_id': ObjectId(entry_id)}, {"$unset": {"itemID": ""}})
+        _create_item_rel(new_values)
+    if "people" in new_values:
+        entries_collection.update_one({'_id': ObjectId(entry_id)}, {"$unset": {"peopleID": ""}})
+        _create_people_rel(new_values)
+
+    new_values_set = {"$set": new_values}
+    entries_collection.update_one({'_id': ObjectId(entry_id)}, new_values_set)
+
+    # extra relationships within collections
+    if "peopleID" in new_values:
+        if len(new_values["peopleID"]) > 1:
+            _create_people_to_people_rel(new_values)
+    if "accountHolderID" in new_values and "peopleID" in new_values:
+        _create_people_to_account_holder_rel(new_values)
+    if "itemID" in new_values:
+        _create_item_to_item_rel(new_values)
+
+    return Message(message="Successfully edited entry.")
+    
+
+@router.post("/edit_item/", tags=["Database Management"], response_model=Message)
+def edit_item(item_id: str, new_values: ItemInput):
+    """
+    Edits an item (specified by ID) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
+    """
+
+    if item_collection.find_one({'_id': ObjectId(item_id)}) == None:
+        return Message(message=f"ERROR: Item {item_id} not found.", error=True)
+
+    new_values = new_values.dict()
+
+    todel = []
+    for key in new_values:
+        if new_values[key] == None:
+            todel.append(key)
+
+    for key in todel:
+        del new_values[key]
+
+    new_values_set = {"$set": new_values}
+    item_collection.update_one({'_id': ObjectId(item_id)}, new_values_set)
+
+    return Message(message="Successfully edited item.")
+
+
+@router.post("/edit_person/", tags=["Database Management"], response_model=Message)
+def edit_person(person_id: str, new_values: PeopleInput):
+    """
+    Edits a person (specified by ID) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
+    """
+
+    if people_collection.find_one({'_id': ObjectId(person_id)}) == None:
+        return Message(message=f"ERROR: Person {person_id} not found.", error=True)
+
+    new_values = new_values.dict()
+
+    todel = []
+    for key in new_values:
+        if new_values[key] == None:
+            todel.append(key)
+
+    for key in todel:
+        del new_values[key]
+
+    new_values_set = {"$set": new_values}
+    people_collection.update_one({'_id': ObjectId(person_id)}, new_values_set)
+
+    return Message(message="Successfully edited person.")
+
+
+@router.post("/add_people_relationship/", tags=["Database Management"], response_model=Message)
+def add_relationship(person1_name: str, person2_name: str):
+    """
+    Creates a relationship between two people (both specified by name) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No relationships will be updated if any error occurs.
+    """
+
+    person1_data = people_collection.find_one({'name': person1_name})
+    person2_data = people_collection.find_one({'name': person2_name})
+
+    if person1_data == None:
+        return Message(message=f"ERROR: {person1_name} not found.", error=True)
+    if person2_data == None:
+        return Message(message=f"ERROR: {person2_name} not found.", error=True)
+        
+    person1_id = person1_data['_id'] 
+    person2_id = person2_data['_id'] 
+
+    if person1_id != person2_id:
+        if "related" in person1_data:
+            for related in person1_data['related']:
+                if related == person2_id:
+                    return Message(message=f"ERROR: Relationship already exists.", error=True)
+        if "related" in person2_data:
+            for related in person2_data['related']:
+                if related == person1_id:
+                    return Message(message=f"ERROR: Relationship already exists.", error=True)
+        people_collection.update_one({'_id': person1_id}, {'$push': {'related': person2_id}}) 
+        people_collection.update_one({'_id': person2_id}, {'$push': {'related': person1_id}})
+    else: 
+        return Message(message=f"ERROR: Both people are the same.", error=True)
+
+    return Message(message="Successfully added relationship.")
+
+
+#@router.post("/hash/", tags=["Database Management"], response_model=Message)
+#def hashing(doc: ParserOutput):
+
+    #print(hash(doc))
+
 # print(test_id) # prints entryID to terminal
 
 # NEED
 # tobaccoMarks relationship
-# places relarionship
+# places relationship
