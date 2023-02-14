@@ -159,11 +159,11 @@ def _create_people_rel(parsed_entry: Dict[str, Any]):
 # puts specified values (keys) into an object by name new_key together for entries
 # what can go wrong: if input does not contain all keys
 def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
-    if new_key != "sterling":
-        for key in keys:
-            if key not in parsed_entry:
-                # print("does not contain all keys\n")
-                return
+    # if new_key != "sterling":
+    for key in keys:
+        if key not in parsed_entry:
+            # print("does not contain all keys\n")
+            return
 
     object: Dict[str, Any] = dict.fromkeys(keys)
 
