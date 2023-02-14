@@ -159,10 +159,11 @@ def _create_people_rel(parsed_entry: Dict[str, Any]):
 # puts specified values (keys) into an object by name new_key together for entries
 # what can go wrong: if input does not contain all keys
 def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
-    for key in keys:
-        if key not in parsed_entry:
-            # print("does not contain all keys\n")
-            return
+    if new_key != "sterling":
+        for key in keys:
+            if key not in parsed_entry:
+                # print("does not contain all keys\n")
+                return
 
     object: Dict[str, Any] = dict.fromkeys(keys)
 
@@ -273,7 +274,7 @@ def _make_db_entry(parsed_entry: ParserOutput):
         # define keys, change key values to change which variables are grouped
         # what can go wrong: will not create object if not all specified keys are in the input
         currency_keys = ["pounds", "shillings", "pennies", "farthings"]
-        sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster"]
+        sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster", "farthings_ster"]
         ledger_keys = ["reel", "folio_year", "folio_page", "entry_id"]
 
         _create_object(parsed_entry, currency_keys, "currency")
