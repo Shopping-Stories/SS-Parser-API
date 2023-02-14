@@ -104,10 +104,20 @@ def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str,
             found_price_last = True
             found_trans.append(cur_entry)
             cur_entry = []
+
+        if info == "TRANS" and len(cur_entry) > 1:
+            found_price_last = False
+            found_noun_last = False
+            cur_entry.pop()
+            found_trans.append(cur_entry)
+            cur_entry = [(word, info, pos)]
+        
         if "NN" in pos and info not in ["PERSON", "DATE"]:
             found_noun_last = True
         
     if found_trans == []:
+        found_trans.append(cur_entry)
+    elif found_trans[-1] != cur_entry and cur_entry != []:
         found_trans.append(cur_entry)
 
     # print(found_trans)

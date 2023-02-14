@@ -3,7 +3,7 @@ from .parser_utils import get_col, get_col_name, add_to_by, isNoun
 from re import split, match, search, sub, finditer, Match
 import spacy
 from itertools import chain
-from .indices import amount_set
+from .indices import amount_set, item_set
 import logging
 
             
@@ -363,6 +363,10 @@ def preprocess(df: pd.DataFrame):
                             # print(next_token.text, new_entry[-1][0])
                             combine_tok_with_prev(new_entry, token, new_pos="SLTBE_F")
                             # print(next_token.text, new_entry[-1][0])
+
+                # If we find a cardinal in the item set, it is probably not a cardinal.
+                elif token.tag_ == "CD" and token.text.lower() in item_set:
+                    new_entry.append((token.text, "", "NN"))
 
                 # Label tokens indicating record type as TRANS
                 elif token.text == "By" or token.text == "To":

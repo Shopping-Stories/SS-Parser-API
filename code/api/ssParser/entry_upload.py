@@ -1,7 +1,7 @@
 from .database import db
 from bson.objectid import ObjectId
 from traceback import format_exc
-from ..api_types import Message
+from ..api_types import Message, ParserOutput
 from typing import List, Dict, Any, Optional, Union
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel, Field
@@ -81,48 +81,6 @@ if __name__ == "__main__":
         "Quantity": 35
     }
 
-# Definition of what parser returns
-
-class ParserOutput(BaseModel):
-    errors: Optional[List[str]]
-    error_context: Optional[List[List[Union[str, List[str]]]]]
-    amount: Optional[str]
-    amount_is_combo: Optional[bool]
-    item: Optional[str]
-    price: Optional[str]
-    price_is_combo: Optional[bool]
-    phrases: Optional[List[Dict[str, Union[str, List[str]]]]]
-    date: Optional[str]
-    pounds: Optional[int]
-    pounds_ster: Optional[int]
-    shillings: Optional[int]
-    shillings_ster: Optional[int]
-    pennies_ster: Optional[int]
-    pennies: Optional[int]
-    farthings_ster: Optional[int]
-    Marginalia: Optional[str]
-    farthings: Optional[int]
-    store: Optional[str]
-    currency_type: Optional[str]
-    currency_totaling_contextless: Optional[bool]
-    commodity_totaling_contextless: Optional[bool]
-    account_name: Optional[str]
-    reel: Optional[int]
-    store_owner: Optional[str]
-    folio_year: Optional[str]
-    folio_page: Optional[int]
-    entry_id: Optional[str]
-    date_year: Optional[str] = Field(alias="Date Year")
-    month: Optional[str] = Field(alias="_Month")
-    Day: Optional[str]
-    debit_or_credit: Optional[str]
-    context: Optional[List[List[str]]]
-    Quantity: Optional[str]
-    Commodity: Optional[str]
-    people: Optional[List[str]]
-    type: Optional[str]
-    liber_book: Optional[str]
-    mentions: Optional[List[str]]
 
 class POutputList(BaseModel):
     entries: List[ParserOutput]
