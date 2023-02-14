@@ -168,6 +168,11 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
     object: Dict[str, Any] = dict.fromkeys(keys)
 
     for key in keys:
+        if key not in parsed_entry:
+            if new_key == "sterling" or new_key == "currency":
+                parsed_entry[key] = 0
+            else:
+                parsed_entry[key] = ""
         if key.endswith("_ster"):
             nk = key.replace("_ster", "")
             object.update({nk: parsed_entry[key]})
