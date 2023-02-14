@@ -317,8 +317,11 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     Creates multiple new database entries from a list of parser output entries.
     Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
     """
-    new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
-    
+    try:
+        new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
+    except Exception as e:
+        return Message(message="ERROR: " + format_exc, error=True)
+
     # If any errors present, return error.
     if any([isinstance(x, str) for x in new_entries]):
         return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
