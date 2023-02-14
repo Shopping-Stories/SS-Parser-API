@@ -1,0 +1,4623 @@
+{
+	"entries": [
+		{
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"TO"
+				],
+				[
+					"Balance",
+					"",
+					"VB"
+				],
+				[
+					"From",
+					"",
+					"IN"
+				],
+				[
+					"Liber A",
+					"LIBER",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"debit_or_credit": "Dr",
+			"entry_id": "2",
+			"farthings": 0,
+			"Folio Reference": "163",
+			"folio_page": 77,
+			"folio_reference": "163",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"2"
+			],
+			"item": "Balance",
+			"liber_book": "A",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Balance From Liber A",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 3,
+			"reel": 58,
+			"shillings": 12,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Balance From Liber A",
+			"tobacco_marks": [],
+			"type": "Liber"
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "2",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Cotton handkerchiefs",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"7/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "3",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"3"
+			],
+			"item": "Cotton handkerchiefs",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Cotton handrs [handkerchiefs] 7/6    1 Linnen [Linen] Do [handkerchief] 1/8    1 Yarn Rug 13/:",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "7/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 7,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Cotton handkerchiefs 7/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Linen handkerchief",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"1/8",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "3",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"3"
+			],
+			"item": "Linen handkerchief",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Cotton handrs [handkerchiefs] 7/6    1 Linnen [Linen] Do [handkerchief] 1/8    1 Yarn Rug 13/:",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/8",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Linen handkerchief 1/8",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Yarn Rug",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"13/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "3",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"3"
+			],
+			"item": "Yarn Rug",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Cotton handrs [handkerchiefs] 7/6    1 Linnen [Linen] Do [handkerchief] 1/8    1 Yarn Rug 13/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "13/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 13,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Yarn Rug 13/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Yarn",
+					"PERSON",
+					"NNP"
+				],
+				[
+					"Rug",
+					"",
+					"NN"
+				],
+				[
+					"17/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "4",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"4"
+			],
+			"item": "Rug",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Yarn Rug 17/:    14 yds [yards] Pleiding 24/6    1 Pr [Pair] Womens Shoes 5/4",
+			"pennies": 0,
+			"people": [
+				"Yarn"
+			],
+			"phrases": [],
+			"poss_amounts": [],
+			"pounds": 0,
+			"price": "17/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 17,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Yarn Rug 17/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "14 yards",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"14 yards",
+					"AMT",
+					"CD"
+				],
+				[
+					"Pleiding",
+					"",
+					"VBG"
+				],
+				[
+					"24/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "4",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"4"
+			],
+			"item": "Pleiding",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Yarn Rug 17/:    14 yds [yards] Pleiding 24/6    1 Pr [Pair] Womens Shoes 5/4",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 1,
+			"price": "24/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 4,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 14 yards Pleiding 24/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1 Pair",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"Womens Shoes",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"5/4",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "4",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"4"
+			],
+			"item": "Womens Shoes",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Yarn Rug 17/:    14 yds [yards] Pleiding 24/6    1 Pr [Pair] Womens Shoes 5/4",
+			"pennies": 4,
+			"phrases": [],
+			"pounds": 0,
+			"price": "5/4",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 5,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Pair Womens Shoes 5/4",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "3 Pairs",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"3 Pairs",
+					"AMT",
+					"CD"
+				],
+				[
+					"Mens Shoes",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"21/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "5",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"5"
+			],
+			"item": "Mens Shoes",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 3 [Pairs] Mens Shoes 21/:    1 Sifter 2/:     1 [Pair] Youths Shoes 4/6    1 [Pair] Yarn Stockgs [Stockings] 3/6",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 1,
+			"price": "21/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 3 Pairs Mens Shoes 21/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Sifter",
+					"",
+					"NN"
+				],
+				[
+					"2/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "5",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"5"
+			],
+			"item": "Sifter",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 3 [Pairs] Mens Shoes 21/:    1 Sifter 2/:     1 [Pair] Youths Shoes 4/6    1 [Pair] Yarn Stockgs [Stockings] 3/6",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "2/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 2,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Sifter 2/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1 Pair",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"Youths Shoes",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"4/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "5",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"5"
+			],
+			"item": "Youths Shoes",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 3 [Pairs] Mens Shoes 21/:    1 Sifter 2/:     1 [Pair] Youths Shoes 4/6    1 [Pair] Yarn Stockgs [Stockings] 3/6",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "4/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 4,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "1 Pair 1 Pair Youths Shoes 4/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1 Pair",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"Yarn Stockings",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"3/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "5",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"5"
+			],
+			"item": "Yarn Stockings",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 3 [Pairs] Mens Shoes 21/:    1 Sifter 2/:     1 [Pair] Youths Shoes 4/6    1 [Pair] Yarn Stockgs [Stockings] 3/6",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "3/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 3,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Pair Yarn Stockings 3/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "2 Pairs",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2 Pairs",
+					"AMT",
+					"CD"
+				],
+				[
+					"Ribbed Stockings",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"8/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "6",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"6"
+			],
+			"item": "Ribbed Stockings",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Prs [Pairs] Ribbd [Ribbed] Stockings 8/:    1 Boys felt hat 1/8    2 Mens Ditto: [hats] 9/: ",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "8/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 8,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Pairs Ribbed Stockings 8/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Boys",
+					"",
+					"NNS"
+				],
+				[
+					"felt",
+					"",
+					"VBD"
+				],
+				[
+					"hat",
+					"",
+					"NN"
+				],
+				[
+					"1/8",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "6",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"6"
+			],
+			"item": "hat",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"Boys"
+			],
+			"original_entry": "To 2 Prs [Pairs] Ribbd [Ribbed] Stockings 8/:    1 Boys felt hat 1/8    2 Mens Ditto: [hats] 9/: ",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/8",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Boys felt hat 1/8",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "2",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Mens Ditto",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					":",
+					"",
+					":"
+				],
+				[
+					"hats",
+					"",
+					"NNS"
+				],
+				[
+					"9/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "6",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"6"
+			],
+			"item": "hats",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"Mens Ditto"
+			],
+			"original_entry": "To 2 Prs [Pairs] Ribbd [Ribbed] Stockings 8/:    1 Boys felt hat 1/8    2 Mens Ditto: [hats] 9/: ",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "9/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 9,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Mens Ditto : hats 9/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "2 Pairs",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2 Pairs",
+					"AMT",
+					"CD"
+				],
+				[
+					"Leather Breeches",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"10/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "7",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"7"
+			],
+			"item": "Leather Breeches",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Prs [Pairs] Leather Breeches 10/:    8 yds [yards] best Roles [Roll] 7/4    20 yds [yards] best Ozenbgs [Osnaburg] 25/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "10/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 10,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Pairs Leather Breeches 10/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "8 yards",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"8 yards",
+					"AMT",
+					"CD"
+				],
+				[
+					"best",
+					"",
+					"JJS"
+				],
+				[
+					"Roll",
+					"",
+					"VB"
+				],
+				[
+					"7/4",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "7",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"7"
+			],
+			"item": "best Roll",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Prs [Pairs] Leather Breeches 10/:    8 yds [yards] best Roles [Roll] 7/4    20 yds [yards] best Ozenbgs [Osnaburg] 25/:",
+			"pennies": 4,
+			"phrases": [],
+			"pounds": 0,
+			"price": "7/4",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 7,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 8 yards best Roll 7/4",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"amount": "20 yards",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"20 yards",
+					"AMT",
+					"CD"
+				],
+				[
+					"best",
+					"",
+					"JJS"
+				],
+				[
+					"Osnaburg",
+					"GPE",
+					"NNP"
+				],
+				[
+					"25/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "7",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"7"
+			],
+			"item": "best Osnaburg",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"Osnaburg"
+			],
+			"original_entry": "To 2 Prs [Pairs] Leather Breeches 10/:    8 yds [yards] best Roles [Roll] 7/4    20 yds [yards] best Ozenbgs [Osnaburg] 25/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 1,
+			"price": "25/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 5,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 20 yards best Osnaburg 25/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cash",
+					"CASH",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "9",
+			"farthings": 0,
+			"Folio Reference": "14",
+			"folio_page": 77,
+			"folio_reference": "14",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"9"
+			],
+			"item": "Currency",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Cash",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"reel": 58,
+			"shillings": 15,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Cash",
+			"tobacco_marks": [],
+			"type": "Cash"
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"amount": "1 Gallon",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Gallon",
+					"AMT",
+					"CD"
+				],
+				[
+					"Rum",
+					"",
+					"NN"
+				],
+				[
+					"6/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "24",
+			"debit_or_credit": "Dr",
+			"entry_id": "10",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"10"
+			],
+			"item": "Rum",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Gallon Rum 6/6    1 yd [yard] Ribbon 1/3    1w [pound] Sugar 9d    ½w [pound] [gun] powder  1/4 ½    2w [pounds] Shott [Shot] 1/:",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "6/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 6,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Gallon Rum 6/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"amount": "1 yard",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 yard",
+					"AMT",
+					"CD"
+				],
+				[
+					"Ribbon",
+					"",
+					"NNP"
+				],
+				[
+					"1/3",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "24",
+			"debit_or_credit": "Dr",
+			"entry_id": "10",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"10"
+			],
+			"item": "Ribbon",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Gallon Rum 6/6    1 yd [yard] Ribbon 1/3    1w [pound] Sugar 9d    ½w [pound] [gun] powder  1/4 ½    2w [pounds] Shott [Shot] 1/:",
+			"pennies": 3,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/3",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 yard Ribbon 1/3",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"amount": "1 pound",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 pound",
+					"AMT",
+					"CD"
+				],
+				[
+					"Sugar",
+					"",
+					"NN"
+				],
+				[
+					"9d",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "24",
+			"debit_or_credit": "Dr",
+			"entry_id": "10",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"10"
+			],
+			"item": "Sugar",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Gallon Rum 6/6    1 yd [yard] Ribbon 1/3    1w [pound] Sugar 9d    ½w [pound] [gun] powder  1/4 ½    2w [pounds] Shott [Shot] 1/:",
+			"pennies": 9,
+			"phrases": [],
+			"pounds": 0,
+			"price": "9d",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 0,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 pound Sugar 9d",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"amount": "0.5w pound",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"½w pound",
+					"AMT",
+					"CD"
+				],
+				[
+					"gun powder",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"1/4 ½",
+					"COMB.PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "24",
+			"debit_or_credit": "Dr",
+			"entry_id": "10",
+			"farthings": 6,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"10"
+			],
+			"item": "gun powder",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Gallon Rum 6/6    1 yd [yard] Ribbon 1/3    1w [pound] Sugar 9d    ½w [pound] [gun] powder  1/4 ½    2w [pounds] Shott [Shot] 1/:",
+			"pennies": 4,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/4 ½",
+			"price_is_combo": true,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To ½w pound gun powder 1/4 ½",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"amount": "2 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"Shot",
+					"",
+					"VBN"
+				],
+				[
+					"1/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "24",
+			"debit_or_credit": "Dr",
+			"entry_id": "10",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"10"
+			],
+			"item": "Shot",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Gallon Rum 6/6    1 yd [yard] Ribbon 1/3    1w [pound] Sugar 9d    ½w [pound] [gun] powder  1/4 ½    2w [pounds] Shott [Shot] 1/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 pounds Shot 1/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cash",
+					"CASH",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "24",
+			"debit_or_credit": "Dr",
+			"entry_id": "11",
+			"farthings": 0,
+			"Folio Reference": "15",
+			"folio_page": 77,
+			"folio_reference": "15",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"11"
+			],
+			"item": "Currency",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Cash",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"reel": 58,
+			"shillings": 10,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Cash",
+			"tobacco_marks": [],
+			"type": "Cash"
+		},
+		{
+			"_Month": "01",
+			"account_name": "Robert Loyd",
+			"amount": "1 quart",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"¼",
+					"",
+					"DT"
+				],
+				[
+					"Brandy",
+					"PERSON",
+					"NNP"
+				],
+				[
+					"1/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "16",
+			"debit_or_credit": "Dr",
+			"entry_id": "12",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"12"
+			],
+			"item": "Brandy",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To ¼ Brandy 1/6    2w [pounds] Sugar 1/8    1 Bushel Salt 3/:   [Per] Son",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To ¼ Brandy 1/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "Robert Loyd",
+			"amount": "2 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"Sugar",
+					"",
+					"NN"
+				],
+				[
+					"1/8",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "16",
+			"debit_or_credit": "Dr",
+			"entry_id": "12",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"12"
+			],
+			"item": "Sugar",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To ¼ Brandy 1/6    2w [pounds] Sugar 1/8    1 Bushel Salt 3/:   [Per] Son",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/8",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 pounds Sugar 1/8",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "Robert Loyd",
+			"amount": "1 Bushel",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Bushel",
+					"AMT",
+					"CD"
+				],
+				[
+					"Salt",
+					"",
+					"NNP"
+				],
+				[
+					"3/:",
+					"PRICE",
+					"CD"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"Son",
+					"",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "16",
+			"debit_or_credit": "Dr",
+			"entry_id": "12",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"12"
+			],
+			"item": "Salt",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To ¼ Brandy 1/6    2w [pounds] Sugar 1/8    1 Bushel Salt 3/:   [Per] Son",
+			"pennies": 0,
+			"people": [
+				"Son"
+			],
+			"phrases": [
+				{
+					"modifies": "3/:",
+					"phrase": [
+						"Per",
+						"Son"
+					]
+				}
+			],
+			"pounds": 0,
+			"price": "3/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 3,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Bushel Salt 3/: Per Son",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "Robert Loyd",
+			"amount": "1 quart",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"¼",
+					"",
+					"CD"
+				],
+				[
+					"Rum",
+					"",
+					"NN"
+				],
+				[
+					"1/10 ½",
+					"COMB.PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "23",
+			"debit_or_credit": "Dr",
+			"entry_id": "13",
+			"farthings": 6,
+			"Folio Reference": "17",
+			"folio_page": 77,
+			"folio_reference": "17",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"13"
+			],
+			"item": "Rum",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To ¼ Rum 1/10 ½    ¼ w [pound] thread 10d    May 19th To Cash lent yr [your] Wife at Alexa [Alexandria] (17) 1/3",
+			"pennies": 10,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/10 ½",
+			"price_is_combo": true,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To ¼ Rum 1/10 ½",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "Robert Loyd",
+			"amount": "0.25 pound",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"¼ pound",
+					"AMT",
+					"CD"
+				],
+				[
+					"thread",
+					"",
+					"NN"
+				],
+				[
+					"10d",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "23",
+			"debit_or_credit": "Dr",
+			"entry_id": "13",
+			"farthings": 0,
+			"Folio Reference": "17",
+			"folio_page": 77,
+			"folio_reference": "17",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"13"
+			],
+			"item": "thread",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To ¼ Rum 1/10 ½    ¼ w [pound] thread 10d    May 19th To Cash lent yr [your] Wife at Alexa [Alexandria] (17) 1/3",
+			"pennies": 10,
+			"phrases": [],
+			"pounds": 0,
+			"price": "10d",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 0,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To ¼ pound thread 10d",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cash lent",
+					"COMB.NOUN",
+					"VBN"
+				],
+				[
+					"your",
+					"",
+					"PRP$"
+				],
+				[
+					"Wife",
+					"",
+					"NN"
+				],
+				[
+					"at",
+					"",
+					"IN"
+				],
+				[
+					"Alexandria",
+					"GPE",
+					"NNP"
+				],
+				[
+					"(",
+					"",
+					"-LRB-"
+				],
+				[
+					"17",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					")",
+					"",
+					"-RRB-"
+				],
+				[
+					"1/3",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "23",
+			"debit_or_credit": "Dr",
+			"entry_id": "13",
+			"farthings": 0,
+			"Folio Reference": "17",
+			"folio_page": 77,
+			"folio_reference": "17",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"13"
+			],
+			"item": "Wife",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To ¼ Rum 1/10 ½    ¼ w [pound] thread 10d    May 19th To Cash lent yr [your] Wife at Alexa [Alexandria] (17) 1/3",
+			"pennies": 3,
+			"people": [
+				"Alexandria"
+			],
+			"phrases": [
+				{
+					"modifies": "Wife",
+					"phrase": [
+						"at",
+						"Alexandria"
+					]
+				}
+			],
+			"poss_amounts": [],
+			"pounds": 0,
+			"price": "1/3",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Cash lent your Wife at Alexandria ( 17 ) 1/3",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "07",
+			"account_name": "Robert Loyd",
+			"amount": "22 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"the",
+					"",
+					"DT"
+				],
+				[
+					"Sheriff",
+					"PERSON",
+					"NNP"
+				],
+				[
+					"22 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"Tobacco",
+					"",
+					"NN"
+				],
+				[
+					"&",
+					"CC.TOB",
+					"CC.DENIED"
+				],
+				[
+					"8/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "08",
+			"debit_or_credit": "Dr",
+			"entry_id": "14",
+			"farthings": 0,
+			"Folio Reference": "115",
+			"folio_page": 77,
+			"folio_reference": "115",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"14"
+			],
+			"item": "Tobacco & 8/:",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To the Sheriff  22w [pounds]  } Tobo [Tobacco] & 8/:",
+			"pennies": 0,
+			"people": [
+				"Sheriff"
+			],
+			"phrases": [],
+			"pounds": 0,
+			"reel": 58,
+			"shillings": 8,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To the Sheriff 22 pounds Tobacco & 8/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "07",
+			"account_name": "Robert Loyd",
+			"amount": "40 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"the",
+					"",
+					"DT"
+				],
+				[
+					"Parish Collector",
+					"PERSON",
+					"NNP"
+				],
+				[
+					"40 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"Tobacco",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": true,
+			"Date Year": "1761",
+			"Day": "08",
+			"debit_or_credit": "Dr",
+			"entry_id": "15",
+			"Folio Reference": "128",
+			"folio_page": 77,
+			"folio_reference": "128",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"15"
+			],
+			"item": "Tobacco",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To the Parish Collector  40w [pounds]  } Tobo [Tobacco]",
+			"people": [
+				"Parish Collector"
+			],
+			"phrases": [],
+			"reel": 58,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To the Parish Collector 40 pounds Tobacco",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "08",
+			"account_name": "Robert Loyd",
+			"amount": "1 ",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"your",
+					"",
+					"PRP$"
+				],
+				[
+					"Penal Bill",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"Payable 1st September",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"next",
+					"",
+					"RB"
+				],
+				[
+					"for",
+					"",
+					"IN"
+				],
+				[
+					"the",
+					"",
+					"DT"
+				],
+				[
+					"Balance",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "18",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"18"
+			],
+			"item": "Balance",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"Payable 1st September",
+				"Penal Bill"
+			],
+			"original_entry": "To your Penal Bill Payable 1st Septr [September] next for the Ballance [Balance]",
+			"pennies": 8,
+			"phrases": [
+				{
+					"modifies": "next",
+					"phrase": [
+						"for",
+						"the",
+						"Balance"
+					]
+				}
+			],
+			"pounds": 6,
+			"reel": 58,
+			"shillings": 18,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To your Penal Bill Payable 1st September next for the Balance",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "08",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Ballance",
+					"",
+					"NN"
+				],
+				[
+					"from",
+					"",
+					"IN"
+				],
+				[
+					"Liber A",
+					"LIBER",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "19",
+			"farthings": 6,
+			"Folio Reference": "16",
+			"folio_page": 77,
+			"folio_reference": "16",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"19"
+			],
+			"item": "Balance",
+			"liber_book": "A",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To Ballance from Liber A",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 1,
+			"reel": 58,
+			"shillings": 8,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Ballance from Liber A",
+			"tobacco_marks": [],
+			"type": "Liber"
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"amount": "1 Pair",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"Girls",
+					"",
+					"NNS"
+				],
+				[
+					"Stays",
+					"",
+					"VBZ"
+				],
+				[
+					"17/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Dr",
+			"entry_id": "20",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"20"
+			],
+			"item": "Stays",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"Girls"
+			],
+			"original_entry": "To 1 Pr [Pair] Girles [Girls] Stays 17/6    1 Youths Castor hat 7/6",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "17/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 17,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Pair Girls Stays 17/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Youths Castor hat",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"7/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Dr",
+			"entry_id": "20",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"20"
+			],
+			"item": "Youths Castor hat",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Pr [Pair] Girles [Girls] Stays 17/6    1 Youths Castor hat 7/6",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "7/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 7,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Youths Castor hat 7/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"fine hat",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"10/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Dr",
+			"entry_id": "21",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"21"
+			],
+			"item": "fine hat",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 fine hat 10/6    1 Cask Butter 52w [pounds] [at] 8d  34/8     To Cask 5/:",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "10/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 10,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 fine hat 10/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Cask Butter",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"52 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"at",
+					"IS.BULK",
+					"IN"
+				],
+				[
+					"8d",
+					"PRICE",
+					"CD"
+				],
+				[
+					"34/8",
+					"PRICE",
+					"CD"
+				],
+				[
+					"34/8",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Dr",
+			"entry_id": "21",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"21"
+			],
+			"item": "Cask Butter",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 fine hat 10/6    1 Cask Butter 52w [pounds] [at] 8d  34/8     To Cask 5/:",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 1,
+			"price": "34/8",
+			"price_is_bulk": true,
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 14,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "1 Cask Butter 52 pounds at 8d 34/8 34/8",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"34/8",
+					"PRICE",
+					"CD"
+				],
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"To",
+					"TRANS",
+					"IN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Dr",
+			"entry_id": "21",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"21"
+			],
+			"item": "Currency",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 fine hat 10/6    1 Cask Butter 52w [pounds] [at] 8d  34/8     To Cask 5/:",
+			"pennies": 8,
+			"phrases": [],
+			"poss_amounts": [],
+			"pounds": 1,
+			"price": "34/8",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 14,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "34/8 To To",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cask",
+					"",
+					"NNP"
+				],
+				[
+					"5/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Dr",
+			"entry_id": "21",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"21"
+			],
+			"item": "Cask",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 fine hat 10/6    1 Cask Butter 52w [pounds] [at] 8d  34/8     To Cask 5/:",
+			"pennies": 0,
+			"phrases": [],
+			"poss_amounts": [],
+			"pounds": 0,
+			"price": "5/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 5,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To Cask 5/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "7 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"7 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"Sugar",
+					"",
+					"NN"
+				],
+				[
+					"at",
+					"IS.BULK",
+					"IN"
+				],
+				[
+					"9d",
+					"PRICE",
+					"CD"
+				],
+				[
+					"12/9",
+					"PRICE",
+					"CD"
+				],
+				[
+					"12/9",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "06",
+			"debit_or_credit": "Dr",
+			"entry_id": "22",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"22"
+			],
+			"item": "Sugar",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 7w [pounds] Sugar [at] 9d  12/9    [December] 22d To 15w [pounds] Sugar 11/3    1 Bottle Turlg [Turlingtons] Balsam 4/4  [Per] order",
+			"pennies": 3,
+			"phrases": [],
+			"pounds": 4,
+			"price": "12/9",
+			"price_is_bulk": true,
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 9,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 7 pounds Sugar at 9d 12/9 12/9",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "15 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"15 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"Sugar",
+					"",
+					"NN"
+				],
+				[
+					"11/3",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "06",
+			"debit_or_credit": "Dr",
+			"entry_id": "22",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"22"
+			],
+			"item": "Sugar",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 7w [pounds] Sugar [at] 9d  12/9    [December] 22d To 15w [pounds] Sugar 11/3    1 Bottle Turlg [Turlingtons] Balsam 4/4  [Per] order",
+			"pennies": 3,
+			"phrases": [],
+			"pounds": 0,
+			"price": "11/3",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 11,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 15 pounds Sugar 11/3",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Bottle Turlingtons Balsam",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"4/4",
+					"PRICE",
+					"CD"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"order",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "06",
+			"debit_or_credit": "Dr",
+			"entry_id": "22",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"22"
+			],
+			"item": "Bottle Turlingtons Balsam",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"order"
+			],
+			"original_entry": "To 7w [pounds] Sugar [at] 9d  12/9    [December] 22d To 15w [pounds] Sugar 11/3    1 Bottle Turlg [Turlingtons] Balsam 4/4  [Per] order",
+			"pennies": 4,
+			"phrases": [
+				{
+					"modifies": "4/4",
+					"phrase": [
+						"Per",
+						"order"
+					]
+				}
+			],
+			"pounds": 0,
+			"price": "4/4",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 4,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Bottle Turlingtons Balsam 4/4 Per order",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "James Lane Junior",
+			"amount": "7.5 Gallons",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"7 ½ Gallons",
+					"AMT",
+					"CD"
+				],
+				[
+					"Rum",
+					"",
+					"NN"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"order",
+					"",
+					"NN"
+				],
+				[
+					"18/9",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "13",
+			"debit_or_credit": "Dr",
+			"entry_id": "23",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"23"
+			],
+			"item": "Rum",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"order"
+			],
+			"original_entry": "To 7 ½ Gallons Rum [Per] order 18/9    Febry [February] 5th To 1 Large Brod [Broad] Axe 10/:",
+			"pennies": 9,
+			"phrases": [
+				{
+					"modifies": "Rum",
+					"phrase": [
+						"Per",
+						"order"
+					]
+				}
+			],
+			"pounds": 0,
+			"price": "18/9",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 18,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 7 ½ Gallons Rum Per order 18/9",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "01",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Large Broad Axe",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"10/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "13",
+			"debit_or_credit": "Dr",
+			"entry_id": "23",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"23"
+			],
+			"item": "Large Broad Axe",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 7 ½ Gallons Rum [Per] order 18/9    Febry [February] 5th To 1 Large Brod [Broad] Axe 10/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "10/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 10,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Large Broad Axe 10/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"very",
+					"",
+					"RB"
+				],
+				[
+					"Large Broad Axe",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"11/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "05",
+			"debit_or_credit": "Dr",
+			"entry_id": "24",
+			"farthings": 0,
+			"Final": "4 pairs?",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"24"
+			],
+			"item": "Large Broad Axe",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 very Large Broad Axe 11/:    500 6d Nails 2/6    <4> [Pairs] Hinges 6/8    1 [Pair] sm: [small] Do [Hinges] 1/3  [Per] ordr [order]",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "11/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 11,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 very Large Broad Axe 11/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "500",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"500",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"6d",
+					"PRICE",
+					"CD"
+				],
+				[
+					"6d Nails",
+					"",
+					"NN"
+				],
+				[
+					"2/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "05",
+			"debit_or_credit": "Dr",
+			"entry_id": "24",
+			"farthings": 0,
+			"Final": "4 pairs?",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"24"
+			],
+			"item": "6d Nails",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 very Large Broad Axe 11/:    500 6d Nails 2/6    <4> [Pairs] Hinges 6/8    1 [Pair] sm: [small] Do [Hinges] 1/3  [Per] ordr [order]",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "2/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 2,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 500 6d 6d Nails 2/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "4 Pairs",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"4 Pairs",
+					"AMT",
+					"CD"
+				],
+				[
+					"Hinges",
+					"",
+					"VBZ"
+				],
+				[
+					"6/8",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "05",
+			"debit_or_credit": "Dr",
+			"entry_id": "24",
+			"farthings": 0,
+			"Final": "4 pairs?",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"24"
+			],
+			"item": "Hinges",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 very Large Broad Axe 11/:    500 6d Nails 2/6    <4> [Pairs] Hinges 6/8    1 [Pair] sm: [small] Do [Hinges] 1/3  [Per] ordr [order]",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 0,
+			"price": "6/8",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 6,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 4 Pairs Hinges 6/8",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "1 Pair",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"small Hinges",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"1/3",
+					"PRICE",
+					"CD"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"order",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "05",
+			"debit_or_credit": "Dr",
+			"entry_id": "24",
+			"farthings": 0,
+			"Final": "4 pairs?",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"24"
+			],
+			"item": "small Hinges",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"order"
+			],
+			"original_entry": "To 1 very Large Broad Axe 11/:    500 6d Nails 2/6    <4> [Pairs] Hinges 6/8    1 [Pair] sm: [small] Do [Hinges] 1/3  [Per] ordr [order]",
+			"pennies": 3,
+			"phrases": [
+				{
+					"modifies": "1/3",
+					"phrase": [
+						"Per",
+						"order"
+					]
+				}
+			],
+			"pounds": 0,
+			"price": "1/3",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Pair small Hinges 1/3 Per order",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "5 yards",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"5 yards",
+					"AMT",
+					"CD"
+				],
+				[
+					"fine black Shalloon",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"20/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "12",
+			"debit_or_credit": "Dr",
+			"entry_id": "25",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"25"
+			],
+			"item": "fine black Shalloon",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 5 yd [yards] fine bla: [black] Shalloon 20/:    2 ½ Doz: [Dozen] Large & 2 ½ Doz: [Dozen] Small Buttons 5/6    1 Frying Pan 7/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 1,
+			"price": "20/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 0,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 5 yards fine black Shalloon 20/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Frying Pan",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"7/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "12",
+			"debit_or_credit": "Dr",
+			"entry_id": "25",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"25"
+			],
+			"item": "Frying Pan",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 5 yd [yards] fine bla: [black] Shalloon 20/:    2 ½ Doz: [Dozen] Large & 2 ½ Doz: [Dozen] Small Buttons 5/6    1 Frying Pan 7/:",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "7/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 7,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Frying Pan 7/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "2",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Whipsaw files",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"2/8",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "25",
+			"debit_or_credit": "Dr",
+			"entry_id": "26",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"26"
+			],
+			"item": "Whipsaw files",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Whipsaw files 2/8    March 9th To 20w [pounds] bro: [brown] Sugar [Per] order 15/:",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 0,
+			"price": "2/8",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 2,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Whipsaw files 2/8",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "02",
+			"account_name": "James Lane Junior",
+			"amount": "20 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"20 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"brown Sugar",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"order",
+					"",
+					"NN"
+				],
+				[
+					"15/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "25",
+			"debit_or_credit": "Dr",
+			"entry_id": "26",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"26"
+			],
+			"item": "brown Sugar",
+			"Marginalia": "Virginia [top center]",
+			"mentions": [
+				"order"
+			],
+			"original_entry": "To 2 Whipsaw files 2/8    March 9th To 20w [pounds] bro: [brown] Sugar [Per] order 15/:",
+			"pennies": 0,
+			"phrases": [
+				{
+					"modifies": "brown Sugar",
+					"phrase": [
+						"Per",
+						"order"
+					]
+				}
+			],
+			"pounds": 0,
+			"price": "15/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 15,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 20 pounds brown Sugar Per order 15/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "03",
+			"account_name": "James Lane Junior",
+			"amount": "2 Sticks",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2 Sticks",
+					"AMT",
+					"CD"
+				],
+				[
+					"Twist",
+					"",
+					"NN"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"John McIntosh",
+					"PERSON",
+					"NNP"
+				],
+				[
+					"1/3",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "27",
+			"debit_or_credit": "Dr",
+			"entry_id": "27",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"27"
+			],
+			"item": "Twist",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Stks [Sticks] Twist [Per] John McIntosh 1/3    June 19th To 1 hh [hank] Shoe thread 1/10 ½",
+			"pennies": 3,
+			"people": [
+				"John McIntosh"
+			],
+			"phrases": [
+				{
+					"modifies": "Twist",
+					"phrase": [
+						"Per",
+						"John McIntosh"
+					]
+				}
+			],
+			"pounds": 0,
+			"price": "1/3",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Sticks Twist Per John McIntosh 1/3",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "03",
+			"account_name": "James Lane Junior",
+			"amount": "1 hank",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 hank",
+					"AMT",
+					"CD"
+				],
+				[
+					"Shoe thread",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"1/10 ½",
+					"COMB.PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "27",
+			"debit_or_credit": "Dr",
+			"entry_id": "27",
+			"farthings": 6,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"27"
+			],
+			"item": "Shoe thread",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Stks [Sticks] Twist [Per] John McIntosh 1/3    June 19th To 1 hh [hank] Shoe thread 1/10 ½",
+			"pennies": 10,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/10 ½",
+			"price_is_combo": true,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 hank Shoe thread 1/10 ½",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Case Lancets",
+					"COMB.NOUN",
+					"NNPS"
+				],
+				[
+					"2/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "28",
+			"farthings": 0,
+			"Final": "Rewrote sugar total for clarity",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"28"
+			],
+			"item": "Case Lancets",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Case Launcet [Lancets] 2/:    1 ¼ yd [yards] ozenbgs [osnaburg] 1/3    28w [pounds] bro: [brown] Sugar at 7d½  <ink>7/6  17/6",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "2/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 2,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Case Lancets 2/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "1.25 yards",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 ¼ yards",
+					"AMT",
+					"CD"
+				],
+				[
+					"osnaburg",
+					"GPE",
+					"NNP"
+				],
+				[
+					"1/3",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "28",
+			"farthings": 0,
+			"Final": "Rewrote sugar total for clarity",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"28"
+			],
+			"item": "osnaburg",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Case Launcet [Lancets] 2/:    1 ¼ yd [yards] ozenbgs [osnaburg] 1/3    28w [pounds] bro: [brown] Sugar at 7d½  <ink>7/6  17/6",
+			"pennies": 3,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/3",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 ¼ yards osnaburg 1/3",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "28 pounds",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"28 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"brown Sugar",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"at",
+					"IS.BULK",
+					"IN"
+				],
+				[
+					"7d½",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "28",
+			"error_context": [
+				[
+					[
+						"To",
+						"TRANS",
+						"IN"
+					],
+					[
+						"28 pounds",
+						"AMT",
+						"CD"
+					],
+					[
+						"brown Sugar",
+						"COMB.NOUN",
+						"NN"
+					],
+					[
+						"at",
+						"IS.BULK",
+						"IN"
+					],
+					[
+						"7d½",
+						"PRICE",
+						"CD"
+					]
+				],
+				[
+					[
+						"To",
+						"TRANS",
+						"IN"
+					],
+					[
+						"28 pounds",
+						"AMT",
+						"CD"
+					],
+					[
+						"brown Sugar",
+						"COMB.NOUN",
+						"NN"
+					],
+					[
+						"at",
+						"IS.BULK",
+						"IN"
+					],
+					[
+						"7d½",
+						"PRICE",
+						"CD"
+					]
+				]
+			],
+			"errors": [
+				"Traceback (most recent call last):\n  File \"/home/admin/shoppingstories-parser/code/api/new_parser/new_parser.py\", line 714, in get_transactions\n    currency = Money(transaction[\"price\"], context=transaction)\n  File \"/home/admin/shoppingstories-parser/code/api/new_parser/british_money.py\", line 68, in __init__\n    raise ValueError(f\"Money parsing failure. This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.\")\nValueError: Money parsing failure. This error should never be raised, panic if it is. It was raised by this: ['7d½'] in context {'amount': '28 pounds', 'amount_is_combo': False, 'item': 'brown Sugar', 'price_is_bulk': True, 'price': '7d½', 'price_is_combo': False, 'phrases': [], 'tobacco_marks': []}. We think unit is ½.\n",
+				"No prices or commodities found in transaction."
+			],
+			"farthings": 6,
+			"Final": "Rewrote sugar total for clarity",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"28"
+			],
+			"item": "brown Sugar",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Case Launcet [Lancets] 2/:    1 ¼ yd [yards] ozenbgs [osnaburg] 1/3    28w [pounds] bro: [brown] Sugar at 7d½  <ink>7/6  17/6",
+			"pennies": 7,
+			"phrases": [],
+			"pounds": 0,
+			"price": "7d ½",
+			"price_is_bulk": true,
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 0,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 28 pounds brown Sugar at 7d½",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"ink7/6",
+					"",
+					"CD"
+				],
+				[
+					"ink7/6",
+					"",
+					"CD"
+				],
+				[
+					"17/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "28",
+			"farthings": 0,
+			"Final": "Rewrote sugar total for clarity",
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"28"
+			],
+			"item": "Currency",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 Case Launcet [Lancets] 2/:    1 ¼ yd [yards] ozenbgs [osnaburg] 1/3    28w [pounds] bro: [brown] Sugar at 7d½  <ink>7/6  17/6",
+			"pennies": 6,
+			"phrases": [],
+			"poss_amounts": [
+				"ink7/6",
+				"ink7/6"
+			],
+			"pounds": 0,
+			"price": "17/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 17,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "ink7/6 ink7/6 17/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "20",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"20",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Panes Window Glass",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"at",
+					"",
+					"IN"
+				],
+				[
+					"9d",
+					"",
+					"CD"
+				],
+				[
+					"15/:",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "29",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"29"
+			],
+			"item": "Panes Window Glass",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 20 Paynes [Panes] Window Glass at 9d  15/:    1 Loaf 12w [pounds] 14 oz [ounces] Single Refind [Refined] Sugar [at] 18d 19/4",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 0,
+			"price": "15/:",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 15,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 20 Panes Window Glass at 9d 15/:",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "14 ounces",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Loaf",
+					"AMT",
+					"CD"
+				],
+				[
+					"12 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"14 ounces",
+					"AMT",
+					"CD"
+				],
+				[
+					"Single Refined Sugar",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"at",
+					"",
+					"IN"
+				],
+				[
+					"18d",
+					"QUANTITY",
+					"CD"
+				],
+				[
+					"19/4",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "29",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"29"
+			],
+			"item": "Single Refined Sugar",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 20 Paynes [Panes] Window Glass at 9d  15/:    1 Loaf 12w [pounds] 14 oz [ounces] Single Refind [Refined] Sugar [at] 18d 19/4",
+			"pennies": 4,
+			"phrases": [],
+			"pounds": 0,
+			"price": "19/4",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 19,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Loaf 12 pounds 14 ounces Single Refined Sugar at 18d 19/4",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "1 Pair",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Pair",
+					"AMT",
+					"CD"
+				],
+				[
+					"Calamanco Shoes",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"7/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "30",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"30"
+			],
+			"item": "Calamanco Shoes",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 [Pair] Callimanco [Calamanco] Shoes 7/6    1 Blaking [Blacking] Ball 1/6",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "7/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 7,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Pair Calamanco Shoes 7/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"amount": "1",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Blacking Ball",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"1/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "01",
+			"debit_or_credit": "Dr",
+			"entry_id": "30",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"30"
+			],
+			"item": "Blacking Ball",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 1 [Pair] Callimanco [Calamanco] Shoes 7/6    1 Blaking [Blacking] Ball 1/6",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price": "1/6",
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 1 Blacking Ball 1/6",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "12",
+			"account_name": "Robert Loyd",
+			"amount": "900",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"House Expenses",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"900",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Bundles Fodder",
+					"COMB.NOUN",
+					"NN"
+				],
+				[
+					"weighing",
+					"NOUN.PHRASE",
+					"IN"
+				],
+				[
+					"846 pounds",
+					"AMT",
+					"CD"
+				],
+				[
+					"at",
+					"IS.BULK",
+					"IN"
+				],
+				[
+					"2/6",
+					"PRICE",
+					"CD"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"Ct",
+					"",
+					"NNP"
+				],
+				[
+					"hundred",
+					"CARDINAL",
+					"CD"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "23",
+			"debit_or_credit": "Cr",
+			"entry_id": "2",
+			"farthings": 0,
+			"Folio Reference": "5",
+			"folio_page": 77,
+			"folio_reference": "5",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"2"
+			],
+			"item": "Bundles Fodder",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"mentions": [
+				"House Expenses",
+				"Ct"
+			],
+			"original_entry": "By House Expences [Expenses] 900 Bundles Fodder wg [weighing] 846w [pounds] a [at] 2/6 [Per] Ct [hundred]",
+			"pennies": 0,
+			"phrases": [],
+			"pounds": 112,
+			"price": "2/6",
+			"price_is_bulk": true,
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 10,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By House Expenses 900 Bundles Fodder weighing 846 pounds at 2/6 Per Ct hundred",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "06",
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cash",
+					"CASH",
+					"NN"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"Wife",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "19",
+			"debit_or_credit": "Cr",
+			"entry_id": "3",
+			"farthings": 0,
+			"Folio Reference": "17",
+			"folio_page": 77,
+			"folio_reference": "17",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"3"
+			],
+			"item": "Currency",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"original_entry": "By Cash [Per] Wife",
+			"pennies": 3,
+			"people": [
+				"Wife"
+			],
+			"phrases": [
+				{
+					"modifies": "Cash",
+					"phrase": [
+						"Per",
+						"Wife"
+					]
+				}
+			],
+			"pounds": 0,
+			"reel": 58,
+			"shillings": 1,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By Cash Per Wife",
+			"tobacco_marks": [],
+			"type": "Cash"
+		},
+		{
+			"_Month": "07",
+			"account_name": "Robert Loyd",
+			"amount": "665",
+			"amount_is_combo": false,
+			"Commodity": "Tobacco",
+			"commodity_totaling_contextless": false,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"1 Hogshead",
+					"AMT",
+					"CD"
+				],
+				[
+					"Tobacco",
+					"ORG",
+					"NNP"
+				],
+				[
+					"Pohick",
+					"TB_LOC",
+					"MLTBE"
+				],
+				[
+					"1049",
+					"TM#",
+					"TMs"
+				],
+				[
+					"RL",
+					"TM.TEXT",
+					"TMs"
+				],
+				[
+					"1",
+					"TB_N",
+					"MLTBE"
+				],
+				[
+					"829",
+					"TB_GW",
+					"MLTBE"
+				],
+				[
+					"102",
+					"TB_TW",
+					"MLTBE"
+				],
+				[
+					"727",
+					"TB_W",
+					"MLTBE"
+				],
+				[
+					"62",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"off",
+					"",
+					"RB"
+				],
+				[
+					"Per",
+					"",
+					"IN"
+				],
+				[
+					"Contra",
+					"ORG",
+					"NNP"
+				],
+				[
+					"665",
+					"TB_FW",
+					"MLTBE"
+				],
+				[
+					"20/:",
+					"PRICE",
+					"MLTBE"
+				],
+				[
+					"Currency",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "08",
+			"debit_or_credit": "Cr",
+			"entry_id": "4",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"4"
+			],
+			"item": "Tobacco",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"mentions": [
+				"Currency",
+				"Contra"
+			],
+			"original_entry": "By 1 Hhgd [Hogshead] Tobacco on Pohick\n[TM: 1049 RL]  N 1  829. .102. .727\n                                                    62  off [Per] Contra\n                                                  665  a [at] 20/: [Currency]",
+			"pennies": 0,
+			"phrases": [
+				{
+					"modifies": "off",
+					"phrase": [
+						"Per",
+						"Contra"
+					]
+				}
+			],
+			"pounds": 6,
+			"price": "20/:",
+			"Quantity": 62,
+			"reel": 58,
+			"shillings": 13,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By 1 Hogshead Tobacco Pohick 1049 RL 1 829 102 727 62 off Per Contra 665 20/: Currency",
+			"tobacco_amount_off": "62",
+			"tobacco_entries": [
+				{
+					"gross_weight": "829",
+					"number": "1",
+					"tare_weight": "102",
+					"weight": "727"
+				}
+			],
+			"tobacco_location": "Pohick",
+			"tobacco_marks": [
+				{
+					"mark_number": "1049",
+					"mark_text": "RL"
+				}
+			]
+		},
+		{
+			"_Month": "07",
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Your",
+					"",
+					"PRP$"
+				],
+				[
+					"Penal Bill",
+					"LAW",
+					"NNP"
+				],
+				[
+					"payable 1st September",
+					"COMB.NOUN",
+					"NNP"
+				],
+				[
+					"next",
+					"DATE",
+					"JJ"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "08",
+			"debit_or_credit": "Cr",
+			"entry_id": "5",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"5"
+			],
+			"item": "payable 1st September",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"mentions": [
+				"Penal Bill"
+			],
+			"original_entry": "By Your Penal Bill payable 1st Septr [September] next",
+			"pennies": 8,
+			"phrases": [],
+			"poss_amounts": [],
+			"pounds": 6,
+			"reel": 58,
+			"shillings": 18,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By Your Penal Bill payable 1st September next",
+			"tobacco_marks": []
+		},
+		{
+			"account_name": "Robert Loyd",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Balance",
+					"",
+					"NN"
+				],
+				[
+					"to",
+					"",
+					"IN"
+				],
+				[
+					"Liber C",
+					"LIBER",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"debit_or_credit": "Cr",
+			"entry_id": "7",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"7"
+			],
+			"item": "Balance",
+			"liber_book": "C",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"original_entry": "By Ballance [Balance] to Liber C",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 6,
+			"reel": 58,
+			"shillings": 18,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By Balance to Liber C",
+			"tobacco_marks": [],
+			"type": "Liber"
+		},
+		{
+			"_Month": "11",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cash",
+					"CASH",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "21",
+			"debit_or_credit": "Cr",
+			"entry_id": "8",
+			"farthings": 6,
+			"Folio Reference": "14",
+			"folio_page": 77,
+			"folio_reference": "14",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"8"
+			],
+			"item": "Currency",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"original_entry": "By Cash",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 1,
+			"reel": 58,
+			"shillings": 8,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By Cash",
+			"tobacco_marks": [],
+			"type": "Cash"
+		},
+		{
+			"_Month": "12",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Cash",
+					"CASH",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "05",
+			"debit_or_credit": "Cr",
+			"entry_id": "9",
+			"farthings": 0,
+			"Folio Reference": "14",
+			"folio_page": 77,
+			"folio_reference": "14",
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"9"
+			],
+			"item": "Currency",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"original_entry": "By Cash",
+			"pennies": 8,
+			"phrases": [],
+			"pounds": 0,
+			"reel": 58,
+			"shillings": 16,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By Cash",
+			"tobacco_marks": [],
+			"type": "Cash"
+		},
+		{
+			"_Month": "09",
+			"account_name": "James Lane Junior",
+			"amount": "1 ",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"John Robertson",
+					"PERSON",
+					"NNP"
+				],
+				[
+					"for",
+					"",
+					"IN"
+				],
+				[
+					"a",
+					"",
+					"DT"
+				],
+				[
+					"hat",
+					"",
+					"NN"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "17",
+			"debit_or_credit": "Cr",
+			"entry_id": "11",
+			"farthings": 0,
+			"Folio Reference": "130",
+			"folio_page": 77,
+			"folio_reference": "130",
+			"folio_year": "1760/1761",
+			"genmat": [
+				1,
+				"11"
+			],
+			"item": "hat",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"original_entry": "By John Robertson for a hat",
+			"pennies": 6,
+			"people": [
+				"John Robertson"
+			],
+			"phrases": [
+				{
+					"modifies": "John Robertson",
+					"phrase": [
+						"for",
+						"a",
+						"hat"
+					]
+				}
+			],
+			"pounds": 0,
+			"reel": 58,
+			"shillings": 10,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By John Robertson for a hat",
+			"tobacco_marks": []
+		},
+		{
+			"_Month": "09",
+			"account_name": "James Lane Junior",
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"By",
+					"TRANS",
+					"IN"
+				],
+				[
+					"Balance",
+					"",
+					"NN"
+				],
+				[
+					"to",
+					"",
+					"IN"
+				],
+				[
+					"Liber C",
+					"LIBER",
+					"NNP"
+				]
+			],
+			"currency_colony": "Virginia",
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1761",
+			"Day": "17",
+			"debit_or_credit": "Cr",
+			"entry_id": "12",
+			"farthings": 6,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"12"
+			],
+			"item": "Balance",
+			"liber_book": "C",
+			"Marginalia": "Colchester 1760..61 [top center]",
+			"original_entry": "By Ballance [Balance] to Liber C",
+			"pennies": 10,
+			"phrases": [],
+			"pounds": 11,
+			"reel": 58,
+			"shillings": 0,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "By Balance to Liber C",
+			"tobacco_marks": [],
+			"type": "Liber"
+		}
+	]
+}

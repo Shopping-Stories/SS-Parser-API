@@ -255,7 +255,7 @@ def _make_db_entry(parsed_entry: ParserOutput):
             del parsed_entry[key]
 
         if "errors" in parsed_entry:
-            return Message(message="Errors were present in entry and as such the entry was not inserted.")
+            return f"Errors were present in entry: {parsed_entry} and as such the entry was not inserted."
 
         # main
         # ensure that keys exist, then create relationships
@@ -311,6 +311,40 @@ def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
     return Message(message=f"Successfully inserted entry. New entry has id {test_id}")
     
 
+@router.get("/test_create_entries", tags=["Database Management"], response_model=Message)
+def test_insert_entries(background_tasks: BackgroundTasks):
+    """
+    Creates multiple new database entries from a list of parser output entries.
+    Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
+    """
+    new_entries = ["nothing"]
+    file = open(join(dirname(__file__), "crap.json"), 'r')
+    data = load(file)
+    file.close()
+    parsed_entry = POutputList.parse_obj(data)
+    try:
+        new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
+    except Exception as e:
+        return Message(message="ERROR: " + format_exc(), error=True)
+
+    # If any errors present, return error.
+    if any([isinstance(x, str) for x in new_entries]):
+        return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
+
+    print([x for x in new_entries if not isinstance(x, dict)])
+
+    try:
+        # Add all to database
+        result = entries_collection.insert_many(new_entries)
+        # Create search terms for new entries
+        background_tasks.add_task(createMetasForEntries, result.inserted_ids)
+    except Exception as e:
+        # Return any errors that may happen
+        return Message(message="ERROR: " + format_exc(), error=True)
+    
+    # If nothing went wrong, return successful message.
+    return Message(message="Successfully inserted entries.")
+
 @router.post("/create_entries/", tags=["Database Management"], response_model=Message)
 def insert_parsed_entries(parsed_entry: POutputList, background_tasks: BackgroundTasks):
     """
@@ -321,7 +355,7 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     try:
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
     except Exception as e:
-        return Message(message="ERROR: " + format_exc, error=True)
+        return Message(message="ERROR: " + format_exc(), error=True)
 
     # If any errors present, return error.
     if any([isinstance(x, str) for x in new_entries]):
@@ -334,7 +368,7 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
         background_tasks.add_task(createMetasForEntries, result.inserted_ids)
     except Exception as e:
         # Return any errors that may happen
-        return Message(message="ERROR: " + format_exc, error=True)
+        return Message(message="ERROR: " + format_exc(), error=True)
     
     # If nothing went wrong, return successful message.
     return Message(message="Successfully inserted entries.")
