@@ -113,7 +113,6 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
         if not row_context["commodity_totaling_contextless"]:
             total_commodity = sum([x["Quantity"] for x in transactions[:-1] if not x["commodity_totaling_contextless"] and "errors" not in x])
 
-            # TODO: If we have multiple commodities, total each individually, probably does not happen due to setup of spreadsheet
             if total_commodity != row_context["Quantity"]:
                 # Add error if commodity totaling fails
                 endl = "\n"
@@ -243,19 +242,6 @@ def get_transactions(df: pd.DataFrame):
             if break_transactions:
                 break_counter += 1
             transactions.append(transaction)
-
-        # TODO: Ignore tobacco mark rows and column total rows for now, delete this later
-        # elif "TM" in get_col(row, "Entry") or search(r"\sN\s\d", get_col(row, "Entry")):
-        #     add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
-        #     transaction = {}
-        #     add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
-        #     trans_in_row_counter += 1
-        #     # Break the transaction list when the account holder changes if a total has not occurred.
-        #     if transactions and "account_name" in transaction and "account_name" in transactions[-1] and transaction["account_name"] != transactions[-1]["account_name"]:
-        #         break_transactions = True
-        #     if break_transactions:
-        #         break_counter += 1
-        #     transactions.append(transaction)
         
         # If row has a good entry
         else:
@@ -482,7 +468,6 @@ def get_transactions(df: pd.DataFrame):
                                     # If there is a per phrase in the noun, split it out.
                                     if search(r"\s+Per\s+", transaction["item"]):
                                         transaction["item"] = split(r"\s+Per\s+", transaction["item"])[0]
-                                        # TODO: Add the per to phrases if it is not already in there here.
 
                         # If the preprocesser thinks we have an interjection but it is in the item set, it is probably the item
                         elif "UH" in pos and word.lower() in item_set:
@@ -529,8 +514,7 @@ def get_transactions(df: pd.DataFrame):
                         
                         # When we see nouns that are the object of phrases, only mark them as the item if the phrase starts with "for" or "of"
                         # as those are likely to be telling us what the transaction is FOR (of is often inside for e.g. for <verb gerund> of <item>) where verb gerund is like making or storing, etc.
-                        # Only do this if the item is in the object index, though, as it might be a person.
-                        # TODO: Test the results of using isNoun() instead of using NN in pos 
+                        # Only do this if the item is in the object index, though, as it might be a person. 
                         elif "NN" in pos and phrase_depth > 0:
                             phrase_depth -= 1
                             nouns.append((word, info, pos))
@@ -1032,8 +1016,9 @@ def parse(df: pd.DataFrame):
                     # print("Ster sums: ")
                     # print(valid_sterling_sums)
                     # print()
-                    raise OSError("blah")
+                    raise OSError("Intentional error that shouldn't be raised by anything else in this code block")
             
+            # OSError is our shorthand for when we cannot figure out which items are sterling and which are currency
             except OSError:
                 for index in indices:
                     if "tobacco_entries" in toOut[index] and toOut[index]["tobacco_entries"]:
@@ -1043,6 +1028,7 @@ def parse(df: pd.DataFrame):
                     else:
                         toOut[index]["errors"] = ["Failed to separate sterling from currency.", ]
             
+            # Don't backsolve when only 1 entry
             except AssertionError:
                 pass
 
@@ -1134,8 +1120,6 @@ if __name__ == "__main__":
 
 # Known issues: 
 # By [entity that is not an item] does not work, often assumes the person is an item, but is not consistent. We need some way to classify if it is a person or entity vs if it is an item. Try: if there are no quantities or determiners it is person/entity, this issue largely fixed by object index - low priority
-# Amount words are handled inconsistently e.g. gallon, pounds are sometimes combined with the item and sometimes combined with the amount. We want them to always be combined with the amount. Fixable by making a list of all of them - high priority
 # Not making good use of when ent_type_ = ORG - lowest priority
 # Make a second pass on transactions in which the item is followed by a phrase and get them to work better - mostly fixed by adding modifies to phrases - lowest priority
-# Does not support tobacco in transaction rather than in quantity/commodity columns - high priority
 # TODO: Fix parsing of solo unicode fraction in d parameter in Money class
