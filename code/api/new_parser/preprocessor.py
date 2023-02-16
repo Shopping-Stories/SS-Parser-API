@@ -202,9 +202,18 @@ def preprocess(df: pd.DataFrame):
         # Replace 1w with 1 w and 1M with 1 M and so on
         big_entry = sub(r"(?<=\s)\d+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
-        # If we see tobacco notes, remove spaces so we don't split entry.
+        # If we see tobacco notes... 
         if search(r"N\s+\d+\s+\d+", big_entry):
+            # If we a have a bunch of these, make sure something looking like a tobacco entry at the end of the string cannot be seen later as a tobacco entry (the final line is guaranteed to not have a tobacco entry in it)
+            # (we do this via inserting a comma between the numbers so later regexes cannot match)
+            if big_entry.count("\n") > 2:
+                big_entry = sub(r"(\d+)[^\S\n\r]+(\d+)(([^\S\n\r]?[\S][^\S\n\r]?)+)\Z", lambda x: f"{x.group(1)}, {x.group(2)}{x.group(3)}", big_entry)
+            
+            # remove spaces so we don't split entry.
             big_entry = sub(r"\s+", " ", big_entry)
+            
+            # Add Ns in front of all tobacco notes
+            big_entry = sub(r"(N\s+)?(\d+)\s(\d+)\s(?!$)", lambda x: f"N {x.group(2)} {x.group(3)} ", big_entry)
 
         # Remove mini subtotals
         big_entry = sub(r"[\u00a3]?\s?(\d+)?\s?\.\.\s?\d+\s?\.\.\s?\d+\s?[\u00BC-\u00BE\u2150-\u215E]?", " ", big_entry)
@@ -356,6 +365,9 @@ def preprocess(df: pd.DataFrame):
                 elif prev_token is not None and prev_token[2] == "SLTBE":
                     if prev_token[0] == "":
                         combine_tok_with_prev(new_entry, token, space=False)
+                    elif prev_token[0].lower() == "for":
+                        # Ignore the word for in these
+                        pass
                     else:
                         if next_token is not None and next_token.text in ["pound", "pounds"]:
                             combine_tok_with_prev(new_entry, token)

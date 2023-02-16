@@ -199,7 +199,7 @@ class Money:
             return self.get_lsdf()[3]
         else:
             raise KeyError(f"Error: Key {key} is an invalid money term")
- 
+
     def __getitem__(self, key: str):
         return self.__getattr__(key)
 

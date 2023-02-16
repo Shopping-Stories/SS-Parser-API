@@ -90,9 +90,9 @@ def _remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
                     add_error(row_context, "Error: Quantity parsing failed in: " + str(e), get_col(row, "Entry"))
             elif entry_name == "Marginalia":
                 # Marginalia sometimes has funky spacing so remove that
-                row_context[entry_name] = get_col(row, entry_name).strip()
+                row_context[entry_name] = str(get_col(row, entry_name)).strip()
             else:
-                row_context[entry_name] = get_col(row, entry_name).strip("[]")
+                row_context[entry_name] = str(get_col(row, entry_name)).strip("[]")
 
 # Checks Commodity and Currency totaling on lists of transactions ended by [Total]
 # Writes down an error in the [Total] transaction if totals don't add up.
@@ -612,7 +612,7 @@ def get_transactions(df: pd.DataFrame):
                                 poss_amounts.append(word)
                         
                         # If we see \d+ off in a tobacco transaction mark it as an amount off
-                        elif word.lower() == "off" and "item" in transaction and ("Tobacco" in transaction["item"].lower() or "tobacco" in row_context["Commodity"].lower()) and prev_word is not None and prev_word.isnumeric():
+                        elif word.lower() == "off" and "item" in transaction and ("Tobacco" in transaction["item"].lower() or ("Commodity" in row_context and "tobacco" in row_context["Commodity"].lower())) and prev_word is not None and prev_word.isnumeric():
                             transaction["tobacco_amount_off"] = prev_word
 
                         # If we see a preposition that is not telling us the transaction type, mark the start of a phrase
@@ -807,6 +807,7 @@ def get_transactions(df: pd.DataFrame):
                 transactions[-1]["pounds_ster"] = currency["pounds"]
                 transactions[-1]["shillings_ster"] = currency["shillings"]
                 transactions[-1]["pennies_ster"] = currency["pennies"]
+                transactions[-1]["farthings_ster"] = currency["farthings"]
                 transactions[-1]["money_obj_ster"] = currency
             
             # If just sterling
@@ -952,8 +953,9 @@ def _clean_pass(entry: dict):
     if "Folio Reference" in entry:
         entry["folio_reference"] = entry["Folio Reference"]
 
-    if "currency_colony" in entry and entry["currency_colony"] == "-":
-        entry["currency_colony"] = "Unknown"
+    if "currency_colony" in entry:
+        if entry["currency_colony"] == "-" or (entry["currency_colony"] != entry["currency_colony"]):
+            entry["currency_colony"] = "Unknown"
 
     return entry
 

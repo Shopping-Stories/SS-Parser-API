@@ -81,23 +81,27 @@ def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str,
         # Allow prices to be followed by per [person] or price per [person]
         if app_until_to_by:
             if word in {"To", "By"} or info == "DATE":
-                cur_entry.append((word, info, pos))
                 app_until_to_by = False
             elif info == "PERSON":
+                if cur_entry:
+                    cur_entry.pop()
                 found_trans[-1].append((word, info, pos))
                 app_until_to_by = False
             else:
+                if cur_entry:
+                    cur_entry.pop()
                 found_trans[-1].append((word, info, pos))
 
         if found_price_last and (word.lower() in {"per", "[per]"} or info == "PRICE"):
             if info == "PRICE":
                 found_trans[-1].append((word, info, pos))
             app_until_to_by = True
+            if cur_entry:
+                cur_entry.pop()
             found_trans[-1].append((word, info, pos))
         
         elif found_price_last:
             found_price_last = False
-            cur_entry.append((word, info, pos))
 
         if info == "PRICE" and found_noun_last:
             found_noun_last = False
@@ -143,14 +147,20 @@ def add_error(map, error, error_context):
 # Column names include: "L Currency", "L Sterling", "Colony Currency", "Folio Year", "EntryID", etc.
 def get_col(df, colname: str):
         colname2 = colname[:]
+        colname3 = colname + " "
         if colname2[0] != "[":
             colname2 = "[" + colname2 + "]"
         else:
             colname2 = colname.strip("[]")
+        colname4 = colname2 + " "
         if colname2 in df:
             return df[colname2]
         elif colname in df:
             return df[colname]
+        elif colname3 in df:
+            return df[colname3]
+        elif colname4 in df:
+            return df[colname4]
         else:
             if colname == "Folio Year":
                 if "Year" in df:
@@ -187,14 +197,20 @@ def get_col(df, colname: str):
 # Column names include: "L Currency", "L Sterling", "Colony Currency", "Folio Year", "EntryID", etc.
 def get_col_name(df, colname: str):
         colname2 = colname[:]
+        colname3 = colname + " "
         if colname2[0] != "[":
             colname2 = "[" + colname2 + "]"
         else:
             colname2 = colname.strip("[]")
+        colname4 = colname2 + " "
         if colname2 in df:
             return colname2
         elif colname in df:
             return colname
+        elif colname3 in df:
+            return colname3
+        elif colname4 in df:
+            return colname4
         else:
             if colname == "Folio Year":
                 if "Year" in df:
