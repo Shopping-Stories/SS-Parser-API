@@ -39,6 +39,7 @@ def _setup_row_currency(row_context: dict, row, entries, transactions_context: d
         row_context["pounds"] = get_col(row, "L Currency")
         row_context["shillings"] = get_col(row, "s Currency")
         row_context["pennies"] = get_col(row, "d Currency")
+        row_context["farthings"] = 0
         try:
             row_context["money_obj"] = Money(l=row_context["pounds"], s=row_context["shillings"], d=row_context["pennies"])
             row_context["farthings"] = row_context["money_obj"]["f"]
@@ -62,6 +63,7 @@ def _setup_row_currency(row_context: dict, row, entries, transactions_context: d
         row_context["pounds_ster"] = get_col(row, "L Sterling")
         row_context["shillings_ster"] = get_col(row, "s Sterling")
         row_context["pennies_ster"] = get_col(row, "d Sterling")
+        row_context["farthings_ster"] = 0
         try:
             row_context["money_obj_ster"] = Money(l=row_context["pounds_ster"], s=row_context["shillings_ster"], d=row_context["pennies_ster"], context=entries)
             row_context["farthings_ster"] = row_context["money_obj_ster"]["f"]
