@@ -173,6 +173,10 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
                 parsed_entry[key] = 0
             else:
                 parsed_entry[key] = ""
+        
+        if key == "entry_id" and parsed_entry["entry_id"].endswith(".0"):
+            parsed_entry["entry_id"] = parsed_entry["entry_id"].removesuffix(".0")
+        
         if key.endswith("_ster"):
             nk = key.replace("_ster", "")
             object.update({nk: parsed_entry[key]})

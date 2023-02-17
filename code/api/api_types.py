@@ -67,6 +67,7 @@ class DatabaseEntry(BaseModel):
     people: Optional[List[str]]
     accountHolderID: Optional[str]
     entryID: Optional[str] = Field(alias="_id")
+    entry_id: Optional[str]
     tobacco_marks: Optional[List[TobaccoMark]]
     tobacco_location: Optional[str]
     tobacco_amount_off: Optional[str]
@@ -123,6 +124,7 @@ class ParserOutput(BaseModel):
     tobacco_marks: Optional[List[TobaccoMark]]
     tobacco_location: Optional[str]
     tobacco_entries: Optional[List[TobaccoEntry]]
+    tobacco_amount_off: Optional[str]
 
 class EntryList(BaseModel):
     entries: List[DatabaseEntry]
