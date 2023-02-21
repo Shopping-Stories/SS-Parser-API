@@ -358,7 +358,7 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     try:
         alreadyFound = set()
         def checkDuplicates(entry):
-            if "hash" in entry:
+            if "hash" in entry and type(entry) is not str:
                 if entry["hash"] in alreadyFound:
                     return f"ERROR: Entry with hash {entry['hash']} already being inserted. Not inserting same entry twice."
                 else:
@@ -366,7 +366,7 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
                     print(alreadyFound)
                     return entry
             else:
-                return f"ERROR: Could not hash entry {entry}."
+                return f"ERROR: Could not hash entry, or other error occured... {entry}."
         
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
         new_entries = [checkDuplicates(x) for x in new_entries]
