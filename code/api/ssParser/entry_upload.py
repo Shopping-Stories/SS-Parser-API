@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 from json import load
 from os import listdir
 from os.path import join, dirname
+from json import dumps
+from json import JSONEncoder 
+import hashlib
 from ..fuzzysearch import createMetasForEntries
 
 # add collections
@@ -92,6 +95,10 @@ class ItemInput(BaseModel):
 class PeopleInput(BaseModel):
     name: Optional[str]
     related: Optional[List[str]]
+
+class HashEncoder(JSONEncoder): 
+        def default(self, o):
+            return o.__dict__
 
 router = APIRouter()
 
@@ -245,6 +252,12 @@ def _create_item_to_item_rel(parsed_entry: Dict[str, Any]):
             item_collection.update_one({'_id': parsed_entry["itemID"]}, {'$push': {'related': item["_id"]}}) 
 
 
+# hashes parsed_entry and adds value to entry, done so that we do not insert duplicate database entries
+def hash_entry(parsed_entry: Dict[str, Any]):
+    entry_dumps = dumps(parsed_entry, cls=HashEncoder)
+    entry_hash = hashlib.sha256(entry_dumps.encode()).hexdigest()
+    parsed_entry.update({"hash": entry_hash})
+
 # Helper function to make database formatted entries
 def _make_db_entry(parsed_entry: ParserOutput):
     parsed_entry = parsed_entry.dict()
@@ -262,6 +275,12 @@ def _make_db_entry(parsed_entry: ParserOutput):
             return f"Errors were present in entry: {parsed_entry} and as such the entry was not inserted."
 
         # main
+        # hashes entry and checks db for matching hash to ensure that it is unique
+        hash_entry(parsed_entry) 
+        if "hash" in parsed_entry: 
+            if entries_collection.find_one({'hash': parsed_entry['hash']}):
+                return f"ERROR: duplicate entry {parsed_entry}, entry was not inserted."
+
         # ensure that keys exist, then create relationships
         if "account_name" in parsed_entry:
             _create_account_holder_rel(parsed_entry)
@@ -295,7 +314,6 @@ def _make_db_entry(parsed_entry: ParserOutput):
     except Exception as e:
         return "ERROR: " + format_exc()
 
-# TODO: Ignore duplicates when inserting
 @router.post("/create_entry/", tags=["Database Management"], response_model=Message)
 def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
     """
@@ -326,28 +344,9 @@ def test_insert_entries(background_tasks: BackgroundTasks):
     data = load(file)
     file.close()
     parsed_entry = POutputList.parse_obj(data)
-    try:
-        new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
-    except Exception as e:
-        return Message(message="ERROR: " + format_exc(), error=True)
-
-    # If any errors present, return error.
-    if any([isinstance(x, str) for x in new_entries]):
-        return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
-
-    print([x for x in new_entries if not isinstance(x, dict)])
-
-    try:
-        # Add all to database
-        result = entries_collection.insert_many(new_entries)
-        # Create search terms for new entries
-        background_tasks.add_task(createMetasForEntries, result.inserted_ids)
-    except Exception as e:
-        # Return any errors that may happen
-        return Message(message="ERROR: " + format_exc(), error=True)
     
     # If nothing went wrong, return successful message.
-    return Message(message="Successfully inserted entries.")
+    return insert_parsed_entries(parsed_entry, background_tasks)
 
 @router.post("/create_entries/", tags=["Database Management"], response_model=Message)
 def insert_parsed_entries(parsed_entry: POutputList, background_tasks: BackgroundTasks):
@@ -357,7 +356,20 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     """
     new_entries = ["nothing"]
     try:
+        alreadyFound = set()
+        def checkDuplicates(entry):
+            if "hash" in entry:
+                if entry["hash"] in alreadyFound:
+                    return f"ERROR: Entry with hash {entry['hash']} already being inserted. Not inserting same entry twice."
+                else:
+                    alreadyFound.add(entry["hash"])
+                    print(alreadyFound)
+                    return entry
+            else:
+                return f"ERROR: Could not hash entry {entry}."
+        
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
+        new_entries = [checkDuplicates(x) for x in new_entries]
     except Exception as e:
         return Message(message="ERROR: " + format_exc(), error=True)
 
@@ -551,13 +563,6 @@ def add_relationship(person1_name: str, person2_name: str):
 
     return Message(message="Successfully added relationship.")
 
-
-#@router.post("/hash/", tags=["Database Management"], response_model=Message)
-#def hashing(doc: ParserOutput):
-
-    #print(hash(doc))
-
-# print(test_id) # prints entryID to terminal
 
 # NEED
 # tobaccoMarks relationship
