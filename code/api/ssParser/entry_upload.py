@@ -1,7 +1,7 @@
 from .database import db
 from bson.objectid import ObjectId
 from traceback import format_exc
-from ..api_types import Message
+from ..api_types import Message, ParserOutput
 from typing import List, Dict, Any, Optional, Union
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel, Field
@@ -11,6 +11,7 @@ from os.path import join, dirname
 from json import dumps
 from json import JSONEncoder 
 import hashlib
+from ..fuzzysearch import createMetasForEntries
 
 # add collections
 entries_collection = db.entries
@@ -83,47 +84,6 @@ if __name__ == "__main__":
         "Quantity": 35
     }
 
-# Definition of what parser returns
-
-class ParserOutput(BaseModel):
-    errors: Optional[List[str]]
-    error_context: Optional[List[List[Union[str, List[str]]]]]
-    amount: Optional[str]
-    amount_is_combo: Optional[bool]
-    item: Optional[str]
-    price: Optional[str]
-    price_is_combo: Optional[bool]
-    phrases: Optional[List[Dict[str, Union[str, List[str]]]]]
-    date: Optional[str]
-    pounds: Optional[int]
-    pounds_ster: Optional[int]
-    shillings: Optional[int]
-    shillings_ster: Optional[int]
-    pennies_ster: Optional[int]
-    pennies: Optional[int]
-    farthings_ster: Optional[int]
-    Marginalia: Optional[str]
-    farthings: Optional[int]
-    currency_type: Optional[str]
-    currency_totaling_contextless: Optional[bool]
-    commodity_totaling_contextless: Optional[bool]
-    account_name: Optional[str]
-    reel: Optional[int]
-    store_owner: Optional[str]
-    folio_year: Optional[str]
-    folio_page: Optional[int]
-    entry_id: Optional[str]
-    date_year: Optional[str] = Field(alias="Date Year")
-    month: Optional[str] = Field(alias="_Month")
-    Day: Optional[str]
-    debit_or_credit: Optional[str]
-    context: Optional[List[List[str]]]
-    Quantity: Optional[str]
-    Commodity: Optional[str]
-    people: Optional[List[str]]
-    type: Optional[str]
-    liber_book: Optional[str]
-    mentions: Optional[List[str]]
 
 class POutputList(BaseModel):
     entries: List[ParserOutput]
@@ -206,6 +166,7 @@ def _create_people_rel(parsed_entry: Dict[str, Any]):
 # puts specified values (keys) into an object by name new_key together for entries
 # what can go wrong: if input does not contain all keys
 def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
+    # if new_key != "sterling":
     for key in keys:
         if key not in parsed_entry:
             # print("does not contain all keys\n")
@@ -214,6 +175,15 @@ def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
     object: Dict[str, Any] = dict.fromkeys(keys)
 
     for key in keys:
+        if key not in parsed_entry:
+            if new_key == "sterling" or new_key == "currency":
+                parsed_entry[key] = 0
+            else:
+                parsed_entry[key] = ""
+        
+        if key == "entry_id" and parsed_entry["entry_id"].endswith(".0"):
+            parsed_entry["entry_id"] = parsed_entry["entry_id"].removesuffix(".0")
+        
         if key.endswith("_ster"):
             nk = key.replace("_ster", "")
             object.update({nk: parsed_entry[key]})
@@ -282,7 +252,7 @@ def _create_item_to_item_rel(parsed_entry: Dict[str, Any]):
             item_collection.update_one({'_id': parsed_entry["itemID"]}, {'$push': {'related': item["_id"]}}) 
 
 
-# hashes parsed_entry and adds value to entry 
+# hashes parsed_entry and adds value to entry, done so that we do not insert duplicate database entries
 def hash_entry(parsed_entry: Dict[str, Any]):
     entry_dumps = dumps(parsed_entry, cls=HashEncoder)
     entry_hash = hashlib.sha256(entry_dumps.encode()).hexdigest()
@@ -302,14 +272,14 @@ def _make_db_entry(parsed_entry: ParserOutput):
             del parsed_entry[key]
 
         if "errors" in parsed_entry:
-            return Message(message="Errors were present in entry and as such the entry was not inserted.")
+            return f"Errors were present in entry: {parsed_entry} and as such the entry was not inserted."
 
         # main
         # hashes entry and checks db for matching hash to ensure that it is unique
         hash_entry(parsed_entry) 
         if "hash" in parsed_entry: 
             if entries_collection.find_one({'hash': parsed_entry['hash']}):
-                return Message(message="ERROR: duplicate entry, entry was not inserted.")
+                return f"ERROR: duplicate entry {parsed_entry}, entry was not inserted."
 
         # ensure that keys exist, then create relationships
         if "account_name" in parsed_entry:
@@ -332,7 +302,7 @@ def _make_db_entry(parsed_entry: ParserOutput):
         # define keys, change key values to change which variables are grouped
         # what can go wrong: will not create object if not all specified keys are in the input
         currency_keys = ["pounds", "shillings", "pennies", "farthings"]
-        sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster"]
+        sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster", "farthings_ster"]
         ledger_keys = ["reel", "folio_year", "folio_page", "entry_id"]
 
         _create_object(parsed_entry, currency_keys, "currency")
@@ -344,7 +314,6 @@ def _make_db_entry(parsed_entry: ParserOutput):
     except Exception as e:
         return "ERROR: " + format_exc()
 
-# TODO: Ignore duplicates when inserting
 @router.post("/create_entry/", tags=["Database Management"], response_model=Message)
 def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
     """
@@ -364,14 +333,46 @@ def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
     return Message(message=f"Successfully inserted entry. New entry has id {test_id}")
     
 
+@router.get("/test_create_entries", tags=["Database Management"], response_model=Message)
+def test_insert_entries(background_tasks: BackgroundTasks):
+    """
+    Creates multiple new database entries from a list of parser output entries.
+    Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
+    """
+    new_entries = ["nothing"]
+    file = open(join(dirname(__file__), "crap.json"), 'r')
+    data = load(file)
+    file.close()
+    parsed_entry = POutputList.parse_obj(data)
+    
+    # If nothing went wrong, return successful message.
+    return insert_parsed_entries(parsed_entry, background_tasks)
+
 @router.post("/create_entries/", tags=["Database Management"], response_model=Message)
 def insert_parsed_entries(parsed_entry: POutputList, background_tasks: BackgroundTasks):
     """
     Creates multiple new database entries from a list of parser output entries.
     Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
     """
-    new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
-    
+    new_entries = ["nothing"]
+    try:
+        alreadyFound = set()
+        def checkDuplicates(entry):
+            if "hash" in entry:
+                if entry["hash"] in alreadyFound:
+                    return f"ERROR: Entry with hash {entry['hash']} already being inserted. Not inserting same entry twice."
+                else:
+                    alreadyFound.add(entry["hash"])
+                    print(alreadyFound)
+                    return entry
+            else:
+                return f"ERROR: Could not hash entry {entry}."
+        
+        new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
+        new_entries = [checkDuplicates(x) for x in new_entries]
+    except Exception as e:
+        return Message(message="ERROR: " + format_exc(), error=True)
+
     # If any errors present, return error.
     if any([isinstance(x, str) for x in new_entries]):
         return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
@@ -379,9 +380,11 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     try:
         # Add all to database
         result = entries_collection.insert_many(new_entries)
+        # Create search terms for new entries
+        background_tasks.add_task(createMetasForEntries, result.inserted_ids)
     except Exception as e:
         # Return any errors that may happen
-        return Message(message="ERROR: " + format_exc, error=True)
+        return Message(message="ERROR: " + format_exc(), error=True)
     
     # If nothing went wrong, return successful message.
     return Message(message="Successfully inserted entries.")
