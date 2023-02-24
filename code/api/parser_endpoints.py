@@ -1,16 +1,18 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends
 from boto3 import client
 from io import BytesIO
 from .api_types import *
 from .new_parser.parser_manager import start_parse, check_progress
 from .new_parser.new_parser import parse_file_and_dump, parse_folder
+from .cognito_auth import auth
 import traceback
 from base64 import b64decode
+from fastapi_cloudauth.verification import Operator
 
 router = APIRouter()
 
 @router.post("/upload_and_parse_single/", tags=["Parser Management"], response_model=Message)
-def upload_file_and_parse(inc_file: IncomingFile, bg_tasks: BackgroundTasks) -> Message:
+def upload_file_and_parse(inc_file: IncomingFile, bg_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> Message:
     """
     Uploads bytes data from data into s3 bucket as filename name. File is assumed to be base64 encoded.
     """
@@ -34,7 +36,7 @@ def upload_file_and_parse(inc_file: IncomingFile, bg_tasks: BackgroundTasks) -> 
     return Message(message="Successfully uploaded file to s3.")
 
 @router.post("/upload_and_parse_multi/", tags=["Parser Management"], response_model=FailedFiles)
-def upload_files_and_parse(inc_files: IncomingFiles, bg_tasks: BackgroundTasks) -> FailedFiles:
+def upload_files_and_parse(inc_files: IncomingFiles, bg_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> FailedFiles:
     """
     Uploads multiple files into s3 and queues a parse. Slightly more efficient for batch uploads. Returns a list of all files for which the upload failed.
     File data is assumed to be base64 encoded.
@@ -65,7 +67,7 @@ def upload_files_and_parse(inc_files: IncomingFiles, bg_tasks: BackgroundTasks) 
 
 
 @router.get("/upload_and_parse_debug/{name}", tags=["Parser Management"], response_model=Message)
-def debug_upload_file_and_parse(name: str, bg_tasks: BackgroundTasks) -> Message:
+def debug_upload_file_and_parse(name: str, bg_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> Message:
     """
     Uploads test data as a file and attempts to download it.
     """
@@ -88,7 +90,7 @@ def debug_upload_file_and_parse(name: str, bg_tasks: BackgroundTasks) -> Message
     return Message(message="Successfully uploaded file to s3.")
 
 @router.get("/test_parser", tags=["Parser Management"], response_model=Message)
-def test_parsing(bg_tasks: BackgroundTasks) -> Message:
+def test_parsing(bg_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> Message:
     """
     Tests parser on a hardcoded file for dev purposes.
     """
@@ -99,7 +101,7 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     return Message(message="Started parser.")
 
 @router.post("/upload/", tags=["Parser Management"], response_model=Message)
-def upload_file(inc_file: IncomingFile) -> Message:
+def upload_file(inc_file: IncomingFile, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> Message:
     """
     Uploads bytes data from data into s3 bucket as filename name. File is assumed to be base64 encoded.
     """
@@ -131,7 +133,7 @@ def get_status():
 
 
 @router.get("/queue_parse", tags=["Parser Management"], response_model=Message)
-def queue_parse(bg_tasks: BackgroundTasks) -> Message:
+def queue_parse(bg_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> Message:
     """
     Queues a parse of files already in the staging area (i.e. uploaded via upload_file).
     This should not usually need to be called, only in case of files sticking in the staging area for some reason (e.g. error) or in case of using upload_file.

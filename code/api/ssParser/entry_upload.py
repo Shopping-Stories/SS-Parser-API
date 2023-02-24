@@ -2,13 +2,15 @@ from .database import db
 from bson.objectid import ObjectId
 from traceback import format_exc
 from ..api_types import Message, ParserOutput
+from ..fuzzysearch import createMetasForEntries
+from ..cognito_auth import auth
 from typing import List, Dict, Any, Optional, Union
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi_cloudauth.verification import Operator
 from pydantic import BaseModel, Field
 from json import load
 from os import listdir
 from os.path import join, dirname
-from ..fuzzysearch import createMetasForEntries
 
 # add collections
 entries_collection = db.entries
@@ -297,7 +299,7 @@ def _make_db_entry(parsed_entry: ParserOutput):
 
 # TODO: Ignore duplicates when inserting
 @router.post("/create_entry/", tags=["Database Management"], response_model=Message)
-def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
+def insert_parsed_entry(parsed_entry: ParserOutput, many=False, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Creates a new database entry from the parser output.
     Sets error flag and has ERROR at the front of the message if any errors occur.
@@ -316,7 +318,7 @@ def insert_parsed_entry(parsed_entry: ParserOutput, many=False):
     
 
 @router.get("/test_create_entries", tags=["Database Management"], response_model=Message)
-def test_insert_entries(background_tasks: BackgroundTasks):
+def test_insert_entries(background_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Creates multiple new database entries from a list of parser output entries.
     Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
@@ -350,7 +352,7 @@ def test_insert_entries(background_tasks: BackgroundTasks):
     return Message(message="Successfully inserted entries.")
 
 @router.post("/create_entries/", tags=["Database Management"], response_model=Message)
-def insert_parsed_entries(parsed_entry: POutputList, background_tasks: BackgroundTasks):
+def insert_parsed_entries(parsed_entry: POutputList, background_tasks: BackgroundTasks, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Creates multiple new database entries from a list of parser output entries.
     Can return errors. If this happens, the database is guaranteed to not be updated with any of the new data.
@@ -394,7 +396,7 @@ def parse_file_exclude_errors(filename):
 
 
 @router.get("/upload_example_data", tags=["Parser Management"], response_model=Message)
-def parse_folder_exclude_errors():
+def parse_folder_exclude_errors(dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     folder = join(dirname(__file__), "outs")
     files = listdir(folder)
     for file in files:
@@ -406,7 +408,7 @@ def parse_folder_exclude_errors():
 
 
 @router.post("/delete_entry/", tags=["Database Management"], response_model=Message)
-def remove_entry(entry_id: str):
+def remove_entry(entry_id: str, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Removes a specified entry from the database (specified by ID).
     Sets error flag and has ERROR at the front of the message if any errors occur.
@@ -420,7 +422,7 @@ def remove_entry(entry_id: str):
 
 
 @router.post("/edit_entry/", tags=["Database Management"], response_model=Message)
-def edit_entry(entry_id: str, new_values: ParserOutput):
+def edit_entry(entry_id: str, new_values: ParserOutput, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Edits an entry (specified by ID) in the database, intakes edited data in parser output format. 
     Sets error flag and has ERROR at the front of the message if any errors occur. 
@@ -466,7 +468,7 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
     
 
 @router.post("/edit_item/", tags=["Database Management"], response_model=Message)
-def edit_item(item_id: str, new_values: ItemInput):
+def edit_item(item_id: str, new_values: ItemInput, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Edits an item (specified by ID) in the database.
     Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
@@ -492,7 +494,7 @@ def edit_item(item_id: str, new_values: ItemInput):
 
 
 @router.post("/edit_person/", tags=["Database Management"], response_model=Message)
-def edit_person(person_id: str, new_values: PeopleInput):
+def edit_person(person_id: str, new_values: PeopleInput, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Edits a person (specified by ID) in the database.
     Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
@@ -518,7 +520,7 @@ def edit_person(person_id: str, new_values: PeopleInput):
 
 
 @router.post("/add_people_relationship/", tags=["Database Management"], response_model=Message)
-def add_relationship(person1_name: str, person2_name: str):
+def add_relationship(person1_name: str, person2_name: str, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Creates a relationship between two people (both specified by name) in the database.
     Sets error flag and has ERROR at the front of the message if any errors occur. No relationships will be updated if any error occurs.

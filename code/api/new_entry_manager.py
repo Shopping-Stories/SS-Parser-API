@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from boto3 import client
 from .api_types import StringList, Message, IncomingFileUrls
+from .cognito_auth import auth
 from threading import Lock
 from traceback import format_exc
+from fastapi_cloudauth.verification import Operator
 
 router = APIRouter()
 
@@ -35,7 +37,7 @@ def get_ready_files():
     return StringList(strings=urls)
 
 @router.post("/del_ready_files", tags=["Parser Management"], response_model=Message)
-def delete_ready_files(urls: IncomingFileUrls):
+def delete_ready_files(urls: IncomingFileUrls, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Deletes files from the list of files ready to be displayed/parsed by the front end.
     Call this after you upload the results from a file to the database via another endpoint.

@@ -1,13 +1,15 @@
 from .ssParser.database import db
 from .api_types import Message, StringList
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from typing import List
+from fastapi_cloudauth.verification import Operator
+from .cognito_auth import auth
 
 router = APIRouter()
 
 
 @router.get("/createStringList/{name}", response_model=Message, tags=["String Lists"])
-def createStringList(name: str) -> Message:
+def createStringList(name: str, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))) -> Message:
     """
     Creates a new string list with the given name.
     """
@@ -19,7 +21,7 @@ def createStringList(name: str) -> Message:
 
 
 @router.get("/addString/", response_model=Message, tags=["String Lists"])
-def addString(name: str, string: str):
+def addString(name: str, string: str, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Adds new string to string list with given name.
     """
@@ -30,7 +32,7 @@ def addString(name: str, string: str):
 
 
 @router.get("/removeString/", response_model=Message, tags=["String Lists"])
-def removeString(name: str, string: str):
+def removeString(name: str, string: str, dependencies = Depends(auth.scope(["Admin", "Moderator"], op=Operator._any))):
     """
     Deletes a given string from the string list with given name.
     """
