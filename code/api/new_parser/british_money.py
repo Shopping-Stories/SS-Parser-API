@@ -6,16 +6,46 @@ from itertools import chain
 # Class to make dealing with money easier, implements arithmetic with money as well as dict-style accessing of attributes
 # e.g. if type(a) is Money, a["pounds"] == a["Pounds"] == a["L"] is the amount of pounds in the transaction
 class Money:
+    # Attempts to figure out what is going on with weird money strings
     def __init__(self, moneystr=None, l=0, s=0, d=0, f=0, tot_f=None, context=None) -> None:
         
-        farthings = 0
+        fracCurrency = 0
         pounds = 0
         shillings = 0
         pennies = 0
-        self.totalFarthings = 0
+        self.totalFracCurrency = 0
+
+        if type(l) is float:
+            if l != l:
+                l = 0
+            elif int(l) == l:
+                l = int(l)
+            else:
+                l = str(l)
+        if type(s) is float:
+            if s != s:
+                s = 0
+            elif int(s) == s:
+                s = int(s)
+            else:
+                s = str(s)
+        if type(d) is float:
+            if d != d:
+                d = 0
+            elif int(d) == d:
+                d = int(d)
+            else:
+                d = str(d)
+        if type(f) is float:
+            if f != f:
+                f = 0
+            elif int(f) == f:
+                f = int(f)
+            else:
+                f = str(f)
 
         if tot_f is not None:
-            self.totalFarthings = tot_f
+            self.totalFracCurrency = tot_f
         else:
             if moneystr is not None:
                 if match(r"\d+[Lsdp]", moneystr.strip()):
@@ -33,9 +63,9 @@ class Money:
                     elif unit in "dp":
                         pennies = int(money)
                         if len(moneystr) > 1:
-                            farthings = int(numeric(moneystr[1]) * 4)
+                            fracCurrency = int(numeric(moneystr[1]) * 12)
                     else:
-                        raise ValueError(f"This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
+                        raise ValueError(f"Money parsing failure. This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
                     
 
                 elif match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", moneystr.strip()):
@@ -48,12 +78,12 @@ class Money:
                                 if numeric(doublesplit[1]) < 1 and numeric(doublesplit[1]) > 0:
                                     s, crap = moneystr
                                     p = doublesplit[0]
-                                    f = round(numeric(doublesplit[1]) * 4)
+                                    f = round(numeric(doublesplit[1]) * 12)
                                     if s != ":":
                                         shillings = int(s)
                                     if p != ":":
                                         pennies = int(p)
-                                    farthings = f
+                                    fracCurrency = f
                                 else:
                                     raise ValueError(f"Bad money string {moneystr}.")
                             except TypeError:
@@ -84,12 +114,12 @@ class Money:
                 pounds = l
                 shillings = s
                 pennies = d
-                farthings = f
+                fracCurrency = f
             else:
                 # Handle nasty formats
                 if f != 0:
                     raise ValueError(f"You cannot give Money nasty {l=}, {s=}, and {d=} and also provide {f=} in context {context}.")
-                if "/" in l or "/" in "s" or "/" in d:
+                if type(l) is str and type(s) is str and type(d) is str and ("/" in l or "/" in "s" or "/" in d):
                     raise ValueError(f"You cannot provide a mixed / format to Money in context {context}.")
                 if type(l) is str and l in ("-", ""):
                     l = 0
@@ -106,29 +136,35 @@ class Money:
                 pennies = d
                 if type(d) is str:
                     if " " in d:
-                        d = d.split(" ")
+                        d = d.strip().split(" ")
                         if len(d) != 2:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}")
                         try:
                             pennies = int(d[0])
-                            farthings = int(4 * numeric(d[1]))
+                            fracCurrency = int(12 * numeric(d[1]))
                         except TypeError:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}.")
                     else:
                         if (len(d) == 1) and (numeric(d.strip("[]")) < 1):
                             pennies = 0
-                            farthings = int(numeric(d.strip("[]")) * 4)
+                            fracCurrency = int(numeric(d.strip("[]")) * 12)
                         else:    
-                            pennies = int(d.strip("[]"))
+                            d = d.strip("[]")
+                            if (re_match := match(r"\s*(\d+)([\u00BC-\u00BE\u2150-\u215E])\s*", d)):
+                                pennies = int(re_match.group(1))
+                                fracCurrency = int(12 * numeric(re_match.group(2)))
+                            else:
+                                pennies = int(d)
 
-            self.totalFarthings = farthings + 4 * pennies + 4 * 12 * shillings + 4 * 12 * 20 * pounds
+            self.totalFracCurrency = fracCurrency + 12 * pennies + 12 * 12 * shillings + 12 * 12 * 20 * pounds
 
+    # Python things to let up add these objects together and treat them like dicts and such.
     def __add__(self, other):
         if type(other) is not Money and other == 0:
             return self
         if type(other) is not Money:
             raise ValueError(f"Error: other {other} must be of type money")
-        return Money(tot_f= other.totalFarthings + self.totalFarthings)
+        return Money(tot_f= other.totalFracCurrency + self.totalFracCurrency)
     
     def __radd__(self, other):
         if type(other) is not Money and other == 0:
@@ -138,9 +174,9 @@ class Money:
 
     def __truediv__(self, other):
         if type(other) is Money:
-            return self.totalFarthings / other.totalFarthings
+            return self.totalFracCurrency / other.totalFracCurrency
         else:
-            return Money(tot_f=self.totalFarthings / other)
+            return Money(tot_f=self.totalFracCurrency / other)
     
     def __floordiv__(self, other):
         return int(self.__truediv__(self, other))
@@ -163,67 +199,70 @@ class Money:
             return self.get_lsdf()[3]
         else:
             raise KeyError(f"Error: Key {key} is an invalid money term")
- 
+
     def __getitem__(self, key: str):
         return self.__getattr__(key)
 
     def __sub__(self, other):
         if type(other) is not Money:
             raise ValueError(f"Error: other {other} must be of type money")
-        return Money(tot_f= self.totalFarthings - other.totalFarthings)
+        return Money(tot_f= self.totalFracCurrency - other.totalFracCurrency)
 
     def __mul__(self, other: float):
         if type(other) is Money:
             raise ValueError("Erorr, cannot multiply money by money.")
         else:
-            return Money(tot_f=self.totalFarthings * other)
+            return Money(tot_f=self.totalFracCurrency * other)
 
     def __iadd__(self, other: Money):
         if type(other) is not Money:
             raise ValueError(f"Error: other {other} must be of type money")
-        self.totalFarthings += other.totalFarthings
+        self.totalFracCurrency += other.totalFracCurrency
         return self
 
     def __isub__(self, other: Money):
         if type(other) is not Money:
             raise ValueError(f"Error: other {other} must be of type money")
-        self.totalFarthings -= other.totalFarthings
+        self.totalFracCurrency -= other.totalFracCurrency
         return self
 
     def __imul__(self, other):
         if type(other) is Money:
             raise ValueError(f"Error: Cannot multiply money by money")
-        self.totalFarthings *= other
-        self.totalFarthings = round(self.totalFarthings)
+        self.totalFracCurrency *= other
+        self.totalFracCurrency = round(self.totalFracCurrency)
         return self
 
     def __eq__(self, other: Money) -> bool:
         if type(other) is not Money:
             if other == 0:
-                return 0 == self.totalFarthings
+                return 0 == self.totalFracCurrency
             raise ValueError(f"Error: other {other} must be of type money")
-        return self.totalFarthings == other.totalFarthings
+        return self.totalFracCurrency == other.totalFracCurrency
 
     def __lt__(self, other: Money) -> bool:
         if type(other) is not Money:
             raise ValueError(f"Error: other {other} must be of type money")
-        return self.totalFarthings < other.totalFarthings
+        return self.totalFracCurrency < other.totalFracCurrency
 
     def __le__(self, other: Money) -> bool:
         if type(other) is not Money:
             raise ValueError(f"Error: other {other} must be of type money")
-        return self.totalFarthings <= other.totalFarthings
+        return self.totalFracCurrency <= other.totalFracCurrency
+
+    def __hash__(self) -> int:
+        return self.totalFracCurrency
 
     def get_lsdf(self):
-        tot_f = abs(self.totalFarthings)
-        l = tot_f // (4 * 12 * 20)
-        tot_f -= l * 4 * 12 * 20
-        s = tot_f // (4 * 12)
-        tot_f -= s * 4 * 12
-        d = tot_f // (4)
-        tot_f -= d * 4
+        tot_f = abs(self.totalFracCurrency)
+        l = tot_f // (12 * 12 * 20)
+        tot_f -= l * 12 * 12 * 20
+        s = tot_f // (12 * 12)
+        tot_f -= s * 12 * 12
+        d = tot_f // (12)
+        tot_f -= d * 12
         f = int(tot_f)
-        if self.totalFarthings < 0:
+        if self.totalFracCurrency < 0:
             return (-l, -s, -d, -f)
         else:
             return (l, s, d, f)

@@ -1,0 +1,62 @@
+{
+	"entries": [
+		{
+			"currency_colony": "Virginia",
+			"_Month": "11",
+			"price": "7/6",
+			
+			"account_name": "Robert Loyd",
+			"amount": "2",
+			"amount_is_combo": false,
+			"commodity_totaling_contextless": true,
+			"context": [
+				[
+					"To",
+					"TRANS",
+					"IN"
+				],
+				[
+					"2",
+					"CARDINAL",
+					"CD"
+				],
+				[
+					"Cotton handkerchiefs",
+					"COMB.NOUN",
+					"NNS"
+				],
+				[
+					"7/6",
+					"PRICE",
+					"CD"
+				]
+			],
+			"currency_totaling_contextless": false,
+			"currency_type": "Currency",
+			"Date Year": "1760",
+			"Day": "20",
+			"debit_or_credit": "Dr",
+			"entry_id": "3",
+			"farthings": 0,
+			"folio_page": 77,
+			"folio_year": "1760/1761",
+			"genmat": [
+				0,
+				"3"
+			],
+			"item": "Cotton handkerchiefs",
+			"Marginalia": "Virginia [top center]",
+			"original_entry": "To 2 Cotton handrs [handkerchiefs] 7/6    1 Linnen [Linen] Do [handkerchief] 1/8    1 Yarn Rug 13/:",
+			"pennies": 6,
+			"phrases": [],
+			"pounds": 0,
+			"price_is_combo": false,
+			"reel": 58,
+			"shillings": 7,
+			"store": "Colchester",
+			"store_owner": "John Glassford & Company",
+			"text_as_parsed": "To 2 Cotton handkerchiefs 7/6",
+			"tobacco_marks": []
+		}
+	]
+}
