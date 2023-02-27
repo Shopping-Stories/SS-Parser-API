@@ -943,6 +943,10 @@ def _clean_pass(entry: dict):
         if entry["currency_colony"] == "-" or (entry["currency_colony"] != entry["currency_colony"]):
             entry["currency_colony"] = "Unknown"
 
+    if "type" in entry:
+        if entry["type"] == "Cash":
+            entry["item"] = "Currency"
+
     return entry
 
 
