@@ -1,5 +1,5 @@
-from fastapi import APIRouter
-from api_types import *
+from fastapi import APIRouter, Response
+from .api_types import *
 import traceback
 from base64 import b64decode
 from boto3 import client
@@ -7,7 +7,7 @@ from io import BytesIO
 
 router = APIRouter()
 
-@router.post("/document", tags=["Documentation"], response_model=Message)
+@router.post("/upload_document", tags=["Documentation"], response_model=Message)
 def upload_document(inc_file: IncomingFile) -> Message:
     """
     uploads a document to the documentation folder
@@ -29,25 +29,32 @@ def upload_document(inc_file: IncomingFile) -> Message:
 
     return Message(message="Successfully uploaded file to s3.")
 
-@router.get("/documents", tags=["Documentation"], response_model=Message)
-def list_all_documents() -> Message:
+@router.get("/list_all_documents", tags=["Documentation"])
+def list_all_documents():
     """
     lists all documents in Documentation
     """
 
     s3_cli = client('s3')
+    filenames = []
 
     try:
-        res = s3_cli.list_objects_v2(Bucket="shoppingstories", Prefix="/Documentation")
+        result = s3_cli.list_objects_v2(Bucket="shoppingstories", Prefix="Documentation/")
     except Exception:
         print("Could not get files from s3.")
         print(traceback.format_exc())
         return Message(message="Error getting files from s3.")
 
-    return res
+    # for item in result['Contents']:
+    #     files = item['Key']
+    #     print(files)
+    #     filenames.append(files)  # optional if you have more filefolders to got through.
+    # return filenames
 
-@router.get("/document/{name}", tags=["Documentation"], response_model=Message)
-def get_documents(name: str) -> Message:
+    return result
+
+@router.get("/get_document/{name}", tags=["Documentation"])
+def get_document(name: str):
     """
     gets the documentation to display
     """
@@ -60,10 +67,15 @@ def get_documents(name: str) -> Message:
         print("Could not get file from s3.")
         print(traceback.format_exc())
         return Message(message="Error getting file from s3.")
+    # print(res)
+    # return res['Body'].read().decode("ANSI")
+    # Set the Content-Type header to 'application/pdf'
+    headers = {'Content-Type': 'application/pdf'}
 
-    return res
+    # Return the binary data of the PDF file directly from the response body
+    return Response(content=res['Body'].read(), headers=headers)
 
-@router.delete("/document/{name}", tags=["Documentation"], response_model=Message)
+@router.get("/delete_document/{name}", tags=["Documentation"], response_model=Message)
 def delete_document(name: str) -> Message:
     """
     deletes document
@@ -77,3 +89,5 @@ def delete_document(name: str) -> Message:
         print("Could not delete file from s3.")
         print(traceback.format_exc())
         return Message(message="Error deleting file from s3.")
+
+    return Message(message="Successfully deleted file from s3.")

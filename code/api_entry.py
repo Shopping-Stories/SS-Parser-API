@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from api import simplesearch, stringlist, parser_endpoints, new_entry_manager
+from api import simplesearch, stringlist, parser_endpoints, new_entry_manager, documentation_endpoints
 from api.ssParser import entry_upload
 import logging
 
@@ -14,6 +14,7 @@ incoming.include_router(stringlist.router)
 incoming.include_router(entry_upload.router)
 incoming.include_router(parser_endpoints.router)
 incoming.include_router(new_entry_manager.router)
+incoming.include_router(documentation_endpoints.router)
 
 incoming.add_middleware(
     CORSMiddleware,
