@@ -258,6 +258,7 @@ def hash_entry(parsed_entry: Dict[str, Any]):
     entry_hash = hashlib.sha256(entry_dumps.encode()).hexdigest()
     parsed_entry.update({"hash": entry_hash})
 
+
 # Helper function to make database formatted entries
 def _make_db_entry(parsed_entry: ParserOutput):
     parsed_entry = parsed_entry.dict()
@@ -497,8 +498,11 @@ def edit_item(item_id: str, new_values: ItemInput):
     for key in todel:
         del new_values[key]
 
-    new_values_set = {"$set": new_values}
-    item_collection.update_one({'_id': ObjectId(item_id)}, new_values_set)
+    item_collection.update_one({'_id': ObjectId(item_id)}, {"$set": new_values})
+
+    # edit item name in entries
+    if "item" in new_values:
+        entries_collection.update_many({'itemID': ObjectId(item_id)}, {'$set': {'item': new_values["item"]}})
 
     return Message(message="Successfully edited item.")
 
@@ -523,8 +527,14 @@ def edit_person(person_id: str, new_values: PeopleInput):
     for key in todel:
         del new_values[key]
 
-    new_values_set = {"$set": new_values}
-    people_collection.update_one({'_id': ObjectId(person_id)}, new_values_set)
+    old_name = people_collection.find_one({'_id': ObjectId(person_id)})["name"]
+    people_collection.update_one({'_id': ObjectId(person_id)}, {"$set": new_values})
+
+    # edit people/accountHolder containing person in entries
+    if "name" in new_values:
+        entries_collection.update_many({'accountHolderID': ObjectId(person_id)}, {'$set': {'account_name': new_values["name"]}})
+        entries_collection.update_many({'peopleID': ObjectId(person_id)}, {'$push': {'people': new_values["name"]}})
+        entries_collection.update_many({'peopleID': ObjectId(person_id)}, {'$pull': {'people': old_name}})
 
     return Message(message="Successfully edited person.")
 
@@ -564,6 +574,62 @@ def add_relationship(person1_name: str, person2_name: str):
     return Message(message="Successfully added relationship.")
 
 
+@router.post("/combine_people/", tags=["Database Management"], response_model=Message)
+def combine_people(person1_name: str, person2_name: str, new_name: str):
+    """
+    Combines two people (both specified by name) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. People will not be combined if any error occurs.
+    """
+    
+    person1_data = people_collection.find_one({'name': person1_name})
+    person2_data = people_collection.find_one({'name': person2_name})
+
+    if person1_data == None:
+        return Message(message=f"ERROR: {person1_name} not found.", error=True)
+    if person2_data == None:
+        return Message(message=f"ERROR: {person2_name} not found.", error=True)
+        
+    person1_id = person1_data['_id'] 
+    person2_id = person2_data['_id'] 
+
+    if person1_id == person2_id:
+        return Message(message=f"ERROR: Both people are the same.", error=True)
+    
+    new_person_id = people_collection.insert_one({"name": new_name}).inserted_id
+
+    new_rel = []
+    if "related" in person1_data:
+        for related in person1_data['related']:
+            if related != person2_id:
+                new_rel.append(related)
+    if "related" in person2_data:
+        for related in person2_data['related']:
+            if related != person1_id:
+                new_rel.append(related)
+    
+    if len(new_rel) > 0:
+        new_rel_set = [*set(new_rel)]
+        for rel in new_rel_set:
+            people_collection.update_one({'_id': new_person_id}, {'$push': {'related': rel}})
+    print(person1_id)
+    people_collection.delete_one({'_id': person1_id})
+    people_collection.delete_one({'_id': person2_id})  
+
+    # edit people/accountHolder containing person in entries
+    entries_collection.update_many({'accountHolderID': person1_id}, {'$set': {'accountHolderID': new_person_id, 'account_name': new_name}})
+    entries_collection.update_many({'accountHolderID': person2_id}, {'$set': {'accountHolderID': new_person_id, 'account_name': new_name}})
+
+    entries_collection.update_many({'peopleID': person1_id}, {'$push': {'peopleID': new_person_id, 'people': new_name}})
+    entries_collection.update_many({'peopleID': person2_id}, {'$push': {'peopleID': new_person_id, 'people': new_name}})
+    entries_collection.update_many({'peopleID': person1_id}, {'$pull': {'peopleID': person1_id, 'people': person1_name}})
+    entries_collection.update_many({'peopleID': person2_id}, {'$pull': {'peopleID': person2_id, 'people': person2_name}})
+  
+    ## ADD FORMER NAMES?
+    ## ADD ADDITIONAL DATA? $merge?
+    
+    return Message(message=f"Successfully compined people as {new_person_id}.")
+      
+    
 # NEED
 # tobaccoMarks relationship
 # places relationship
