@@ -12,6 +12,7 @@ from json import dumps
 from json import JSONEncoder 
 import hashlib
 from ..fuzzysearch import createMetasForEntries
+import pandas as pd
 
 # add collections
 entries_collection = db.entries
@@ -127,9 +128,9 @@ def _create_account_holder_rel(parsed_entry: Dict[str, Any]):
 # exact search for item in items, add itemID to dict
 # checks if already in db, adds to db if not, makes relationship regardless
 def _create_item_rel(parsed_entry: Dict[str, Any]):
-    if item_collection.count_documents({"item": parsed_entry["item"]}, limit=1) > 0:
+    if item_collection.count_documents({"item": {"$regex": "^" + parsed_entry["item"] + "$", "$options": 'i'}}, limit=1) > 0:
         item_id = (item_collection.find_one(
-            {"item": parsed_entry["item"]}, {"_id"}))
+            {"item": {"$regex": "^" + parsed_entry["item"] + "$", "$options": 'i'}}, {"_id"}))
 
         parsed_entry.update({"itemID": item_id["_id"]})
 
@@ -138,6 +139,8 @@ def _create_item_rel(parsed_entry: Dict[str, Any]):
             {"item": parsed_entry["item"]}).inserted_id
 
         parsed_entry.update({"itemID": item_id})
+
+        _create_item_to_item_rel(parsed_entry)
 
 
 # exact search for people array in people, add peopleID(s) to dict
@@ -296,8 +299,8 @@ def _make_db_entry(parsed_entry: ParserOutput):
                 _create_people_to_people_rel(parsed_entry)
         if "accountHolderID" in parsed_entry and "peopleID" in parsed_entry:
             _create_people_to_account_holder_rel(parsed_entry)
-        if "itemID" in parsed_entry:
-            _create_item_to_item_rel(parsed_entry)
+        #if "itemID" in parsed_entry:
+            #_create_item_to_item_rel(parsed_entry)
 
         # create objects to group together similar data
         # define keys, change key values to change which variables are grouped
@@ -630,6 +633,52 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
     return Message(message=f"Successfully compined people as {new_person_id}.")
       
     
+@router.post("/upload_items/", tags=["Database Management"], response_model=Message)
+def item_upload(file_name: str):
+    """
+    Uploads items from a master list's categories sheet. Categories must be FIRST or ONLY sheet in the document, or function will fail. File must be in \api\ssParser\...
+    If categories section is not read, function will fail. If data differs from expected formatting, all data prior to error will still be entered.
+    """
+    file = "api\ssParser\\" + file_name
+    print(file)
+    #file = "api\ssParser\C_1760_Item_Master_List_Categories_TEST6.xlsx"
+
+    df = pd.read_excel("api\ssParser\\" + file_name)
+    print(df.shape)
+    print(df[:5])
+
+    for index, row in df.iterrows():
+        if item_collection.find_one({'item': {"$regex": "^" + row['Item'] + "$", "$options": 'i'}}):
+            
+            item_data = item_collection.find_one({'item': {"$regex": "^" + row['Item'] + "$", "$options": 'i'}})
+            print("found ", row["Item"], " as ", item_data["item"])
+            item_collection.update_one({'_id': item_data['_id']}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
+            
+            if 'related' in item_data:
+                print("has related 1")
+                for related in item_data['related']:
+                    print("has related")
+                    if 'category' not in item_collection.find_one({'_id': related}):
+                        print(related, " is related")
+                        item_collection.update_one({'_id': related}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
+                    
+        else:
+            print("NOT found ", row["Item"])
+            new_item_id = item_collection.insert_one({'item': row['Item'], 'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}).inserted_id
+            relatedItems = item_collection.find({"item": {
+            "$regex": '.*' + row['Item'] + '.*', # edit regex?
+            "$options": 'i'
+            }})
+            for item in relatedItems:
+                if new_item_id != item["_id"]:
+                    item_collection.update_one({'_id': item["_id"]}, {'$push': {'related': new_item_id}}) 
+                    item_collection.update_one({'_id': new_item_id}, {'$push': {'related': item["_id"]}}) 
+                    if 'category' not in item:
+                        print(item['_id'], " is related")
+                        item_collection.update_one({'_id': item['_id']}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
+    # TO DO: item to item rel only new new items ^^^
+
+    return Message(message="Successfully uploaded item data.")
 # NEED
 # tobaccoMarks relationship
 # places relationship
