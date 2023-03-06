@@ -55,7 +55,8 @@ def start_parse(client):
             logging.info("file worked.")
             todelete.append(filename)
     
-    client.delete_objects(Bucket="shoppingstories", Delete={"Objects": [{"Key": key} for key in todelete], "Quiet": True})
+    if todelete:
+        client.delete_objects(Bucket="shoppingstories", Delete={"Objects": [{"Key": key} for key in todelete], "Quiet": True})
 
     logging.info("Starting parse")
     parse_folder(dump_folder)
