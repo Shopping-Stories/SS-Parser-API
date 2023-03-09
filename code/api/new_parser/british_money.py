@@ -67,7 +67,6 @@ class Money:
                     else:
                         raise ValueError(f"Money parsing failure. This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
                     
-
                 elif match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", moneystr.strip()):
                     moneystr = moneystr.split("/")
                     if len(moneystr) == 2:
@@ -103,18 +102,25 @@ class Money:
                         if s != ":":
                             shillings = int(s)
                         if p != ":":
-                            pennies = int(p)
+                            if len(p.split(" ")) > 1:
+                                spl = p.split(" ")
+                                fracCurrency = round(numeric(spl[1]) * 12)
+                                pennies = int(spl[0])
+                            else:
+                                pennies = int(p)
                     
                     else:
                         raise ValueError(f"Money string {moneystr} was too long for the l/s/d format")
 
                 else:
                     raise ValueError(f"Money string {moneystr} did not match any known patterns in context {context}")
+                
             elif type(l) is int and type(s) is int and type(d) is int and type(f) is int:
                 pounds = l
                 shillings = s
                 pennies = d
                 fracCurrency = f
+           
             else:
                 # Handle nasty formats
                 if f != 0:
@@ -135,7 +141,7 @@ class Money:
                     shillings = int(s.strip("[]"))
                 pennies = d
                 if type(d) is str:
-                    if " " in d:
+                    if " " in d.strip():
                         d = d.strip().split(" ")
                         if len(d) != 2:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}")

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from api import simplesearch, stringlist, parser_endpoints, new_entry_manager, documentation_endpoints, fuzzysearch, advsearch
 from api.ssParser import entry_upload
+from api.new_parser.people import people_index_coro
 import logging
 import sys
 
@@ -27,9 +28,14 @@ incoming.add_middleware(
     allow_headers="*"
 )
 
+
+@incoming.on_event("startup")
+async def start_people_tasks():
+    await people_index_coro()
+
 @incoming.get("/")
 async def main():
-    return {"message": "The api is still working. API Version 1.3.1"}
+    return {"message": "The api is still working. API Version 1.4.1"}
 
 if __name__ == "__main__":
     uvicorn.run("api_entry:incoming", port=5050, log_level='info')
