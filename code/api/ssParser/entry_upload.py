@@ -658,6 +658,12 @@ def item_upload(file_name: str):
                 print("has related 1")
                 for related in item_data['related']:
                     print("has related")
+                    if related is None:
+                        continue
+                    found = item_collection.find_one({'_id': related})
+                    if found is None:
+                        continue
+                    
                     if 'category' not in item_collection.find_one({'_id': related}):
                         print(related, " is related")
                         item_collection.update_one({'_id': related}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
