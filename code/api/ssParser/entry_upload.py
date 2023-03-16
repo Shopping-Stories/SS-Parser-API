@@ -370,8 +370,20 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
                 return f"ERROR: Could not hash entry, or other error occured... {entry}."
         
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
+        
         # Do not insert duplicate entries
-        new_entries = [(n := checkDuplicates(x)) for x in new_entries if type(n) is not str]
+        new_new_entries = []
+        for x in new_entries:
+            if type(x) is str:
+                new_new_entries.append(x)
+            else:  
+                n = checkDuplicates(x)
+                if type(n) is str:
+                    pass
+                else:
+                    new_new_entries.append(n)
+        new_entries = new_new_entries
+
     except Exception as e:
         return Message(message="ERROR: " + format_exc(), error=True)
 
