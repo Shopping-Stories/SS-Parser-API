@@ -376,8 +376,8 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
         return Message(message="ERROR: " + format_exc(), error=True)
 
     # If any errors present, return error.
-    # if any([isinstance(x, str) for x in new_entries]):
-    #     return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
+    if any([isinstance(x, str) for x in new_entries]):
+        return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
 
     try:
         # Add all to database
