@@ -371,7 +371,7 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
         
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
         # Do not insert duplicate entries
-        new_entries = [checkDuplicates(x) for x in new_entries if type(checkDuplicates(x)) is not str]
+        new_entries = [(n := checkDuplicates(x)) for x in new_entries if type(n) is not str]
     except Exception as e:
         return Message(message="ERROR: " + format_exc(), error=True)
 
