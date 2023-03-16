@@ -364,7 +364,7 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
                     return f"ERROR: Entry with hash {entry['hash']} already being inserted. Not inserting same entry twice."
                 else:
                     alreadyFound.add(entry["hash"])
-                    print(alreadyFound)
+                    # print(alreadyFound)
                     return entry
             else:
                 return f"ERROR: Could not hash entry, or other error occured... {entry}."
@@ -611,7 +611,7 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
         new_rel_set = [*set(new_rel)]
         for rel in new_rel_set:
             people_collection.update_one({'_id': new_person_id}, {'$push': {'related': rel}})
-    print(person1_id)
+    # print(person1_id)
     people_collection.delete_one({'_id': person1_id})
     people_collection.delete_one({'_id': person2_id})  
 
