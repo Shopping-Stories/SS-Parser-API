@@ -370,13 +370,14 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
                 return f"ERROR: Could not hash entry, or other error occured... {entry}."
         
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
-        new_entries = [checkDuplicates(x) for x in new_entries]
+        # Do not insert duplicate entries
+        new_entries = [checkDuplicates(x) for x in new_entries if type(checkDuplicates(x)) is not str]
     except Exception as e:
         return Message(message="ERROR: " + format_exc(), error=True)
 
     # If any errors present, return error.
-    if any([isinstance(x, str) for x in new_entries]):
-        return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
+    # if any([isinstance(x, str) for x in new_entries]):
+    #     return Message(message="ERROR: At least one error occured when uploading so nothing was uploaded.\nERRORS:\n" + "\n  ".join([x for x in new_entries if isinstance(x, str)]), error=True)
 
     try:
         # Add all to database
