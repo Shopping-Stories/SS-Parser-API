@@ -94,8 +94,8 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     """
     folder = "..\\data\\Amelia\\"
     file = "C_1760_002_FINAL_.xlsx"
-    task = parse_file_and_dump
-    bg_tasks.add_task(task, folder, file)
+    task = parse_folder
+    bg_tasks.add_task(task, folder)
     return Message(message="Started parser.")
 
 @router.post("/upload/", tags=["Parser Management"], response_model=Message)

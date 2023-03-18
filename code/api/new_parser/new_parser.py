@@ -903,7 +903,7 @@ def get_transactions(df: pd.DataFrame):
                                 newPeople.append(f"{' or '.join([Person(x).__str__() for x in name])}")
                             else:
                                 newPeople.append(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}")
-                    elif len(word.split(" ")) == 1:
+                    elif len(word.lower().replace(".", "").removeprefix("mr ").removeprefix("ms ").removeprefix("mrs ").split(" ")) == 1:
                         if "account_name" in entry:
                             newPeople.append(f"{word} from acct {Person(entry['account_name'].lower().strip())}")
                     else:
