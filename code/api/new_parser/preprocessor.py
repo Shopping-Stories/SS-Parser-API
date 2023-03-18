@@ -263,7 +263,7 @@ def preprocess(df: pd.DataFrame):
         big_entry = sub(r"(DO|Do|DITTO|Ditto|D)\.*\s*\[\w+\]", _remove_ditto, big_entry)
 
         # Replace 1w with 1 w and 1M with 1 M and so on
-        big_entry = sub(r"(?<=\s)\d+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
+        big_entry = sub(r"(?<=\s)[[\u00BC-\u00BE\u2150-\u215E]\d]+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
         # If we see tobacco notes... 
         if search(r"N\s+\d+\s+\d+", big_entry):
