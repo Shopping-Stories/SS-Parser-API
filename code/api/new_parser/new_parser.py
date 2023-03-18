@@ -240,6 +240,29 @@ def get_transactions(df: pd.DataFrame):
         if entries and entries[0] == "BAD_ENTRY":
             add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
             transaction = {}
+            # Still add in everything from row context to assist in manual editing process later.
+            for key, value in row_context.items():
+                if "pounds" in key or "shillings" in key or "pennies" in key or "farthings" in key:
+                    pass
+                else:
+                    if key == "money_obj":
+                        currency = row_context["money_obj"]
+                        transaction["original_money_obj"] = value
+                        transaction["pounds"] = currency["pounds"]
+                        transaction["shillings"] = currency["shillings"]
+                        transaction["pennies"] = currency["pennies"]
+                        transaction["farthings"] = currency["farthings"]
+                    elif key == "money_obj_ster":
+                        currency = row_context["money_obj_ster"]
+                        transaction["pounds_ster"] = currency["pounds"]
+                        transaction["shillings_ster"] = currency["shillings"]
+                        transaction["pennies_ster"] = currency["pennies"]
+                        transaction["farthings_ster"] = currency["farthings"]
+                        transaction["original_money_obj_ster"] = value
+                    elif key not in transaction:
+                        if "farthings" not in key:
+                            transaction[key] = value
+            
             add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
             trans_in_row_counter += 1
             # Break the transaction list when the account holder changes if a total has not occurred.
@@ -1122,44 +1145,45 @@ def parse(df: pd.DataFrame):
                 
                 # print(to_backsolve)
                 
-                ster_sum = toOut[indices[0]]["original_money_obj_ster"]
-                curr_sum = toOut[indices[0]]["original_money_obj"]
-                # print(ster_sum)
-                # print(curr_sum)
+                if "original_money_obj" in toOut[indices[0]] and "original_money_obj_ster" in toOut[indices[0]]:
+                    ster_sum = toOut[indices[0]]["original_money_obj_ster"]
+                    curr_sum = toOut[indices[0]]["original_money_obj"]
+                    # print(ster_sum)
+                    # print(curr_sum)
 
-                valid_currrency_sums = []
-                valid_sterling_sums = []
-                for i in range(1, (len(to_backsolve) // 2) + 1):
-                    for combo in combinations(to_backsolve, i):
-                        combo = set(combo)
-                        complement = to_backsolve.difference(combo)
-                        combo_sum = sum(x[1] for x in combo)
-                        complement_sum = sum(x[1] for x in complement)
-                        # print(combo, combo_sum, ster_sum, combo_sum == ster_sum, curr_sum, combo_sum == curr_sum)
-                        # print(complement, complement_sum, curr_sum, complement_sum == curr_sum, ster_sum, complement_sum == ster_sum)
-                        if combo_sum == ster_sum and complement_sum == curr_sum:
-                            if combo not in valid_sterling_sums and complement not in valid_currrency_sums:
-                                valid_sterling_sums.append(combo)
-                                valid_currrency_sums.append(complement)
-                        elif combo_sum == curr_sum and complement_sum == ster_sum:
-                            if combo not in valid_currrency_sums and complement not in valid_sterling_sums:
-                                valid_sterling_sums.append(complement)
-                                valid_currrency_sums.append(combo)
+                    valid_currrency_sums = []
+                    valid_sterling_sums = []
+                    for i in range(1, (len(to_backsolve) // 2) + 1):
+                        for combo in combinations(to_backsolve, i):
+                            combo = set(combo)
+                            complement = to_backsolve.difference(combo)
+                            combo_sum = sum(x[1] for x in combo)
+                            complement_sum = sum(x[1] for x in complement)
+                            # print(combo, combo_sum, ster_sum, combo_sum == ster_sum, curr_sum, combo_sum == curr_sum)
+                            # print(complement, complement_sum, curr_sum, complement_sum == curr_sum, ster_sum, complement_sum == ster_sum)
+                            if combo_sum == ster_sum and complement_sum == curr_sum:
+                                if combo not in valid_sterling_sums and complement not in valid_currrency_sums:
+                                    valid_sterling_sums.append(combo)
+                                    valid_currrency_sums.append(complement)
+                            elif combo_sum == curr_sum and complement_sum == ster_sum:
+                                if combo not in valid_currrency_sums and complement not in valid_sterling_sums:
+                                    valid_sterling_sums.append(complement)
+                                    valid_currrency_sums.append(combo)
+                    
+                    if len(valid_currrency_sums) == 1 and len(valid_sterling_sums) == 1:
+                        for i, price in valid_currrency_sums[0]:
+                            toOut[i]["currency_type"] = "Currency"
+                        for i, price in valid_sterling_sums[0]:
+                            toOut[i]["currency_type"] = "Sterling"
+                    else:
+                        # print("Curr sums: ")
+                        # print(valid_currrency_sums)
+                        # print("Ster sums: ")
+                        # print(valid_sterling_sums)
+                        # print()
+                        raise OSError("Intentional error that shouldn't be raised by anything else in this code block")
                 
-                if len(valid_currrency_sums) == 1 and len(valid_sterling_sums) == 1:
-                    for i, price in valid_currrency_sums[0]:
-                        toOut[i]["currency_type"] = "Currency"
-                    for i, price in valid_sterling_sums[0]:
-                        toOut[i]["currency_type"] = "Sterling"
-                else:
-                    # print("Curr sums: ")
-                    # print(valid_currrency_sums)
-                    # print("Ster sums: ")
-                    # print(valid_sterling_sums)
-                    # print()
-                    raise OSError("Intentional error that shouldn't be raised by anything else in this code block")
-            
-            # OSError is our shorthand for when we cannot figure out which items are sterling and which are currency
+                # OSError is our shorthand for when we cannot figure out which items are sterling and which are currency
             except OSError:
                 for index in indices:
                     if "tobacco_entries" in toOut[index] and toOut[index]["tobacco_entries"]:
