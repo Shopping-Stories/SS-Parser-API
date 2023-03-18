@@ -135,10 +135,10 @@ class Money:
                     d = 0
                 pounds = l
                 if type(l) is str:
-                    pounds = int(l.strip("[]"))
+                    pounds = int(l.strip("[]<>"))
                 shillings = s
                 if type(s) is str:
-                    shillings = int(s.strip("[]"))
+                    shillings = int(s.strip("[]<>"))
                 pennies = d
                 if type(d) is str:
                     if " " in d.strip():
@@ -151,11 +151,11 @@ class Money:
                         except TypeError:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}.")
                     else:
-                        if (len(d) == 1) and (numeric(d.strip("[]")) < 1):
+                        if (len(d) == 1) and (numeric(d.strip("[]<>")) < 1):
                             pennies = 0
-                            fracCurrency = int(numeric(d.strip("[]")) * 12)
+                            fracCurrency = int(numeric(d.strip("[]<>")) * 12)
                         else:    
-                            d = d.strip("[]")
+                            d = d.strip("[]<>")
                             if (re_match := match(r"\s*(\d+)([\u00BC-\u00BE\u2150-\u215E])\s*", d)):
                                 pennies = int(re_match.group(1))
                                 fracCurrency = int(12 * numeric(re_match.group(2)))
