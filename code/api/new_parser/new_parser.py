@@ -1090,6 +1090,8 @@ def _clean_pass(entry: dict):
                 quarts = int(numeric(entry["amount"]) * 4)
                 if quarts == 1:
                     entry["amount"] = f"{quarts} quart"
+                elif quarts < 1:
+                    entry["amount"] = f"{numeric(entry['amount'] * 4)} quarts"
                 else:
                     entry["amount"] = f"{quarts} quarts"
         elif "amount" in entry and type(entry["amount"]) is str and len(entry["amount"].split("/")) == 2:
@@ -1129,6 +1131,8 @@ def _clean_pass(entry: dict):
                     quarts = int(numeric(entry["amount"]) * 4)
                 if quarts == 1:
                     entry["amount"] = f"{quarts} quart"
+                elif quarts < 1:
+                    entry["amount"] = f"{numeric(entry['amount']) * 4} quarts"
                 else:
                     entry["amount"] = f"{quarts} quarts"
 
