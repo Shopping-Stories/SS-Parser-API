@@ -602,8 +602,8 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
     if person2_data == None:
         return Message(message=f"ERROR: {person2_name} not found.", error=True)
         
-    person1_id = person1_data['_id'] 
-    person2_id = person2_data['_id'] 
+    person1_id = person1_data['_id']
+    person2_id = person2_data['_id']
 
     if person1_id == person2_id:
         return Message(message=f"ERROR: Both people are the same.", error=True)
@@ -632,10 +632,9 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
     entries_collection.update_many({'accountHolderID': person1_id}, {'$set': {'accountHolderID': new_person_id, 'account_name': new_name}})
     entries_collection.update_many({'accountHolderID': person2_id}, {'$set': {'accountHolderID': new_person_id, 'account_name': new_name}})
 
-    entries_collection.update_many({'peopleID': person1_id}, {'$push': {'peopleID': new_person_id, 'people': new_name}})
-    entries_collection.update_many({'peopleID': person2_id}, {'$push': {'peopleID': new_person_id, 'people': new_name}})
-    entries_collection.update_many({'peopleID': person1_id}, {'$pull': {'peopleID': person1_id, 'people': person1_name}})
-    entries_collection.update_many({'peopleID': person2_id}, {'$pull': {'peopleID': person2_id, 'people': person2_name}})
+    entries_collection.update_many({"$or": [{'peopleID': person1_id}, {'peopleID': person2_id}]}, {'$push': {'peopleID': new_person_id}})
+    entries_collection.update_many({'peopleID': new_person_id}, {'$pull': {'peopleID': {"$in": [person1_id, person2_id]}, 'people': {"$in": [person1_name, person2_name]}}})
+    entries_collection.update_many({'peopleID': new_person_id}, {'$push': {'people': new_name}})
   
     ## ADD FORMER NAMES?
     ## ADD ADDITIONAL DATA? $merge?
