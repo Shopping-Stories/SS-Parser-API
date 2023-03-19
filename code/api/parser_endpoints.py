@@ -100,6 +100,25 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     return Message(message="Started parser.")
 
 
+@router.get("/parse_all", tags=["Parser Management"], response_model=Message)
+def test_parsing(bg_tasks: BackgroundTasks) -> Message:
+    """
+    Parses all data in a hardcoded folder.
+    """
+    folders = ["..\\data\\Amelia\\", "..\\data\\Mahlon\\"]
+    task = parse_file_and_dump
+    
+    filenames = []
+
+    for folder in folders:
+        files = os.listdir(folder)
+        for file in files:
+            if file.endswith(".xls") or file.endswith(".xlsx"):
+                filenames.append(file.removesuffix(".xlsx").removesuffix(".xls"))
+                bg_tasks.add_task(task, folder, file.removesuffix(".xlsx").removesuffix(".xls"))
+    
+    return Message(message=f"Parsing: {', '.join(filenames)}")
+
 @router.get("/reparse_exceptions", tags=["Parser Management"], response_model=Message)
 def parse_exceptions(bg_tasks: BackgroundTasks) -> Message:
     """
