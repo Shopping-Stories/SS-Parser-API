@@ -35,7 +35,7 @@ async def start_people_tasks():
 
 @incoming.get("/")
 async def main():
-    return {"message": "The api is still working. API Version 1.4.7"}
+    return {"message": "The api is still working. API Version 1.4.8"}
 
 if __name__ == "__main__":
     uvicorn.run("api_entry:incoming", port=5050, log_level='info')
