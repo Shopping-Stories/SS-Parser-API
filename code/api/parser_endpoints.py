@@ -114,8 +114,8 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
         files = os.listdir(folder)
         for file in files:
             if file.endswith(".xls") or file.endswith(".xlsx"):
-                filenames.append(file.removesuffix(".xlsx").removesuffix(".xls"))
-                bg_tasks.add_task(task, folder, file.removesuffix(".xlsx").removesuffix(".xls"))
+                filenames.append(file)
+                bg_tasks.add_task(task, folder, file)
     
     return Message(message=f"Parsing: {', '.join(filenames)}")
 
