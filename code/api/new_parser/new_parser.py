@@ -1084,25 +1084,27 @@ def _clean_pass(entry: dict):
         if "type" in entry and entry["type"] == "Cash":
             entry["item"] = "Currency"
     
-    if entry["item"].lower() in drink_set:
-        if "amount" in entry and type(entry["amount"]) is str and entry["amount"].isnumeric() and len(entry["amount"]) == 1:
-            if numeric(entry["amount"]) < 1:
-                quarts = int(numeric(entry["amount"]) * 4)
-                if quarts == 1:
-                    entry["amount"] = f"{quarts} quart"
-                elif quarts < 1:
-                    entry["amount"] = f"{numeric(entry['amount'] * 4)} quarts"
-                else:
-                    entry["amount"] = f"{quarts} quarts"
-        elif "amount" in entry and type(entry["amount"]) is str and len(entry["amount"].split("/")) == 2:
-                try:
-                    quarts = int(entry["amount"].split("/")[0])
+    if "item" in entry:
+        # Convert 1/4 in a drink transaction to 1 quart
+        if entry["item"].lower() in drink_set:
+            if "amount" in entry and type(entry["amount"]) is str and entry["amount"].isnumeric() and len(entry["amount"]) == 1:
+                if numeric(entry["amount"]) < 1:
+                    quarts = int(numeric(entry["amount"]) * 4)
                     if quarts == 1:
                         entry["amount"] = f"{quarts} quart"
+                    elif quarts < 1:
+                        entry["amount"] = f"{numeric(entry['amount'] * 4)} quarts"
                     else:
                         entry["amount"] = f"{quarts} quarts"
-                except:
-                    add_error(entry, f"Failed to parse amount: {entry['amount']}", "")
+            elif "amount" in entry and type(entry["amount"]) is str and len(entry["amount"].split("/")) == 2:
+                    try:
+                        quarts = int(entry["amount"].split("/")[0])
+                        if quarts == 1:
+                            entry["amount"] = f"{quarts} quart"
+                        else:
+                            entry["amount"] = f"{quarts} quarts"
+                    except:
+                        add_error(entry, f"Failed to parse amount: {entry['amount']}", "")
 
     if "amount" in entry:
         if type(entry["amount"]) is str:
@@ -1122,19 +1124,20 @@ def _clean_pass(entry: dict):
     if "context" in entry:
         entry["text_as_parsed"] = " ".join([x if type(x) is str else x[0] for x in entry["context"]])
 
-    # Convert 1/4 in a drink transaction to 1 quart
-    if entry["item"].lower() in drink_set:
-        if ("amount" not in entry or entry["amount"] == "" or entry["amount"] == None) and "text_as_parsed" in entry:
-            if entry["text_as_parsed"][0].isnumeric() and not entry["text_as_parsed"][1].isnumeric():
-                entry["amount"] = entry["text_as_parsed"][0]
-                if numeric(entry["amount"]) < 1:
-                    quarts = int(numeric(entry["amount"]) * 4)
-                if quarts == 1:
-                    entry["amount"] = f"{quarts} quart"
-                elif quarts < 1:
-                    entry["amount"] = f"{numeric(entry['amount']) * 4} quarts"
-                else:
-                    entry["amount"] = f"{quarts} quarts"
+    if "item" in entry:
+        # Convert 1/4 in a drink transaction to 1 quart
+        if entry["item"].lower() in drink_set:
+            if ("amount" not in entry or entry["amount"] == "" or entry["amount"] == None) and "text_as_parsed" in entry:
+                if entry["text_as_parsed"][0].isnumeric() and not entry["text_as_parsed"][1].isnumeric():
+                    entry["amount"] = entry["text_as_parsed"][0]
+                    if numeric(entry["amount"]) < 1:
+                        quarts = int(numeric(entry["amount"]) * 4)
+                    if quarts == 1:
+                        entry["amount"] = f"{quarts} quart"
+                    elif quarts < 1:
+                        entry["amount"] = f"{numeric(entry['amount']) * 4} quarts"
+                    else:
+                        entry["amount"] = f"{quarts} quarts"
 
     if "Folio Reference" in entry:
         entry["folio_reference"] = entry["Folio Reference"]
