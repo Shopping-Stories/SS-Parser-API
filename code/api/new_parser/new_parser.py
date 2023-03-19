@@ -890,24 +890,62 @@ def get_transactions(df: pd.DataFrame):
         for transaction in transactions:
             # Fix up people and mentions fields before we check genmat
             entry = transaction
+
+            # If we see Per [person] at end of transaction, it automatically should apply to all items in the transaction
+            if "original_entry" in transaction:
+                mtch = search(r"\[?[pP]er\]?(( \[?[A-Za-z\.]+\]?){1,4})\s*$", transaction["original_entry"])
+                if mtch:
+                    if "people" in entry:
+                        entry["people"].append(mtch.group(1).replace("[", "").replace("]", "").strip())
+                    else:
+                        entry["people"] = [mtch.group(1).replace("[", "").replace("]", "").strip(), ]
+
             if "people" in entry:
                 # If people identified are "wife", lookup who that refers to, if there is only a first name, write down the acct holder as well to help later on
                 newPeople = []
-                for word in frozenset(entry["people"]):
-                    if word in relationships:
-                        if "account_name" in entry:
-                            name = Person(entry["account_name"])[word]
-                            if len(name) == 1:
-                                newPeople.append(Person(name[0]).__str__())
-                            elif len(name) > 1:
-                                newPeople.append(f"{' or '.join([Person(x).__str__() for x in name])}")
-                            else:
-                                newPeople.append(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}")
-                    elif len(word.lower().replace(".", "").removeprefix("mr ").removeprefix("ms ").removeprefix("mrs ").split(" ")) == 1:
-                        if "account_name" in entry:
-                            newPeople.append(f"{word} from acct {Person(entry['account_name'].lower().strip())}")
-                    else:
+                lowerPeople = set()
+                # print(frozenset([x.lower() for x in entry["people"]]))
+                for word in frozenset([x.lower() for x in entry["people"]]):
+                    if " of " in word or " from acct " in word or " or " in word:
                         newPeople.append(word)
+                        continue
+                    
+                    # Ignore common non-people words that often get recognized as people
+                    if word.lower().replace(".", "").strip().removeprefix("your ").strip() in ["folio", "account", "order", "nett", "contra", "sundry", "sundries", "sterling", "currency", "insurance", "london", "occoquan", "pohick", "virginia", "quantico", "vizt"]:
+                        if "mentions" in entry:
+                            entry["mentions"].append(word)
+                        else:
+                            entry["mentions"] = [word, ]
+                        continue
+                    
+                    elif word.lower().strip().split(" ")[0] in relationships:
+                        rship = word.lower().split(" ")[0]
+                        if "account_name" in entry:
+                            name = Person(entry["account_name"])[rship]
+                            if len(name) == 1:
+                                if name[0].lower() not in lowerPeople:
+                                    newPeople.append(Person(name[0]).__str__())
+                                    lowerPeople.add(Person(name[0]).__str__().lower())
+                            elif len(name) > 1:
+                                if f"{' or '.join([Person(x).__str__() for x in name])}".lower() not in lowerPeople:
+                                    lowerPeople.add(f"{' or '.join([Person(x).__str__() for x in name])}".lower())
+                                    newPeople.append(f"{' or '.join([Person(x).__str__() for x in name])}")
+                            else:
+                                if f"{Person(word)} of {Person(entry['account_name'].lower().strip())}".lower() not in lowerPeople:
+                                    lowerPeople.add(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}".lower())
+                                    newPeople.append(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}")
+                    
+                    elif len(word.lower().replace(".", "").removeprefix("mr ").removeprefix("ms ").removeprefix("mrs ").removeprefix("your ").split(" ")) == 1:
+                        if "account_name" in entry:
+                            if word.lower() not in ["folio", "account", "order", "nett", "contra", "sundry", "sundries", "sterling", "currency", "insurance", "london", "occoquan", "pohick", "virginia", "quantico", "vizt"]:
+                                if f"{word} from acct {Person(entry['account_name'].lower().strip())}".lower() not in lowerPeople:
+                                    lowerPeople.add(f"{word} from acct {Person(entry['account_name'].lower().strip())}".lower())
+                                    newPeople.append(f"{word} from acct {Person(entry['account_name'].lower().strip())}")
+
+                    else:
+                        if word.lower() not in lowerPeople:
+                            lowerPeople.add(word.lower())
+                            newPeople.append(word)
 
                 del entry["people"]
                 entry["people"] = newPeople
@@ -946,7 +984,10 @@ def get_transactions(df: pd.DataFrame):
                             if word in namelist:
                                 if len(word.split(" ")) == 1:
                                     if "account_name" in entry:
-                                        newPeople.append(f"{Person(word)} from acct {Person(entry['account_name'].lower().strip())}")
+                                        if word.lower() not in ["folio", "account", "order", "nett", "contra", "sundry", "sundries", "sterling", "currency", "insurance", "london", "occoquan", "pohick", "virginia", "quantico", "vizt"]:
+                                            newPeople.append(f"{Person(word)} from acct {Person(entry['account_name'].lower().strip())}")
+                                        else:
+                                            newMentions.append(oword)
                                     else:
                                         newMentions.append(oword)
                                 else:
@@ -961,9 +1002,15 @@ def get_transactions(df: pd.DataFrame):
                     entry["people"] += newPeople
                 else:
                     entry["people"] = newPeople
+                
+            if "tobacco_marks" not in transaction:
+                transaction["tobacco_marks"] = []
 
-                entry["people"] = [x for x in frozenset(entry["people"])]
+            if "people" in entry:
+                entry["people"] = [x for x in frozenset([x.lower() for x in entry["people"]])]
 
+
+        
         # If there is definitely a person mentioned in this row
         if row_context["genmat"][0] == 1:
             if any([("people" in transaction) or (len(transaction["tobacco_marks"]) > 0) for transaction in transactions if "entry_id" in transaction and transaction["entry_id"] == row_context["genmat"][1]]):

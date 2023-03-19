@@ -93,7 +93,7 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     Tests parser on a hardcoded file for dev purposes.
     """
     folder = "..\\data\\Amelia\\"
-    file = "C_1760_002_FINAL_.xlsx"
+    file = "C_1760_023_FINAL_.xlsx"
     task = parse_folder
     bg_tasks.add_task(task, folder)
     return Message(message="Started parser.")
