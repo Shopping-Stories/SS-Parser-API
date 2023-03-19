@@ -893,12 +893,12 @@ def get_transactions(df: pd.DataFrame):
 
             # If we see Per [person] at end of transaction, it automatically should apply to all items in the transaction
             if "original_entry" in transaction:
-                mtch = search(r"\[?[pP]er\]?(( \[?[A-Za-z\.]+\]?){1,4})\s*$", transaction["original_entry"])
+                mtch = search(r"\[?(([pP]er)|([fF]or))\]?(( \[?[A-Za-z\.]+\]?){1,4})\s*$", transaction["original_entry"])
                 if mtch:
                     if "people" in entry:
-                        entry["people"].append(mtch.group(1).replace("[", "").replace("]", "").strip())
+                        entry["people"].append(mtch.group(4).replace("[", "").replace("]", "").strip())
                     else:
-                        entry["people"] = [mtch.group(1).replace("[", "").replace("]", "").strip(), ]
+                        entry["people"] = [mtch.group(4).replace("[", "").replace("]", "").strip(), ]
 
             if "people" in entry:
                 # If people identified are "wife", lookup who that refers to, if there is only a first name, write down the acct holder as well to help later on
