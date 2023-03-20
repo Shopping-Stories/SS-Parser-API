@@ -476,6 +476,14 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
         entries_collection.update_one({'_id': ObjectId(entry_id)}, {"$unset": {"peopleID": ""}})
         _create_people_rel(new_values)
 
+    currency_keys = ["pounds", "shillings", "pennies", "farthings"]
+    sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster", "farthings_ster"]
+    ledger_keys = ["reel", "folio_year", "folio_page", "entry_id"]
+
+    _create_object(new_values, currency_keys, "currency")
+    _create_object(new_values, sterling_keys, "sterling")
+    _create_object(new_values, ledger_keys, "ledger")
+
     new_values_set = {"$set": new_values}
     entries_collection.update_one({'_id': ObjectId(entry_id)}, new_values_set)
 
