@@ -46,9 +46,29 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     contents.append({"ledger.folio_page": page})
 
   query = {"$and": contents}
-  results = entries.find(query)
+  res = entries.find(query)
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
+  res_ids = []
+  for entry in res:
+    res_ids.append(entry['_id'])
+
+  results = entries.aggregate([
+    {"$match": {"_id": {"$in": res_ids}}},
+    {"$lookup": {
+      "from": "items",
+      "localField": "itemID",
+      "foreignField": "_id",
+      "as": "related_items"
+    }},
+    {"$lookup": {
+      "from": "people",
+      "localField": "peopleID",
+      "foreignField": "_id",
+      "as": "related_people"
+    }}
+  ])
+
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}
@@ -71,19 +91,19 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   entries = db['entries']
   _ids = []
 
-  itemids = items.find({"item": {"$regex": item, "$options": 'i'}})
+  itemids = items.find({"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}})
   for i in itemids:
     _ids.append(i['_id'])
 
   catids = categories.find({"$and": [
-      {"item": {"$regex": item, "$options": 'i'}},
+      {"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}},
       {"category": {"$regex": cat, "$options": 'i'}},
       {"subcategory": {"$regex": subcat, "$options": 'i'}}
     ]})
   for i in catids:
     _ids.append(i['_id'])
 
-  contents = [{"$or": [{"itemID": {"$in": _ids}}, {"item": {"$regex": item, "$options": 'i'}}]}]
+  contents = [{"$or": [{"itemID": {"$in": _ids}}, {"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}}]}]
 
   if(amt!=""):
     contents.append({"amount": {"$regex": amt, "$options": 'i'}})
@@ -99,9 +119,29 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     contents.append({"ledger.folio_page": page})
 
   query = {"$and": contents}
-  results = entries.find(query)
+  res = entries.find(query)
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
+  res_ids = []
+  for entry in res:
+    res_ids.append(entry['_id'])
+
+  results = entries.aggregate([
+    {"$match": {"_id": {"$in": res_ids}}},
+    {"$lookup": {
+      "from": "items",
+      "localField": "itemID",
+      "foreignField": "_id",
+      "as": "related_items"
+    }},
+    {"$lookup": {
+      "from": "people",
+      "localField": "peopleID",
+      "foreignField": "_id",
+      "as": "related_people"
+    }}
+  ])
+
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}
