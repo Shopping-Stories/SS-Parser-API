@@ -480,9 +480,12 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
     sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster", "farthings_ster"]
     ledger_keys = ["reel", "folio_year", "folio_page", "entry_id"]
 
-    _create_object(new_values, currency_keys, "currency")
-    _create_object(new_values, sterling_keys, "sterling")
-    _create_object(new_values, ledger_keys, "ledger")
+    if all([x in new_values for x in currency_keys]):
+        _create_object(new_values, currency_keys, "currency")
+    if all([x in new_values for x in sterling_keys]):
+        _create_object(new_values, sterling_keys, "sterling")
+    if all([x in new_values for x in ledger_keys]):
+        _create_object(new_values, ledger_keys, "ledger")
 
     new_values_set = {"$set": new_values}
     entries_collection.update_one({'_id': ObjectId(entry_id)}, new_values_set)
