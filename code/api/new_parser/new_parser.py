@@ -1132,7 +1132,11 @@ def _clean_pass(entry: dict):
                     entry["amount"] = entry["text_as_parsed"][0]
                     if numeric(entry["amount"]) < 1:
                         quarts = int(numeric(entry["amount"]) * 4)
-                    if quarts == 1:
+                    else:
+                        quarts = None
+                    if quarts is None:
+                        pass
+                    elif quarts == 1:
                         entry["amount"] = f"{quarts} quart"
                     elif quarts < 1:
                         entry["amount"] = f"{numeric(entry['amount']) * 4} quarts"

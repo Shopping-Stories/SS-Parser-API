@@ -104,7 +104,7 @@ class ParserOutput(BaseModel):
     reel: Optional[int]
     store_owner: Optional[str]
     folio_year: Optional[str]
-    folio_page: Optional[int]
+    folio_page: Optional[str]
     folio_reference: Optional[str]
     entry_id: Optional[str]
     date_year: Optional[str] = Field(alias="Date Year")
