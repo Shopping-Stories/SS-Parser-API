@@ -2,6 +2,8 @@ from typing import List, Tuple
 from re import split, search
 from unicodedata import numeric
 
+month_to_number = {"january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6, "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12}
+
 # Adds to or by to a list of entries, using the first entry in the list 
 # to determine whether to add to or by.
 def add_to_by(entries: List[str]):
@@ -63,6 +65,7 @@ def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str,
     # Ignore people and dates because they are definitely not the item being purchased
     found_trans = []
     mltbe = False
+    ignoring_prices = False
     cur_entry = []
     found_noun_last = False
     found_price_last = False
@@ -71,12 +74,19 @@ def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str,
     # print(entry)
     for word, info, pos in entry:
         cur_entry.append((word, info, pos))
-        # If we have a multiline tobacco entry, pass it all through as one entry.
+        # If we have a multiline tobacco entry, or otherwise don't want to split up entry by price locations, pass it all through as one entry.
         if pos == "MLTBE":
             mltbe = True
         
         if mltbe:
             continue
+        
+        if pos == "IGNORE_PRICES":
+            ignoring_prices = True
+            if cur_entry:
+                cur_entry.pop()
+
+        appd = False
 
         # Allow prices to be followed by per [person] or price per [person]
         if app_until_to_by:
@@ -86,24 +96,27 @@ def handle_multiple_prices(entry: List[Tuple[str, str, str]]) -> List[Tuple[str,
                 if cur_entry:
                     cur_entry.pop()
                 found_trans[-1].append((word, info, pos))
+                appd = True
                 app_until_to_by = False
             else:
                 if cur_entry:
                     cur_entry.pop()
-                found_trans[-1].append((word, info, pos))
+                if pos != "IGNORE_PRICES":
+                    found_trans[-1].append((word, info, pos))
+                appd = True
 
-        if found_price_last and (word.lower() in {"per", "[per]"} or info == "PRICE"):
-            if info == "PRICE":
-                found_trans[-1].append((word, info, pos))
+        if found_price_last and (word.lower() in {"per", "[per]"} or info == "PRICE" or "fancy_" in pos or pos == "IGNORE_PRICES"):
             app_until_to_by = True
-            if cur_entry:
+            if cur_entry and cur_entry[-1] == (word, info, pos):
                 cur_entry.pop()
-            found_trans[-1].append((word, info, pos))
+            if pos != "IGNORE_PRICES":
+                if not appd:
+                    found_trans[-1].append((word, info, pos))
         
         elif found_price_last:
             found_price_last = False
 
-        if info == "PRICE" and found_noun_last:
+        if info == "PRICE" and found_noun_last and not ignoring_prices:
             found_noun_last = False
             found_price_last = True
             found_trans.append(cur_entry)

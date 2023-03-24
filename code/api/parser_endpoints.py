@@ -6,6 +6,7 @@ from .new_parser.parser_manager import start_parse, check_progress
 from .new_parser.new_parser import parse_file_and_dump, parse_folder
 import traceback
 from base64 import b64decode
+import os
 
 router = APIRouter()
 
@@ -92,11 +93,52 @@ def test_parsing(bg_tasks: BackgroundTasks) -> Message:
     """
     Tests parser on a hardcoded file for dev purposes.
     """
-    folder = "..\\data\\Mahlon\\"
-    file = "C_1760_102_FINAL_.xlsx"
+    folder = "..\\data\\Amelia\\"
+    file = "C_1760_012_FINAL_.xls"
     task = parse_file_and_dump
     bg_tasks.add_task(task, folder, file)
     return Message(message="Started parser.")
+
+
+@router.get("/parse_all", tags=["Parser Management"], response_model=Message)
+def test_parsing(bg_tasks: BackgroundTasks) -> Message:
+    """
+    Parses all data in a hardcoded folder.
+    """
+    folders = ["..\\data\\Amelia\\", "..\\data\\Mahlon\\"]
+    task = parse_file_and_dump
+    
+    filenames = []
+
+    for folder in folders:
+        files = os.listdir(folder)
+        for file in files:
+            if file.endswith(".xls") or file.endswith(".xlsx"):
+                filenames.append(file)
+                bg_tasks.add_task(task, folder, file)
+    
+    return Message(message=f"Parsing: {', '.join(filenames)}")
+
+@router.get("/reparse_exceptions", tags=["Parser Management"], response_model=Message)
+def parse_exceptions(bg_tasks: BackgroundTasks) -> Message:
+    """
+    Runs parser on any files resulting in exceptions from a previous parse.
+    """
+
+    folders = ["..\\data\\Amelia\\", "..\\data\\Mahlon\\"]
+    task = parse_file_and_dump
+    
+    filenames = []
+
+    for folder in folders:
+        files = os.listdir(folder)
+        for file in files:
+            if file.endswith(".exception"):
+                filenames.append(file.removesuffix(".exception"))
+                bg_tasks.add_task(task, folder, file.removesuffix(".exception"))
+    
+    return Message(message=f"Parsing: {', '.join(filenames)}")
+
 
 @router.post("/upload/", tags=["Parser Management"], response_model=Message)
 def upload_file(inc_file: IncomingFile) -> Message:

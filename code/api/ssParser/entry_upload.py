@@ -362,18 +362,31 @@ def insert_parsed_entries(parsed_entry: POutputList, background_tasks: Backgroun
     try:
         alreadyFound = set()
         def checkDuplicates(entry):
-            if "hash" in entry:
+            if "hash" in entry and type(entry) is not str:
                 if entry["hash"] in alreadyFound:
                     return f"ERROR: Entry with hash {entry['hash']} already being inserted. Not inserting same entry twice."
                 else:
                     alreadyFound.add(entry["hash"])
-                    print(alreadyFound)
+                    # print(alreadyFound)
                     return entry
             else:
-                return f"ERROR: Could not hash entry {entry}."
+                return f"ERROR: Could not hash entry, or other error occured... {entry}."
         
         new_entries = [_make_db_entry(x) for x in parsed_entry.entries]
-        new_entries = [checkDuplicates(x) for x in new_entries]
+        
+        # Do not insert duplicate entries
+        new_new_entries = []
+        for x in new_entries:
+            if type(x) is str:
+                new_new_entries.append(x)
+            else:  
+                n = checkDuplicates(x)
+                if type(n) is str:
+                    pass
+                else:
+                    new_new_entries.append(n)
+        new_entries = new_new_entries
+
     except Exception as e:
         return Message(message="ERROR: " + format_exc(), error=True)
 
@@ -522,6 +535,17 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
     if "people" in new_values:
         entries_collection.update_one({'_id': ObjectId(entry_id)}, {"$unset": {"peopleID": ""}})
         _create_people_rel(new_values)
+
+    currency_keys = ["pounds", "shillings", "pennies", "farthings"]
+    sterling_keys = ["pounds_ster", "shillings_ster", "pennies_ster", "farthings_ster"]
+    ledger_keys = ["reel", "folio_year", "folio_page", "entry_id"]
+
+    if all([x in new_values for x in currency_keys]):
+        _create_object(new_values, currency_keys, "currency")
+    if all([x in new_values for x in sterling_keys]):
+        _create_object(new_values, sterling_keys, "sterling")
+    if all([x in new_values for x in ledger_keys]):
+        _create_object(new_values, ledger_keys, "ledger")
 
     new_values_set = {"$set": new_values}
     entries_collection.update_one({'_id': ObjectId(entry_id)}, new_values_set)
@@ -684,8 +708,8 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
     if person2_data == None:
         return Message(message=f"ERROR: {person2_name} not found.", error=True)
         
-    person1_id = person1_data['_id'] 
-    person2_id = person2_data['_id'] 
+    person1_id = person1_data['_id']
+    person2_id = person2_data['_id']
 
     if person1_id == person2_id:
         return Message(message=f"ERROR: Both people are the same.", error=True)
@@ -714,10 +738,9 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
     entries_collection.update_many({'accountHolderID': person1_id}, {'$set': {'accountHolderID': new_person_id, 'account_name': new_name}})
     entries_collection.update_many({'accountHolderID': person2_id}, {'$set': {'accountHolderID': new_person_id, 'account_name': new_name}})
 
-    entries_collection.update_many({'peopleID': person1_id}, {'$push': {'peopleID': new_person_id, 'people': new_name}})
-    entries_collection.update_many({'peopleID': person2_id}, {'$push': {'peopleID': new_person_id, 'people': new_name}})
-    entries_collection.update_many({'peopleID': person1_id}, {'$pull': {'peopleID': person1_id, 'people': person1_name}})
-    entries_collection.update_many({'peopleID': person2_id}, {'$pull': {'peopleID': person2_id, 'people': person2_name}})
+    entries_collection.update_many({"$or": [{'peopleID': person1_id}, {'peopleID': person2_id}]}, {'$push': {'peopleID': new_person_id}})
+    entries_collection.update_many({'peopleID': new_person_id}, {'$pull': {'peopleID': {"$in": [person1_id, person2_id]}, 'people': {"$in": [person1_name, person2_name]}}})
+    entries_collection.update_many({'peopleID': new_person_id}, {'$push': {'people': new_name}})
   
     # update related people in people
     people_collection.update_many({'related': person1_id}, {'$push': {'related': new_person_id}})

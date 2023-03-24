@@ -3,17 +3,18 @@ from sys import argv
 from os import listdir
 from os import path
 import traceback
-from re import split, search, sub
+from re import split, search, sub, match
 from itertools import chain
 from .british_money import Money
 from json import dump
 from typing import List
-from .parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col
+from .parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col, month_to_number
 from .preprocessor import preprocess
 from .indices import item_set, drink_set
 from unicodedata import numeric
 import logging
 from itertools import combinations
+from .people import relationships, Person, namelist
 
 # NOTE: All functions in this file have side effects which is why they are in this file and not in parser_utils.
 # parser_utils contains only functions with NO side effects.
@@ -30,11 +31,11 @@ def print_debug(string: str = ""):
 # save all values in the currency columns in the row context
 def _setup_row_currency(row_context: dict, row, entries, transactions_context: dict):
     # If there is no currency money, mark as contextless transaction
-    if all([get_col(row, x) == "-" for x in ["L Currency", "s Currency", "d Currency", "L Sterling", "s Sterling", "d Sterling"]]):
+    if all([get_col(row, x) in ["-", " -", "- "] for x in ["L Currency", "s Currency", "d Currency", "L Sterling", "s Sterling", "d Sterling"]]):
         row_context["currency_totaling_contextless"] = True
     
     # If there is Colony Currency Money, remember it
-    elif not all([get_col(row, x) == "-" for x in ["L Currency", "s Currency", "d Currency"]]):
+    elif not all([get_col(row, x) in ["-", " -", "- "] for x in ["L Currency", "s Currency", "d Currency"]]):
         row_context["currency_type"] = "Currency"
         row_context["pounds"] = get_col(row, "L Currency")
         row_context["shillings"] = get_col(row, "s Currency")
@@ -55,7 +56,7 @@ def _setup_row_currency(row_context: dict, row, entries, transactions_context: d
     
     # If there is British Sterling Currency Money, remember it, setting currency type to both if there is both
     # Colony currency and sterling.
-    if not all([get_col(row, x) == "-" for x in ["L Sterling", "s Sterling", "d Sterling"]]):
+    if not all([get_col(row, x) in ["-", " -", "- "] for x in ["L Sterling", "s Sterling", "d Sterling"]]):
         if "currency_type" in row_context:
             row_context["currency_type"] = "Both"
         else:
@@ -82,7 +83,7 @@ def _setup_row_currency(row_context: dict, row, entries, transactions_context: d
 def _remember_nullable_cols(row_context: dict, nullable_cols: List[str], row):
     for entry_name in nullable_cols:
         val = get_col(row, entry_name)
-        if val == "-" or val == "" or str(val) == "nan":
+        if val in ["-", " -", "- "] or val == "" or str(val) == "nan":
             pass
         else:
             if entry_name == "Quantity":
@@ -120,7 +121,10 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
                 add_error(transactions[-1], f"Commodity totaling failed, total was {total_commodity}, expected was {row_context['Quantity']}", get_col(row, "Entry"))
         
         # If currency totaling successful do nothing
-        if row_context["currency_type"] == "Both":
+        if "currency_type" not in row_context:
+            pass
+
+        elif row_context["currency_type"] == "Both":
             if total_money_curr == row_context["money_obj"] and total_money_ster == row_context["money_obj_ster"]:
                 pass
             # Otherwise add error
@@ -128,6 +132,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
                 endl = "\n"
                 print_debug(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotals were {total_money_curr} and {total_money_ster}, and expected totals were {row_context['money_obj']} and {row_context['money_obj_ster']}")
                 add_error(transactions[-1], f"Currency totaling failed, totals were {total_money_curr} and {total_money_ster}, expected were {row_context['money_obj']} and {row_context['money_obj_ster']}", get_col(row, "Entry"))
+        
         elif row_context["currency_type"] == "Sterling":
             if total_money_ster == row_context["money_obj_ster"]:
                 pass
@@ -136,6 +141,7 @@ def _verify_ender_totaling(row_context: dict, transactions: list, row):
                 endl = "\n"
                 print_debug(f"Error: Totaling failed on entries: {''.join(chain(*[str(x) + endl for x in transactions]))}\nTotal was {total_money_ster}, and expected total was {row_context['money_obj_ster']}")
                 add_error(transactions[-1], f"Currency totaling failed, total was {total_money_ster}, expected was {row_context['money_obj_ster']}", get_col(row, "Entry"))
+        
         elif row_context["currency_type"] == "Currency":
             if total_money_curr == row_context["money_obj"]:
                 pass
@@ -189,7 +195,7 @@ def get_transactions(df: pd.DataFrame):
             row_context["currency_totaling_contextless"] = False
 
         # Detect if we need to do commodity totaling
-        if all([get_col(row, x) == "-" for x in ["Quantity", "Commodity"]]):
+        if all([get_col(row, x) in ["-", " -", "- "] for x in ["Quantity", "Commodity"]]):
             row_context["commodity_totaling_contextless"] = True
         
         # If we find both a quantity and a commodity, mark the transaction for commodity totaling
@@ -215,7 +221,7 @@ def get_transactions(df: pd.DataFrame):
 
         row_context["reel"] = get_col(row, "Reel")
         row_context["store_owner"] = get_col(row, "Owner")
-        row_context["folio_year"] = get_col(row, "Year")
+        row_context["folio_year"] = get_col(row, "Folio Year")
         row_context["folio_page"] = get_col(row, "Folio Page")
         row_context["entry_id"] = str(get_col(row, "EntryID"))
         row_context["store"] = get_col(row, "Store")
@@ -234,6 +240,29 @@ def get_transactions(df: pd.DataFrame):
         if entries and entries[0] == "BAD_ENTRY":
             add_error(row_context, f"Bad entry: {entries[-1]}.", entries)
             transaction = {}
+            # Still add in everything from row context to assist in manual editing process later.
+            for key, value in row_context.items():
+                if "pounds" in key or "shillings" in key or "pennies" in key or "farthings" in key:
+                    pass
+                else:
+                    if key == "money_obj":
+                        currency = row_context["money_obj"]
+                        transaction["original_money_obj"] = value
+                        transaction["pounds"] = currency["pounds"]
+                        transaction["shillings"] = currency["shillings"]
+                        transaction["pennies"] = currency["pennies"]
+                        transaction["farthings"] = currency["farthings"]
+                    elif key == "money_obj_ster":
+                        currency = row_context["money_obj_ster"]
+                        transaction["pounds_ster"] = currency["pounds"]
+                        transaction["shillings_ster"] = currency["shillings"]
+                        transaction["pennies_ster"] = currency["pennies"]
+                        transaction["farthings_ster"] = currency["farthings"]
+                        transaction["original_money_obj_ster"] = value
+                    elif key not in transaction:
+                        if "farthings" not in key:
+                            transaction[key] = value
+            
             add_error(transaction, f"Bad entry: {entries[-1]}.", entries)
             trans_in_row_counter += 1
             # Break the transaction list when the account holder changes if a total has not occurred.
@@ -296,6 +325,10 @@ def get_transactions(df: pd.DataFrame):
                             transaction["item"] += " & " + word
                             continue
                         
+                        # Ignore IGNORE_PRICES tokens
+                        if pos == "IGNORE_PRICES":
+                            continue
+
                         if addPriceToItem:
                             addPriceToItem = False
 
@@ -309,9 +342,26 @@ def get_transactions(df: pd.DataFrame):
                             else:
                                 print_debug(f"Error, unrecognized transaction type: {word} in {entry}")
 
+                        elif "fancy_" in pos:
+                            unit = pos.split("_")[1]
+
+                            if unit == "pounds":
+                                transaction["real_price"] = word
+                            elif unit != "frac":
+                                transaction["real_price"] += "/" + word
+                            elif unit == "frac" and word != "0":
+                                transaction["real_price"] += " " + word
+
+                        # Handle our date regex to fix dates later
+                        elif pos == "DATE_REGEX":
+                            if info == "DATE.MONTH":
+                                transaction["date_month"] = word
+                            
+                            elif info == "DATE.DAY":
+                                transaction["date_day"] = word
+
                         # Handle multiline tobacco entries
                         elif pos == "MLTBE":
-                            # Remember tobacco locations at row level
                             if info == "TB_LOC":
                                 transaction["tobacco_location"] = word
 
@@ -628,6 +678,12 @@ def get_transactions(df: pd.DataFrame):
                         
                     # Now we are done writing things down
                     
+                    # If we saw a fancy price, override the price with that and unset price_is_bulk
+                    if "real_price" in transaction:
+                        transaction["price"] = transaction["real_price"]
+                        if "price_is_bulk" in transaction:
+                            del transaction["price_is_bulk"]
+
                     # Make sure we have an item in our transaction
                     if "item" not in transaction and "type" not in transaction:
                         # Check if any of the nouns are probably the item
@@ -681,6 +737,9 @@ def get_transactions(df: pd.DataFrame):
                             transaction["amount"] = poss_amounts[0]
                         else:
                             transaction["poss_amounts"] = poss_amounts
+                    
+                    if "amount" in transaction:
+                        transaction["amount"] = transaction["amount"].strip()
 
                     # If there is not an item in the transaction and it is not a special type (e.g. Liber or Cash), error out.
                     if "item" not in transaction and "type" not in transaction:
@@ -782,7 +841,10 @@ def get_transactions(df: pd.DataFrame):
         # Should not be able to raise errors
         if transactions and trans_in_row_counter == 1 and not row_context["currency_totaling_contextless"]:
             # If both sterling and currency
-            if row_context["currency_type"] == "Both":
+            if "currency_type" not in row_context:
+                pass
+
+            elif row_context["currency_type"] == "Both":
                 currency = row_context["money_obj"]
                 transactions[-1]["pounds"] = currency["pounds"]
                 transactions[-1]["shillings"] = currency["shillings"]
@@ -825,6 +887,130 @@ def get_transactions(df: pd.DataFrame):
             if "Quantity" in row_context:
                 transactions[-1]["Quantity"] = row_context["Quantity"]
 
+        for transaction in transactions:
+            # Fix up people and mentions fields before we check genmat
+            entry = transaction
+
+            # If we see Per [person] at end of transaction, it automatically should apply to all items in the transaction
+            if "original_entry" in transaction:
+                mtch = search(r"\[?(([pP]er)|([fF]or))\]?(( \[?[A-Za-z\.]+\]?){1,4})\s*$", transaction["original_entry"])
+                if mtch:
+                    if "people" in entry:
+                        entry["people"].append(mtch.group(4).replace("[", "").replace("]", "").strip())
+                    else:
+                        entry["people"] = [mtch.group(4).replace("[", "").replace("]", "").strip(), ]
+
+            if "people" in entry:
+                # If people identified are "wife", lookup who that refers to, if there is only a first name, write down the acct holder as well to help later on
+                newPeople = []
+                lowerPeople = set()
+                # print(frozenset([x.lower() for x in entry["people"]]))
+                for word in frozenset([x.lower() for x in entry["people"]]):
+                    if " of " in word or " from acct " in word or " or " in word:
+                        newPeople.append(word)
+                        continue
+                    
+                    # Ignore common non-people words that often get recognized as people
+                    if word.lower().replace(".", "").strip().removeprefix("your ").strip() in ["folio", "account", "order", "nett", "contra", "sundry", "sundries", "sterling", "currency", "insurance", "london", "occoquan", "pohick", "virginia", "quantico", "vizt"]:
+                        if "mentions" in entry:
+                            entry["mentions"].append(word)
+                        else:
+                            entry["mentions"] = [word, ]
+                        continue
+                    
+                    elif word.lower().strip().split(" ")[0] in relationships:
+                        rship = word.lower().split(" ")[0]
+                        if "account_name" in entry:
+                            name = Person(entry["account_name"])[rship]
+                            if len(name) == 1:
+                                if name[0].lower() not in lowerPeople:
+                                    newPeople.append(Person(name[0]).__str__())
+                                    lowerPeople.add(Person(name[0]).__str__().lower())
+                            elif len(name) > 1:
+                                if f"{' or '.join([Person(x).__str__() for x in name])}".lower() not in lowerPeople:
+                                    lowerPeople.add(f"{' or '.join([Person(x).__str__() for x in name])}".lower())
+                                    newPeople.append(f"{' or '.join([Person(x).__str__() for x in name])}")
+                            else:
+                                if f"{Person(word)} of {Person(entry['account_name'].lower().strip())}".lower() not in lowerPeople:
+                                    lowerPeople.add(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}".lower())
+                                    newPeople.append(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}")
+                    
+                    elif len(word.lower().replace(".", "").removeprefix("mr ").removeprefix("ms ").removeprefix("mrs ").removeprefix("your ").split(" ")) == 1:
+                        if "account_name" in entry:
+                            if word.lower() not in ["folio", "account", "order", "nett", "contra", "sundry", "sundries", "sterling", "currency", "insurance", "london", "occoquan", "pohick", "virginia", "quantico", "vizt"]:
+                                if f"{word} from acct {Person(entry['account_name'].lower().strip())}".lower() not in lowerPeople:
+                                    lowerPeople.add(f"{word} from acct {Person(entry['account_name'].lower().strip())}".lower())
+                                    newPeople.append(f"{word} from acct {Person(entry['account_name'].lower().strip())}")
+
+                    else:
+                        if word.lower() not in lowerPeople:
+                            lowerPeople.add(word.lower())
+                            newPeople.append(word)
+
+                del entry["people"]
+                entry["people"] = newPeople
+
+            if "mentions" in entry:
+                # Deduplicate entry mentions
+                entry["mentions"] = [x for x in frozenset(entry["mentions"])]
+                
+                # Cleanup any extra people in mentions
+                newMentions = []
+                newPeople = []
+                for oword in entry["mentions"]:
+                    # If the word is a relationship word like Wife, attempt to figure out who the wife is, otherwise put Wife of <Acct holder>
+                    word = oword.lower().strip()
+                    if word in relationships:
+                        if "account_name" in entry:
+                            name = Person(entry["account_name"])[word]
+                            if len(name) == 1:
+                                newPeople.append(Person(name[0]).__str__())
+                            elif len(name) > 1:
+                                newPeople.append(f"{' or '.join([Person(x).__str__() for x in name])}")
+                            else:
+                                newPeople.append(f"{Person(word)} of {Person(entry['account_name'].lower().strip())}")
+                        else:
+                            newMentions.append(oword)
+                    else:
+                        if len(word.split(" ")) == 2:
+                            splitWord = word.split(" ")
+                            firstName = splitWord[0]
+                            lastName = splitWord[1]
+                            if firstName in namelist or (firstName + " " + lastName) in namelist:
+                                newPeople.append(firstName + " " + lastName)
+                            else:
+                                newMentions.append(oword)
+                        else:
+                            if word in namelist:
+                                if len(word.split(" ")) == 1:
+                                    if "account_name" in entry:
+                                        if word.lower() not in ["folio", "account", "order", "nett", "contra", "sundry", "sundries", "sterling", "currency", "insurance", "london", "occoquan", "pohick", "virginia", "quantico", "vizt"]:
+                                            newPeople.append(f"{Person(word)} from acct {Person(entry['account_name'].lower().strip())}")
+                                        else:
+                                            newMentions.append(oword)
+                                    else:
+                                        newMentions.append(oword)
+                                else:
+                                    newMentions.append(oword)
+                            else:
+                                newMentions.append(oword)
+                
+                del entry["mentions"]
+                entry["mentions"] = newMentions
+            
+                if "people" in entry:
+                    entry["people"] += newPeople
+                else:
+                    entry["people"] = newPeople
+                
+            if "tobacco_marks" not in transaction:
+                transaction["tobacco_marks"] = []
+
+            if "people" in entry:
+                entry["people"] = [x for x in frozenset([x.lower() for x in entry["people"]])]
+
+
+        
         # If there is definitely a person mentioned in this row
         if row_context["genmat"][0] == 1:
             if any([("people" in transaction) or (len(transaction["tobacco_marks"]) > 0) for transaction in transactions if "entry_id" in transaction and transaction["entry_id"] == row_context["genmat"][1]]):
@@ -893,7 +1079,12 @@ def _clean_pass(entry: dict):
         # Replace ballance with balance
         if entry["item"].lower() == "ballance":
             entry["item"] = "Balance"
-        
+    
+    if "item" not in entry:
+        if "type" in entry and entry["type"] == "Cash":
+            entry["item"] = "Currency"
+    
+    if "item" in entry:
         # Convert 1/4 in a drink transaction to 1 quart
         if entry["item"].lower() in drink_set:
             if "amount" in entry and type(entry["amount"]) is str and entry["amount"].isnumeric() and len(entry["amount"]) == 1:
@@ -901,22 +1092,19 @@ def _clean_pass(entry: dict):
                     quarts = int(numeric(entry["amount"]) * 4)
                     if quarts == 1:
                         entry["amount"] = f"{quarts} quart"
+                    elif quarts < 1:
+                        entry["amount"] = f"{numeric(entry['amount'] * 4)} quarts"
                     else:
                         entry["amount"] = f"{quarts} quarts"
             elif "amount" in entry and type(entry["amount"]) is str and len(entry["amount"].split("/")) == 2:
-                    quarts = int(entry["amount"].split("/")[0])
-                    if quarts == 1:
-                        entry["amount"] = f"{quarts} quart"
-                    else:
-                        entry["amount"] = f"{quarts} quarts"
-    
-    if "item" not in entry:
-        if "type" in entry and entry["type"] == "Cash":
-            entry["item"] = "Currency"
-    
-    if "mentions" in entry:
-        # Deduplicate entry mentions
-        entry["mentions"] = [x for x in frozenset(entry["mentions"])]
+                    try:
+                        quarts = int(entry["amount"].split("/")[0])
+                        if quarts == 1:
+                            entry["amount"] = f"{quarts} quart"
+                        else:
+                            entry["amount"] = f"{quarts} quarts"
+                    except:
+                        add_error(entry, f"Failed to parse amount: {entry['amount']}", "")
 
     if "amount" in entry:
         if type(entry["amount"]) is str:
@@ -936,12 +1124,35 @@ def _clean_pass(entry: dict):
     if "context" in entry:
         entry["text_as_parsed"] = " ".join([x if type(x) is str else x[0] for x in entry["context"]])
 
+    if "item" in entry:
+        # Convert 1/4 in a drink transaction to 1 quart
+        if entry["item"].lower() in drink_set:
+            if ("amount" not in entry or entry["amount"] == "" or entry["amount"] == None) and "text_as_parsed" in entry:
+                if entry["text_as_parsed"][0].isnumeric() and not entry["text_as_parsed"][1].isnumeric():
+                    entry["amount"] = entry["text_as_parsed"][0]
+                    if numeric(entry["amount"]) < 1:
+                        quarts = int(numeric(entry["amount"]) * 4)
+                    else:
+                        quarts = None
+                    if quarts is None:
+                        pass
+                    elif quarts == 1:
+                        entry["amount"] = f"{quarts} quart"
+                    elif quarts < 1:
+                        entry["amount"] = f"{numeric(entry['amount']) * 4} quarts"
+                    else:
+                        entry["amount"] = f"{quarts} quarts"
+
     if "Folio Reference" in entry:
         entry["folio_reference"] = entry["Folio Reference"]
 
     if "currency_colony" in entry:
-        if entry["currency_colony"] == "-" or (entry["currency_colony"] != entry["currency_colony"]):
+        if entry["currency_colony"] in ["-", " -", "- "] or (entry["currency_colony"] != entry["currency_colony"]):
             entry["currency_colony"] = "Unknown"
+
+    if "type" in entry:
+        if entry["type"] == "Cash":
+            entry["item"] = "Currency"
 
     return entry
 
@@ -956,10 +1167,19 @@ def parse(df: pd.DataFrame):
         toOut = [_clean_pass({key: val for key, val in x.items() if key != "money_obj" and key != "money_obj_ster"}) for x in transaction]
 
         # Group all entrys with the same id together in order to attempt to backsolve currency types on entries with both currency and sterling
+        # also used to fix dates when we see specific strings that should change the date
         entry_id_to_index = {}
         both_entries = set()
+        eids = []
+        eid_seen = set()
         for i, entry in enumerate(toOut):
             if "entry_id" in entry:
+                if entry["entry_id"] in eid_seen:
+                    pass
+                else: 
+                    eid_seen.add(entry["entry_id"])
+                    eids.append(entry["entry_id"])
+
                 if entry["entry_id"] in entry_id_to_index:
                     entry_id_to_index[entry["entry_id"]].append(i)
                 else:
@@ -969,7 +1189,19 @@ def parse(df: pd.DataFrame):
                     if entry["currency_type"] == "Both":
                         both_entries.add(entry["entry_id"])
 
-        # For all entries with same id, do the currency backsolving by instpecting all possible price sum combinations
+        # Fix dates when we see a string like "november 19th" telling us the date needs to change
+        for eid in eids:
+            curr_date = {"date_month": None, "date_day": None}
+            for i in entry_id_to_index[eid]:
+                if "date_month" in toOut[i]:
+                    curr_date["date_month"] = toOut[i]["date_month"]
+                    curr_date["date_day"] = toOut[i]["date_day"]
+                
+                if curr_date["date_month"] is not None:
+                    toOut[i]["_Month"] = month_to_number[curr_date["date_month"].lower()]
+                    toOut[i]["Day"] = curr_date["date_day"]
+
+        # For all entries with same id, do the currency backsolving by inspecting all possible price sum combinations
         for eid in both_entries:
             indices = entry_id_to_index[eid]
             try:
@@ -981,44 +1213,45 @@ def parse(df: pd.DataFrame):
                 
                 # print(to_backsolve)
                 
-                ster_sum = toOut[indices[0]]["original_money_obj_ster"]
-                curr_sum = toOut[indices[0]]["original_money_obj"]
-                # print(ster_sum)
-                # print(curr_sum)
+                if "original_money_obj" in toOut[indices[0]] and "original_money_obj_ster" in toOut[indices[0]]:
+                    ster_sum = toOut[indices[0]]["original_money_obj_ster"]
+                    curr_sum = toOut[indices[0]]["original_money_obj"]
+                    # print(ster_sum)
+                    # print(curr_sum)
 
-                valid_currrency_sums = []
-                valid_sterling_sums = []
-                for i in range(1, (len(to_backsolve) // 2) + 1):
-                    for combo in combinations(to_backsolve, i):
-                        combo = set(combo)
-                        complement = to_backsolve.difference(combo)
-                        combo_sum = sum(x[1] for x in combo)
-                        complement_sum = sum(x[1] for x in complement)
-                        # print(combo, combo_sum, ster_sum, combo_sum == ster_sum, curr_sum, combo_sum == curr_sum)
-                        # print(complement, complement_sum, curr_sum, complement_sum == curr_sum, ster_sum, complement_sum == ster_sum)
-                        if combo_sum == ster_sum and complement_sum == curr_sum:
-                            if combo not in valid_sterling_sums and complement not in valid_currrency_sums:
-                                valid_sterling_sums.append(combo)
-                                valid_currrency_sums.append(complement)
-                        elif combo_sum == curr_sum and complement_sum == ster_sum:
-                            if combo not in valid_currrency_sums and complement not in valid_sterling_sums:
-                                valid_sterling_sums.append(complement)
-                                valid_currrency_sums.append(combo)
+                    valid_currrency_sums = []
+                    valid_sterling_sums = []
+                    for i in range(1, (len(to_backsolve) // 2) + 1):
+                        for combo in combinations(to_backsolve, i):
+                            combo = set(combo)
+                            complement = to_backsolve.difference(combo)
+                            combo_sum = sum(x[1] for x in combo)
+                            complement_sum = sum(x[1] for x in complement)
+                            # print(combo, combo_sum, ster_sum, combo_sum == ster_sum, curr_sum, combo_sum == curr_sum)
+                            # print(complement, complement_sum, curr_sum, complement_sum == curr_sum, ster_sum, complement_sum == ster_sum)
+                            if combo_sum == ster_sum and complement_sum == curr_sum:
+                                if combo not in valid_sterling_sums and complement not in valid_currrency_sums:
+                                    valid_sterling_sums.append(combo)
+                                    valid_currrency_sums.append(complement)
+                            elif combo_sum == curr_sum and complement_sum == ster_sum:
+                                if combo not in valid_currrency_sums and complement not in valid_sterling_sums:
+                                    valid_sterling_sums.append(complement)
+                                    valid_currrency_sums.append(combo)
+                    
+                    if len(valid_currrency_sums) == 1 and len(valid_sterling_sums) == 1:
+                        for i, price in valid_currrency_sums[0]:
+                            toOut[i]["currency_type"] = "Currency"
+                        for i, price in valid_sterling_sums[0]:
+                            toOut[i]["currency_type"] = "Sterling"
+                    else:
+                        # print("Curr sums: ")
+                        # print(valid_currrency_sums)
+                        # print("Ster sums: ")
+                        # print(valid_sterling_sums)
+                        # print()
+                        raise OSError("Intentional error that shouldn't be raised by anything else in this code block")
                 
-                if len(valid_currrency_sums) == 1 and len(valid_sterling_sums) == 1:
-                    for i, price in valid_currrency_sums[0]:
-                        toOut[i]["currency_type"] = "Currency"
-                    for i, price in valid_sterling_sums[0]:
-                        toOut[i]["currency_type"] = "Sterling"
-                else:
-                    # print("Curr sums: ")
-                    # print(valid_currrency_sums)
-                    # print("Ster sums: ")
-                    # print(valid_sterling_sums)
-                    # print()
-                    raise OSError("Intentional error that shouldn't be raised by anything else in this code block")
-            
-            # OSError is our shorthand for when we cannot figure out which items are sterling and which are currency
+                # OSError is our shorthand for when we cannot figure out which items are sterling and which are currency
             except OSError:
                 for index in indices:
                     if "tobacco_entries" in toOut[index] and toOut[index]["tobacco_entries"]:

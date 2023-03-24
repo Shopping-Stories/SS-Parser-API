@@ -5,6 +5,7 @@ import spacy
 from itertools import chain
 from .indices import amount_set, item_set
 import logging
+from .people import namelist
 
             
 # Regex for the price
@@ -12,6 +13,13 @@ price_regex = r"((\d+[Lsdp])|((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+)))"
 
 # Regex for tobacco marks
 mark_regex = r"\[TM:\s+(\d+)\s*(\w+)\]"
+
+# Matches the form Jan. [January] 5th To, looking for the "5," "January," and the To
+# in order to change the order around and ensure dates get recognized without a hitch
+month_regex = r"(([Jj]an|[Ff]eb|[Mm]ar|[Aa]pr|[Mm]ay|[Jj]un|[Jj]ul|[Aa]ug|[Ss]ep|[Oo]ct|[Nn]ov|[Dd]ec)[\.a-z]*[^\S\r\n]{0,3})?\[?([Jj]anuary|[Ff]ebruary|[Mm]arch|[Aa]pril|[Mm]ay|[Jj]une|[Jj]uly|[Aa]ugust|[Ss]eptember|[Oo]ctober|[Nn]ovember|[Dd]ecember)\]?[^\S\r\n]{0,3}\[?(\d{1,2})[\.A-z]*\]?([^\S\r\n]{0,3}\[?([Tt]o|[Bb]y)\]?)?"
+
+# Matches annoying price format: 12..2..4 ¼, extracting the 12, 2, 4, and ¼.
+fancy_price = r"£?(\d+)?\.\.\[?(\d+)\]?\.\.(\[?([0-9]+)\]?)?(\s?([\u00BC-\u00BE\u2150-\u215E]))?"
 
 # Modifies the df to copy marginalia values down into rows for which they are null
 # Also does the same for date year, month, and day.
@@ -73,6 +81,14 @@ def _remove_xx(tag, replacement):
     else:
         return tag
 
+def _remove_ditto(match: Match) -> str:
+    newRe = search(r"\[\w+\]", match.group())
+    if newRe:
+        newStr = (newRe.group())[1:-1]
+        return newStr
+    
+    return ""
+
 # Exceptions to the normal rule of not deleting words before [something] unless it starts with the same letter as something
 def is_exception(word, i, smaller_entry):
     if (word.strip("[]<>^") in {"pound", "pounds"}) and i - 1 > 0 and (smaller_entry[i - 1] == "w" or smaller_entry[i - 1] == "wt"):
@@ -89,6 +105,48 @@ def handle_bracket_replacements(match: Match) -> str:
         return match.group(2)
     else:
         return match.group(1) + " " + match.group(2)
+
+# Replaces 12..2..4 ¼ with
+# fancy_pounds 12 fancy_shillings 2 fancy_pennies 4 fancy_frac ¼
+def _handle_dates(match: Match) -> str:
+    newStr = ""
+    if match.group(6) is not None:
+        newStr += match.group(6) + " "
+    newStr += f"date_month {match.group(3)} "
+    newStr += f"date_day {match.group(4)} "
+    newStr += f"end_date"
+    return newStr
+
+def _handle_fancy_price(match: Match) -> str:
+    newStr = ""
+    if match.group(1) is not None:
+        newStr += "fancy_pounds "
+        newStr += match.group(1)
+        newStr += " "
+    else:
+        newStr += "fancy_pounds 0 "
+    
+    if match.group(2) is not None:
+        newStr += "fancy_shillings "
+        newStr += match.group(2)
+        newStr += " "
+    else:
+        newStr += "fancy_shillings 0 "
+    
+    if match.group(4) is not None:
+        newStr += "fancy_pennies "
+        newStr += match.group(4)
+        newStr += " "
+    else:
+        newStr += "fancy_pennies 0 "
+
+    if match.group(6) is not None:
+        newStr += "fancy_frac "
+        newStr += match.group(6)
+    else:
+        newStr += "fancy_frac 0"
+
+    return newStr.strip()
 
 # Handles entries of the form:
 # By 2 hogshead tobacco on occoquan
@@ -175,6 +233,15 @@ def preprocess(df: pd.DataFrame):
         # Remove } from the text as it messes everything up
         big_entry = big_entry.replace("}", "")
 
+        # Replace dates with easily parseable tokens
+        big_entry = sub(month_regex, _handle_dates, big_entry)
+
+        # Replace difficult to deal with price formats with easily parseable tokens
+        big_entry = sub(fancy_price, _handle_fancy_price, big_entry)
+
+        # Remove fancy pounds symbol as that confuses the parser
+        big_entry = sub(r"£(\d+)", lambda x: x.group(1) + "L", big_entry)
+
         # Replace all tobacco marks with easily parseable tokens
         big_entry = sub(mark_regex, _get_tobacco_mark_replacement, big_entry)
 
@@ -193,14 +260,10 @@ def preprocess(df: pd.DataFrame):
             # print()
 
         # Remove "Ditto"
-        ditto = search(r"(DO|Do|DITTO|Ditto)\.*\s*\[\w+\]", big_entry)
-        if ditto:
-            newRe = search("\[\w+\]", ditto.group())
-            newStr = (newRe.group())[1:-1]
-            big_entry = big_entry.replace(ditto.group(), newStr)
+        big_entry = sub(r"(DO|Do|DITTO|Ditto|D)\.*\s*\[\w+\]", _remove_ditto, big_entry)
 
         # Replace 1w with 1 w and 1M with 1 M and so on
-        big_entry = sub(r"(?<=\s)\d+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
+        big_entry = sub(r"(?<=\s)[\u00BC-\u00BE\u2150-\u215E\d]+([Mm]|wt|w)(?=\s\[)", lambda match: match.group(0)[:-2] + " " + match.group(0)[-2:] if "wt" in match.group(0) else match.group(0)[:-1] + " " + match.group(0)[-1], big_entry)
         
         # If we see tobacco notes... 
         if search(r"N\s+\d+\s+\d+", big_entry):
@@ -236,7 +299,7 @@ def preprocess(df: pd.DataFrame):
                 if "wt." == word[-3:]:
                     word = word.replace("wt.", "wt")
                     smaller_entry[i] = word
-                if word.startswith("[") and i-1 >= 0 and smaller_entry[i-1].lower().startswith(word[1].lower()):
+                if word.startswith("[") and i-1 >= 0 and len(word) >= 2 and len(smaller_entry) > 0 and smaller_entry[i-1].lower().startswith(word[1].lower()):
                     new_sent.pop()
                 elif is_exception(word, i, smaller_entry):
                     new_sent.pop()
@@ -315,6 +378,9 @@ def preprocess(df: pd.DataFrame):
                 if token.ent_type_ == "PERSON":
                     if "NN" not in token.tag_:
                         token.ent_type_ = ""
+                
+                if token.tag_ == "NNP" and len(token.text.split(" ")) == 1:
+                    namelist.add(token.text.lower())
 
                 # If we see the sheriff or the parish collector mark them as people
                 if token.text.lower() == "sherriff" or token.text.lower() == "sheriff" or token.text.lower() == "parish" or token.text.lower() == "collector" or token.text.lower() == "parrish":
@@ -324,6 +390,25 @@ def preprocess(df: pd.DataFrame):
                 # Allows us to start elif chain
                 if False:
                     pass
+
+                # Handle special markers for fancy price format
+                elif "fancy_" in token.text:
+                    new_entry.append(("", "", "IGNORE_PRICES"))
+                    new_entry.append(("", token.text, token.text + "_APP_NEXT"))
+
+                # Handle special markers for dates
+                elif token.text == "date_month":
+                    new_entry.append(("", "DATE.MONTH", "DATE_APP_NEXT"))
+
+                elif token.text == "date_day":
+                    new_entry.append(("", "DATE.DAY", "DATE_APP_NEXT"))
+
+                elif token.text == "end_date":
+                    pass
+
+                # Make sure sundries are not marked as people
+                elif token.text.lower() in {"sundries", "sundrys", "sundry"}:
+                    new_entry.append((token.text, "", "NN"))
 
                 # Handle special markers from tobacco marks, applying these ent_type and tag to the token following them
                 elif token.text == "tobacco_mark_number":
@@ -376,6 +461,14 @@ def preprocess(df: pd.DataFrame):
                             combine_tok_with_prev(new_entry, token, new_pos="SLTBE_F")
                             # print(next_token.text, new_entry[-1][0])
 
+                # When the previous token was a date marker, remember what follows it as part of a date
+                elif prev_token is not None and prev_token[2] == "DATE_APP_NEXT":
+                    combine_tok_with_prev(new_entry, token, space=False, new_pos="DATE_REGEX")
+
+                # If token pos tells us specifically to append the next thing we see
+                elif prev_token is not None and prev_token[2].endswith("_APP_NEXT"):
+                    combine_tok_with_prev(new_entry, token, space=False, new_pos=prev_token[2].removesuffix("_APP_NEXT")) 
+
                 # If we find a cardinal in the item set, it is probably not a cardinal.
                 elif token.tag_ == "CD" and token.text.lower() in item_set:
                     new_entry.append((token.text, "", "NN"))
@@ -393,7 +486,7 @@ def preprocess(df: pd.DataFrame):
                     new_entry.append((token.text, "PRICE", _remove_xx(token.tag_, "CD")))
                 
                 # If we find something in the amount word index, combine it with the previous token and mark as amt unless there are no numbers to combine it with
-                elif prev_token is not None and token.text.lower() in amount_set and (prev_token[2] in {"DT", "CD"} or prev_token[1] == "CARDINAL" or prev_token[1] == "QUANTITY" or prev_token[1] == "COMB.QUANTITY" or prev_token[1] == "AMT" or prev_token[0] in amount_set or prev_token[0].isnumeric()):
+                elif prev_token is not None and token.text.lower() in amount_set and prev_token[2] not in ["DATE_REGEX"] and (prev_token[2] in {"DT", "CD"} or prev_token[1] == "CARDINAL" or prev_token[1] == "QUANTITY" or prev_token[1] == "COMB.QUANTITY" or prev_token[1] == "AMT" or prev_token[0] in amount_set or prev_token[0].isnumeric()):
                     combine_tok_with_prev(new_entry, token, new_ent="AMT")
 
                 elif token.text.lower() in amount_set and "VB" in token.tag_:
@@ -401,7 +494,7 @@ def preprocess(df: pd.DataFrame):
 
                 # Check for 1 ⅔ style mixed numbers, combine them if found
                 # The regex makes extra super sure we don't have a price when we do this
-                elif prev_token is not None and token.text.isnumeric() and prev_token[0].isnumeric() and search(r"(?<!/|\d)\d+\s[\u00BC-\u00BE\u2150-\u215E]", " ".join((prev_token[0], token.text))):
+                elif prev_token is not None and token.text.isnumeric() and prev_token[0].isnumeric() and prev_token[2] not in ["DATE_REGEX"] and search(r"(?<!/|\d)\d+\s[\u00BC-\u00BE\u2150-\u215E]", " ".join((prev_token[0], token.text))):
                     combine_tok_with_prev(new_entry, token)
                 
                 # Attempt to combine similar tokens into 1 token for easier parsing
@@ -431,7 +524,7 @@ def preprocess(df: pd.DataFrame):
                 elif prev_token is not None and token.ent_type_ == "QUANTITY" and prev_token[1] == "QUANTITY":
                     token = (token.text, token.ent_type_, token.tag_)
                     while (prev_token is not None) and ("QUANTITY" in prev_token[1] or prev_token[2] == "CD" or prev_token[2] == "DT") and "PRICE" not in prev_token[1]:
-                        token = combine_tok_with_prev(new_entry, token, new_ent="COMB.QUANTITY", new_pos=token[2], toret=True)
+                        token = combine_tok_with_prev(new_entry, token, new_ent="COMB.QUANTITY", new_pos="CD", toret=True)
                         if new_entry:
                             prev_token = new_entry[-1]
                         else:

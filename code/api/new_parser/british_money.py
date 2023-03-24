@@ -67,7 +67,6 @@ class Money:
                     else:
                         raise ValueError(f"Money parsing failure. This error should never be raised, panic if it is. It was raised by this: {moneystr} in context {context}. We think unit is {unit}.")
                     
-
                 elif match(r"((\:|(\d+))\/)?(\:|(\d+))\/(\:|(\d+))", moneystr.strip()):
                     moneystr = moneystr.split("/")
                     if len(moneystr) == 2:
@@ -103,18 +102,25 @@ class Money:
                         if s != ":":
                             shillings = int(s)
                         if p != ":":
-                            pennies = int(p)
+                            if len(p.split(" ")) > 1:
+                                spl = p.split(" ")
+                                fracCurrency = round(numeric(spl[1]) * 12)
+                                pennies = int(spl[0])
+                            else:
+                                pennies = int(p)
                     
                     else:
                         raise ValueError(f"Money string {moneystr} was too long for the l/s/d format")
 
                 else:
                     raise ValueError(f"Money string {moneystr} did not match any known patterns in context {context}")
+                
             elif type(l) is int and type(s) is int and type(d) is int and type(f) is int:
                 pounds = l
                 shillings = s
                 pennies = d
                 fracCurrency = f
+           
             else:
                 # Handle nasty formats
                 if f != 0:
@@ -129,13 +135,13 @@ class Money:
                     d = 0
                 pounds = l
                 if type(l) is str:
-                    pounds = int(l.strip("[]"))
+                    pounds = int(l.strip("[]<>"))
                 shillings = s
                 if type(s) is str:
-                    shillings = int(s.strip("[]"))
+                    shillings = int(s.strip("[]<>"))
                 pennies = d
                 if type(d) is str:
-                    if " " in d:
+                    if " " in d.strip():
                         d = d.strip().split(" ")
                         if len(d) != 2:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}")
@@ -145,11 +151,11 @@ class Money:
                         except TypeError:
                             raise ValueError(f"Value of {d=} badly formatted for money in context {context}.")
                     else:
-                        if (len(d) == 1) and (numeric(d.strip("[]")) < 1):
+                        if (len(d) == 1) and (numeric(d.strip("[]<>")) < 1):
                             pennies = 0
-                            fracCurrency = int(numeric(d.strip("[]")) * 12)
+                            fracCurrency = int(numeric(d.strip("[]<>")) * 12)
                         else:    
-                            d = d.strip("[]")
+                            d = d.strip("[]<>")
                             if (re_match := match(r"\s*(\d+)([\u00BC-\u00BE\u2150-\u215E])\s*", d)):
                                 pennies = int(re_match.group(1))
                                 fracCurrency = int(12 * numeric(re_match.group(2)))
