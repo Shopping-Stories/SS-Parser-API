@@ -92,6 +92,9 @@ class POutputList(BaseModel):
 class ItemInput(BaseModel):
     item: Optional[str]
     related: Optional[List[str]]
+    archMat: Optional[int]
+    category: Optional[str]
+    subcategory: Optional[str]
 
 class PeopleInput(BaseModel):
     name: Optional[str]
@@ -106,41 +109,40 @@ router = APIRouter()
 # exact search for account_holder in people, add accountHolderID to entries
 # checks if already in db, adds to db if not, makes relationship regardless
 def _create_account_holder_rel(parsed_entry: Dict[str, Any]):
-    if people_collection.count_documents({"name": {
-        "$regex": parsed_entry["account_name"],
-        "$options": 'i'
-        }}, limit=1):
-        people_id = (people_collection.find_one(
-            {"name": {
-                "$regex": parsed_entry["account_name"],
-                "$options": 'i'
-            }}, {"_id"}))
+    people_id = _create_people(parsed_entry["account_name"])
+    parsed_entry.update({"accountHolderID": people_id}) 
 
-        parsed_entry.update({"accountHolderID": people_id["_id"]})
 
+# exact search for "item" in items collection (case insensitive), returns itemID
+# checks if already in db, adds to db if not, calls _create_item_to_item_rel for new items
+def _create_item(item):
+    if item_collection.find_one({'item': {'$regex': '^' + item + '$', '$options': 'i'}}): # choose regex
+        item_id = item_collection.find_one({'item': {'$regex': '^' + item + '$', '$options': 'i'}}, {'_id'}) #update? simplify?
+        item_id = item_id['_id']
     else:
-        people_id = people_collection.insert_one(
-            {"name": parsed_entry["account_name"]}).inserted_id
+        item_id = item_collection.insert_one({'item': item}).inserted_id
+        _create_item_to_item_rel(item, item_id)
 
-        parsed_entry.update({"accountHolderID": people_id})
+    return item_id
 
 
-# exact search for item in items, add itemID to dict
+# exact search for item in items (case insensitive), add itemID to dict
 # checks if already in db, adds to db if not, makes relationship regardless
 def _create_item_rel(parsed_entry: Dict[str, Any]):
-    if item_collection.count_documents({"item": {"$regex": "^" + parsed_entry["item"] + "$", "$options": 'i'}}, limit=1) > 0:
-        item_id = (item_collection.find_one(
-            {"item": {"$regex": "^" + parsed_entry["item"] + "$", "$options": 'i'}}, {"_id"}))
+    item_id = _create_item(parsed_entry["item"])
+    parsed_entry.update({"itemID": item_id})
 
-        parsed_entry.update({"itemID": item_id["_id"]})
 
+# exact search for "person" in people collection (case insensitive), returns peopleID
+# checks if already in db, adds to db if not
+def _create_people(person):
+    if people_collection.find_one({'name': {'$regex': '^' + person + '$', '$options': 'i'}}):
+        people_id = people_collection.find_one({'name': {'$regex': '^' + person + '$', '$options': 'i'}}, {'_id'})
+        people_id = people_id['_id']
     else:
-        item_id = item_collection.insert_one(
-            {"item": parsed_entry["item"]}).inserted_id
+        people_id = people_collection.insert_one({'name': person}).inserted_id
 
-        parsed_entry.update({"itemID": item_id})
-
-        _create_item_to_item_rel(parsed_entry)
+    return people_id
 
 
 # exact search for people array in people, add peopleID(s) to dict
@@ -148,31 +150,15 @@ def _create_item_rel(parsed_entry: Dict[str, Any]):
 def _create_people_rel(parsed_entry: Dict[str, Any]):
     parsed_entry.update({"peopleID": []})
     for person in parsed_entry["people"]:
-        if people_collection.count_documents({"name": {
-            "$regex": person,
-            "$options": 'i'
-        }}, limit=1):
-            people_id = (people_collection.find_one({"name": {
-                "$regex": person,
-                "$options": 'i'
-            }}, {"_id"}))
-
-            parsed_entry["peopleID"].append(people_id["_id"])
-
-        else:
-            people_id = people_collection.insert_one(
-                {"name": person}).inserted_id
-
-            parsed_entry["peopleID"].append(people_id)
+        people_id = _create_people(person)
+        parsed_entry["peopleID"].append(people_id) 
 
 
 # puts specified values (keys) into an object by name new_key together for entries
 # what can go wrong: if input does not contain all keys
 def _create_object(parsed_entry: Dict[str, Any], keys: List[str], new_key: str):
-    # if new_key != "sterling":
     for key in keys:
         if key not in parsed_entry:
-            # print("does not contain all keys\n")
             return
 
     object: Dict[str, Any] = dict.fromkeys(keys)
@@ -242,17 +228,31 @@ def _create_people_to_account_holder_rel(parsed_entry: Dict[str, Any]):
                 people_collection.update_one({'_id': person}, {'$push': {'related': accHol}}) 
 
 
+# regex search for related items
+# separates every word in a string, removes plurals, and regex searches for strings containing word, returns list or related items
+def item_regex(item):
+    regex_matches = []
+    item = item.split(" ")
+    for i in item:
+        i = i.rstrip("s")
+        related_items = item_collection.find({"item": {
+        "$regex": '(^|\s+)' + i + 's*($|\s+)', 
+        "$options": 'i'
+        }})
+        for rel in related_items:
+            regex_matches.append(rel)
+
+    return regex_matches
+
+
 # creates relationship between similar items in the database, skips duplicates
 # substring will relate to all items containing it, larger 
-def _create_item_to_item_rel(parsed_entry: Dict[str, Any]):
-    relatedItems = item_collection.find({"item": {
-        "$regex": '.*' + parsed_entry["item"] + '.*', # edit regex?
-        "$options": 'i'
-    }})
-    for item in relatedItems:
-        if parsed_entry["itemID"] != item["_id"]:
-            item_collection.update_one({'_id': item["_id"]}, {'$push': {'related': parsed_entry["itemID"]}}) 
-            item_collection.update_one({'_id': parsed_entry["itemID"]}, {'$push': {'related': item["_id"]}}) 
+def _create_item_to_item_rel(item, item_id):
+    relatedItems = item_regex(item) 
+    for rel_item in relatedItems:
+        if item_id != rel_item["_id"]:
+            item_collection.update_one({'_id': rel_item["_id"]}, {'$push': {'related': item_id}}) 
+            item_collection.update_one({'_id': item_id}, {'$push': {'related': rel_item["_id"]}}) 
 
 
 # hashes parsed_entry and adds value to entry, done so that we do not insert duplicate database entries
@@ -421,6 +421,35 @@ def parse_folder_exclude_errors():
     return Message(message="Successfully uploaded example data.")
 
 
+@router.post("/create_person/", tags=["Database Management"], response_model=Message)
+def insert_person(person: str): 
+    """
+    Manually creates a new person from user input. 
+    """
+    person_id = _create_people(person)
+
+    # add additional optional data here if needed
+    
+    return Message(message=f"Successfully inserted person. New person has id {person_id}")
+
+
+@router.post("/create_item/", tags=["Database Management"], response_model=Message)
+def insert_item(item: str, archMat: int = "", category: str = "", subcategory: str = ""): #add all data
+    """
+    Manually creates a new item from user input. 
+    """
+    item_id = _create_item(item)
+
+    if archMat:
+        item_collection.update_one({'_id': ObjectId(item_id)}, {"$set": {"archMat": archMat}}) 
+    if category:
+        item_collection.update_one({'_id': ObjectId(item_id)}, {"$set": {"category": category}})
+    if subcategory:
+        item_collection.update_one({'_id': ObjectId(item_id)}, {"$set": {"subcategory": subcategory}})
+    
+    return Message(message=f"Successfully inserted item. New item has id {item_id}")
+
+
 @router.post("/delete_entry/", tags=["Database Management"], response_model=Message)
 def remove_entry(entry_id: str):
     """
@@ -433,6 +462,34 @@ def remove_entry(entry_id: str):
         return Message(message="Successfully deleted entry.")
     else:
         return Message(message=f"ERROR: Entry {entry_id} not found.", error=True)
+    
+
+@router.post("/delete_person/", tags=["Database Management"], response_model=Message)
+def remove_person(person_id: str):
+    """
+    Removes a specified person from the database (specified by ID).
+    Sets error flag and has ERROR at the front of the message if any errors occur.
+    """
+
+    if people_collection.find_one({'_id': ObjectId(person_id)}):
+        people_collection.delete_one({'_id': ObjectId(person_id)})
+        return Message(message="Successfully deleted person.")
+    else:
+        return Message(message=f"ERROR: Person {person_id} not found.", error=True)
+
+
+@router.post("/delete_item/", tags=["Database Management"], response_model=Message)
+def remove_item(item_id: str):
+    """
+    Removes a specified item from the database (specified by ID).
+    Sets error flag and has ERROR at the front of the message if any errors occur.
+    """
+
+    if item_collection.find_one({'_id': ObjectId(item_id)}):
+        item_collection.delete_one({'_id': ObjectId(item_id)})
+        return Message(message="Successfully deleted item.")
+    else:
+        return Message(message=f"ERROR: Item {item_id} not found.", error=True)
 
 
 @router.post("/edit_entry/", tags=["Database Management"], response_model=Message)
@@ -481,35 +538,6 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
     return Message(message="Successfully edited entry.")
     
 
-@router.post("/edit_item/", tags=["Database Management"], response_model=Message)
-def edit_item(item_id: str, new_values: ItemInput):
-    """
-    Edits an item (specified by ID) in the database.
-    Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
-    """
-
-    if item_collection.find_one({'_id': ObjectId(item_id)}) == None:
-        return Message(message=f"ERROR: Item {item_id} not found.", error=True)
-
-    new_values = new_values.dict()
-
-    todel = []
-    for key in new_values:
-        if new_values[key] == None:
-            todel.append(key)
-
-    for key in todel:
-        del new_values[key]
-
-    item_collection.update_one({'_id': ObjectId(item_id)}, {"$set": new_values})
-
-    # edit item name in entries
-    if "item" in new_values:
-        entries_collection.update_many({'itemID': ObjectId(item_id)}, {'$set': {'item': new_values["item"]}})
-
-    return Message(message="Successfully edited item.")
-
-
 @router.post("/edit_person/", tags=["Database Management"], response_model=Message)
 def edit_person(person_id: str, new_values: PeopleInput):
     """
@@ -542,8 +570,37 @@ def edit_person(person_id: str, new_values: PeopleInput):
     return Message(message="Successfully edited person.")
 
 
+@router.post("/edit_item/", tags=["Database Management"], response_model=Message)
+def edit_item(item_id: str, new_values: ItemInput):
+    """
+    Edits an item (specified by ID) in the database.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No data will be edited in an error occurs.
+    """
+
+    if item_collection.find_one({'_id': ObjectId(item_id)}) == None:
+        return Message(message=f"ERROR: Item {item_id} not found.", error=True)
+
+    new_values = new_values.dict()
+
+    todel = []
+    for key in new_values:
+        if new_values[key] == None:
+            todel.append(key)
+
+    for key in todel:
+        del new_values[key]
+
+    item_collection.update_one({'_id': ObjectId(item_id)}, {"$set": new_values})
+
+    # edit item name in entries
+    if "item" in new_values:
+        entries_collection.update_many({'itemID': ObjectId(item_id)}, {'$set': {'item': new_values["item"]}})
+
+    return Message(message="Successfully edited item.")
+
+
 @router.post("/add_people_relationship/", tags=["Database Management"], response_model=Message)
-def add_relationship(person1_name: str, person2_name: str):
+def add_people_relationship(person1_name: str, person2_name: str):
     """
     Creates a relationship between two people (both specified by name) in the database.
     Sets error flag and has ERROR at the front of the message if any errors occur. No relationships will be updated if any error occurs.
@@ -577,10 +634,45 @@ def add_relationship(person1_name: str, person2_name: str):
     return Message(message="Successfully added relationship.")
 
 
+@router.post("/add_item_relationship/", tags=["Database Management"], response_model=Message)
+def add_item_relationship(item1: str, item2: str):
+    """
+    Creates a relationship between two items (both specified by name) in the database. Inherits data from primary item.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No relationships will be updated if any error occurs.
+    """
+
+    item1_data = item_collection.find_one({'item': item1})
+    item2_data = item_collection.find_one({'item': item2})
+
+    if item1_data == None:
+        return Message(message=f"ERROR: {item1} not found.", error=True)
+    if item2_data == None:
+        return Message(message=f"ERROR: {item2} not found.", error=True)
+        
+    item1_id = item1_data['_id'] 
+    item2_id = item2_data['_id'] 
+
+    if item1_id != item2_id:
+        if "related" in item1_data:
+            for related in item1_data['related']:
+                if related == item2_id:
+                    return Message(message=f"ERROR: Relationship already exists.", error=True)
+        if "related" in item2_data:
+            for related in item2_data['related']:
+                if related == item1_id:
+                    return Message(message=f"ERROR: Relationship already exists.", error=True)
+        item_collection.update_one({'_id': item1_id}, {'$push': {'related': item2_id}}) 
+        item_collection.update_one({'_id': item2_id}, {'$push': {'related': item1_id}})
+    else: 
+        return Message(message=f"ERROR: Both items are the same.", error=True)
+
+    return Message(message="Successfully added relationship.")
+
+
 @router.post("/combine_people/", tags=["Database Management"], response_model=Message)
 def combine_people(person1_name: str, person2_name: str, new_name: str):
     """
-    Combines two people (both specified by name) in the database.
+    Combines two people (both specified by name) in the database. Case sensitive.
     Sets error flag and has ERROR at the front of the message if any errors occur. People will not be combined if any error occurs.
     """
     
@@ -614,7 +706,7 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
         new_rel_set = [*set(new_rel)]
         for rel in new_rel_set:
             people_collection.update_one({'_id': new_person_id}, {'$push': {'related': rel}})
-    print(person1_id)
+
     people_collection.delete_one({'_id': person1_id})
     people_collection.delete_one({'_id': person2_id})  
 
@@ -627,58 +719,104 @@ def combine_people(person1_name: str, person2_name: str, new_name: str):
     entries_collection.update_many({'peopleID': person1_id}, {'$pull': {'peopleID': person1_id, 'people': person1_name}})
     entries_collection.update_many({'peopleID': person2_id}, {'$pull': {'peopleID': person2_id, 'people': person2_name}})
   
-    ## ADD FORMER NAMES?
-    ## ADD ADDITIONAL DATA? $merge?
+    # update related people in people
+    people_collection.update_many({'related': person1_id}, {'$push': {'related': new_person_id}})
+    people_collection.update_many({'related': person1_id}, {'$pull': {'related': person1_id}})
+    people_collection.update_many({'related': person2_id}, {'$push': {'related': new_person_id}})
+    people_collection.update_many({'related': person2_id}, {'$pull': {'related': person2_id}})
     
     return Message(message=f"Successfully compined people as {new_person_id}.")
-      
+
+
+@router.post("/combine_items/", tags=["Database Management"], response_model=Message)
+def combine_items(primary_item: str, secondary_item: str, new_item_name: str):
+    """
+    Combines two items (both specified by name) in the database. Inherits data from primary item, unless primary item has no data in a field. Case sensitive.
+    Sets error flag and has ERROR at the front of the message if any errors occur. People will not be combined if any error occurs.
+    """
+
+    primary_item_data = item_collection.find_one({'item': primary_item})
+    secondary_item_data = item_collection.find_one({'item': secondary_item})
+
+    if primary_item_data == None:
+        return Message(message=f"ERROR: {primary_item} not found.", error=True)
+    if secondary_item_data == None:
+        return Message(message=f"ERROR: {secondary_item} not found.", error=True)
+        
+    primary_item_id = primary_item_data['_id'] 
+    secondary_item_id = secondary_item_data['_id'] 
+
+    if primary_item_id == secondary_item_id:
+        return Message(message=f"ERROR: Both items are the same.", error=True)
     
+    item_collection.update_one({'_id': primary_item_id}, {'$set': {'item': new_item_name}})
+
+    if 'related' in primary_item_data and 'related' in secondary_item_data:
+        for secondary_related in secondary_item_data['related']:
+            if secondary_related != primary_item_id and secondary_related not in primary_item_data['related']:
+                item_collection.update_one({'_id': primary_item_id}, {'$push': {'related': secondary_related}})
+        if secondary_item_id in primary_item_data['related']:
+            item_collection.update_one({'_id': primary_item_id}, {'$pull': {'related': secondary_item_id}})
+    elif 'related' in secondary_item_data:
+        for secondary_related in secondary_item_data['related']:
+            if secondary_related != primary_item_id:
+                item_collection.update_one({'_id': primary_item_id}, {'$push': {'related': secondary_related}})
+
+    if 'archMat' not in primary_item_data and 'archMat' in secondary_item_data:
+        item_collection.update_one({'_id': primary_item_id}, {'$set': {'archMat': secondary_item_data['archMat']}})
+    
+    if 'category' not in primary_item_data and 'category' in secondary_item_data:
+        item_collection.update_one({'_id': primary_item_id}, {'$set': {'category': secondary_item_data['category']}})
+
+    if 'subcategory' not in primary_item_data and 'subcategory' in secondary_item_data:
+        item_collection.update_one({'_id': primary_item_id}, {'$set': {'subcategory': secondary_item_data['subcategory']}})
+
+    item_collection.delete_one({'_id': secondary_item_id})
+
+    # update related items
+    item_collection.update_many({'related': secondary_item_id}, {'$push': {'related': primary_item_id}})
+    item_collection.update_many({'related': secondary_item_id}, {'$pull': {'related': secondary_item_id}})
+    # update entries
+    entries_collection.update_many({'itemID': secondary_item_id}, {'$set': {'itemID': primary_item_id, 'item': new_item_name}})
+
+    return Message(message=f"Successfully compined items as {primary_item_id}.")
+
+
 @router.post("/upload_items/", tags=["Database Management"], response_model=Message)
 def item_upload(file_name: str):
     """
     Uploads items from a master list's categories sheet. Categories must be FIRST or ONLY sheet in the document, or function will fail. File must be in \api\ssParser\...
     If categories section is not read, function will fail. If data differs from expected formatting, all data prior to error will still be entered.
     """
-    file = "api\ssParser\\" + file_name
-    print(file)
-    #file = "api\ssParser\C_1760_Item_Master_List_Categories_TEST6.xlsx"
 
     df = pd.read_excel("api\ssParser\\" + file_name)
-    print(df.shape)
-    print(df[:5])
 
     for index, row in df.iterrows():
+        ## reformats items with commas
+        if ", " in row['Item']:
+            split_input = row['Item'].split(", ")
+            sorted_input = list(reversed(split_input))
+            joined_input = " ".join(sorted_input)
+            row['Item'] = joined_input
+
         if item_collection.find_one({'item': {"$regex": "^" + row['Item'] + "$", "$options": 'i'}}):
             
             item_data = item_collection.find_one({'item': {"$regex": "^" + row['Item'] + "$", "$options": 'i'}})
-            print("found ", row["Item"], " as ", item_data["item"])
             item_collection.update_one({'_id': item_data['_id']}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
             
             if 'related' in item_data:
-                print("has related 1")
                 for related in item_data['related']:
-                    print("has related")
                     if 'category' not in item_collection.find_one({'_id': related}):
-                        print(related, " is related")
                         item_collection.update_one({'_id': related}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
                     
         else:
-            print("NOT found ", row["Item"])
             new_item_id = item_collection.insert_one({'item': row['Item'], 'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}).inserted_id
-            relatedItems = item_collection.find({"item": {
-            "$regex": '.*' + row['Item'] + '.*', # edit regex?
-            "$options": 'i'
-            }})
+            relatedItems = item_regex(row['Item'])
             for item in relatedItems:
                 if new_item_id != item["_id"]:
                     item_collection.update_one({'_id': item["_id"]}, {'$push': {'related': new_item_id}}) 
                     item_collection.update_one({'_id': new_item_id}, {'$push': {'related': item["_id"]}}) 
                     if 'category' not in item:
-                        print(item['_id'], " is related")
                         item_collection.update_one({'_id': item['_id']}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
-    # TO DO: item to item rel only new new items ^^^
 
     return Message(message="Successfully uploaded item data.")
-# NEED
-# tobaccoMarks relationship
-# places relationship
