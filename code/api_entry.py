@@ -38,4 +38,13 @@ async def main():
     return {"message": "The api is still working. API Version 1.4.9"}
 
 if __name__ == "__main__":
-    uvicorn.run("api_entry:incoming", port=5050, log_level='info')
+    # By default, run parser on all files in s3 bucket with prefix ParseMe
+    # DO NOT CHANGE DEFAULT BEHAVAIOR! WILL BREAK PARSER AS IT RUNS ON AWS ECS BY RUNNING THIS FILE!
+    # Also do not move the imports they are in here so we don't have to install pytorch to run the basic api
+    if len(sys.argv) > 1 and sys.argv[1] == "parser":
+        from boto3 import client
+        from api.new_parser.parser_manager import start_parse
+        s3 = client("s3")
+        start_parse(s3)
+    else:
+        uvicorn.run("api_entry:incoming", port=5050, log_level='info')

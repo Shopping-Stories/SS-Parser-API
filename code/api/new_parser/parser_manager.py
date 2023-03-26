@@ -14,6 +14,7 @@ isparsing = False
 
 _parsing_lock = Lock()
 
+# Parses everything in s3 bucket under prefix ParseMe
 def start_parse(client):
     acquired = _parsing_lock.acquire(blocking=False)
     if not acquired:

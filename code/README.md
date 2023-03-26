@@ -1,4 +1,5 @@
 # Shopping Stories V4 Python API  
+Please note that requirements.txt contains all requirements for the api without the parser, and parser_requirements.txt should contain everything necessary to run the parser.  
 To build and run the api, run the following:  
 ```bash
 chmod +x ./setup_scripts/setup.sh
