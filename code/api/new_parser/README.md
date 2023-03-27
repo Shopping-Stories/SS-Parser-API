@@ -2,7 +2,7 @@
 I know the directory structure is a little complex, but the parser was originally a part of the API.  
 Once we realized that would be too expensive, we moved the parser onto AWS ECS to reduce costs significantly.  
 Luckily, the parser was designed to be mostly separate from the API so this was simple enough.
-Essentially nothing in this folder should be referenced by the rest of the API, however things in this folder may reference the rest of the API.  
+Essentially nothing in this folder should be referenced by the rest of the API (except for people.py, other files should be able to use that), however things in this folder may reference the rest of the API.  
 
 To run the parser on everything in s3 you can run 
 ```

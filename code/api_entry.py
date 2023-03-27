@@ -35,7 +35,7 @@ async def start_people_tasks():
 
 @incoming.get("/")
 async def main():
-    return {"message": "The api is still working. API Version 1.4.9"}
+    return {"message": "The api is still working. API Version 1.5.0"}
 
 if __name__ == "__main__":
     # By default, run parser on all files in s3 bucket with prefix ParseMe

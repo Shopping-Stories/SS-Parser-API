@@ -1,0 +1,24 @@
+{
+    "family": "shopParser", 
+    "networkMode": "awsvpc", 
+    "containerDefinitions": [
+        {
+            "name": "shopParser", 
+            "image": "921328813402.dkr.ecr.us-east-1.amazonaws.com/shoppingstories/parser:latest", 
+            "essential": true, 
+            "entryPoint": [
+                "sh",
+		        "-c"
+            ], 
+            "command": [
+                "python /parser/api_entry.py parser"
+            ]
+        }
+    ], 
+    "requiresCompatibilities": [
+        "FARGATE"
+    ], 
+    "cpu": "2048", 
+    "memory": "16384",
+    "executionRoleArn": "arn:aws:iam::921328813402:role/ParserRole"
+}
