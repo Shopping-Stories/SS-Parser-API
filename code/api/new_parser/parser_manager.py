@@ -6,7 +6,7 @@ import traceback
 import datetime
 from threading import Lock
 import logging
-from json import dump
+from json import dumps
 from io import BytesIO
 
 
@@ -148,9 +148,8 @@ def upload_results(client):
 
 _progress_lock = Lock()
 def set_progress(number: float, client):
-    toUpload = BytesIO()
     prog = {"progress": number}
-    dump(prog, toUpload)
+    toUpload = BytesIO(dumps(prog).encode("UTF-8"))
     with _progress_lock:
         client.upload_fileobj(toUpload, "shoppingstories", "ParserProgress/progress.json")
 

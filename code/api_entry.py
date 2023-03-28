@@ -44,6 +44,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "parser":
         from boto3 import client
         from api.new_parser.parser_manager import start_parse
+        import asyncio
+        # Make sure the people index gets created
+        asyncio.run(people_index_coro())
         s3 = client("s3")
         start_parse(s3)
     else:
