@@ -4,6 +4,8 @@ from io import BytesIO
 from .api_types import *
 import traceback
 from base64 import b64decode
+from json import loads
+from traceback import format_exc
 
 router = APIRouter()
 
@@ -85,7 +87,7 @@ def debug_upload_file_and_parse(name: str, bg_tasks: BackgroundTasks) -> Message
 
     return Message(message="Successfully uploaded file to s3.")
 
-# Endpoints that can be used to test the parser, do not push to github while these are uncommented.
+# Endpoints that can be used to test the parser locally, do not push to github while these are uncommented.
 # @router.get("/test_parser", tags=["Parser Management"], response_model=Message)
 # def test_parsing(bg_tasks: BackgroundTasks) -> Message:
 #     """
@@ -165,10 +167,23 @@ def get_status():
     """
     Gets the progress of the parser, 1 is finished, 0 is starting.
     """
-
-    # progress, filenames = check_progress()
-    # return ParserProgress(progress=progress, filenames=filenames)
-    return ParserProgress(progress=0, filenames=["nothing.txt"])
+    s3_cli = client("s3")
+    toOut = None
+    try:
+        out = s3_cli.list_objects_v2(Bucket="shoppingstories", Prefix="ParserProgress")
+        filenames = [x["Key"] for x in out["Contents"] if x["Key"] != "ParserProgress/"]
+        if "ParserProgress/progress.json" in filenames:
+            file = BytesIO()
+            s3_cli.download_fileobj("shoppingstories", "ParserProgress/progress.json", file)
+            file.seek(0)
+            progress = file.read()
+            progress = progress.decode("UTF-8")
+            progress = loads(progress)
+            toOut = ParserProgress(progress=float(progress["progress"]), filenames=["no_errors.txt"])
+    except: 
+        toOut = ParserProgress(progress=1, filenames=[format_exc()])
+    
+    return toOut
 
 
 @router.get("/queue_parse", tags=["Parser Management"], response_model=Message)
