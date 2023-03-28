@@ -6,6 +6,8 @@ import traceback
 import datetime
 from threading import Lock
 import logging
+from json import dump
+from io import BytesIO
 
 
 dump_folder = join(dirname(__file__), "ParseMe")
@@ -60,7 +62,8 @@ def start_parse(client):
         client.delete_objects(Bucket="shoppingstories", Delete={"Objects": [{"Key": key} for key in todelete], "Quiet": True})
 
     logging.info("Starting parse")
-    parse_folder(dump_folder)
+    set_progress(0, client)
+    parse_folder(dump_folder, get_set_progress_for_parser(client))
     logging.info("finished parse.")
     _parsing_lock.release()
 
@@ -142,3 +145,17 @@ def upload_results(client):
 
     _parsing_lock.release()
     preparsed_lock.release()
+
+_progress_lock = Lock()
+def set_progress(number: float, client):
+    toUpload = BytesIO()
+    prog = {"progress": number}
+    dump(prog, toUpload)
+    with _progress_lock:
+        client.upload_fileobj(toUpload, "shoppingstories", "ParserProgress/progress.json")
+
+def get_set_progress_for_parser(client):
+    def sp(number: float):
+        set_progress(number, client)
+    
+    return sp

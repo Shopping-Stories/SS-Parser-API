@@ -1319,17 +1319,22 @@ def parse_file(filePath):
 
     return out
 
-
-def parse_folder(folder):
+# set_progress is a function that takes a float reprsenting the current parsing progress
+def parse_folder(folder, set_progress = None):
     logging.info(f"Parsing folder: {folder}")
     filenames = listdir(folder)
     filenames = [x for x in filenames if x.split(".")[-1] in ["xls", "xlsx"]]
+    n = 0
+    total = len(filenames)
     for filename in filenames:
         try:
             out = parse_file(path.join(folder, filename))
             file = open(path.join(folder, filename) + ".json", 'w')
             dump(out, file)
             file.close()
+            if set_progress is not None:
+                n += 1
+                set_progress(n / total)
             print_debug(f"Finished file {filename}")
             print_debug()
         except Exception as e:
@@ -1339,7 +1344,10 @@ def parse_folder(folder):
             file = open(path.join(folder, filename) + ".exception", 'w')
             file.write(str(e) + "\n" + text)
             file.close()
-
+            if set_progress is not None:
+                n += 1
+                set_progress(n / total)
+            
     
 # If we are executed directly from command line, parse the file given in the first argument to the program
 if __name__ == "__main__":
