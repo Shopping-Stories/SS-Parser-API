@@ -12,7 +12,7 @@ router = APIRouter()
 def do_parse():
     ecs = client("ecs")
     cluster_arn = "arn:aws:ecs:us-east-1:921328813402:cluster/shopParser"
-    currTasks = ecs.list_tasks(cluster=cluster_arn)
+    currTasks = ecs.list_tasks(cluster=cluster_arn, desiredStatus="RUNNING")
     if len(currTasks["taskArns"]) > 0: 
         # If no task is currently running, start the parser, otherwise do nothing.
         ecs.run_task(taskDefinition="arn:aws:ecs:us-east-1:921328813402:task-definition/shopParser:3", launchType="FARGATE", cluster=cluster_arn, networkConfiguration={"awsvpcConfiguration": {"subnets": ["subnet-ef238dce", "subnet-8acc6fec", "subnet-38c7b475", "subnet-db46ea84"]}})
@@ -207,6 +207,6 @@ def queue_parse(bg_tasks: BackgroundTasks) -> Message:
     Queues a parse of files already in the staging area (i.e. uploaded via upload_file).
     This should not usually need to be called, only in case of files sticking in the staging area for some reason (e.g. error) or in case of using upload_file.
     """
-    
+
     bg_tasks.add_task(do_parse)
     return Message(message="Successfully queued a parse.")
