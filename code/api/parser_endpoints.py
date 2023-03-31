@@ -13,7 +13,7 @@ def do_parse():
     ecs = client("ecs")
     cluster_arn = "arn:aws:ecs:us-east-1:921328813402:cluster/shopParser"
     currTasks = ecs.list_tasks(cluster=cluster_arn, desiredStatus="RUNNING")
-    if len(currTasks["taskArns"]) > 0: 
+    if len(currTasks["taskArns"]) == 0: 
         # If no task is currently running, start the parser, otherwise do nothing.
         ecs.run_task(taskDefinition="arn:aws:ecs:us-east-1:921328813402:task-definition/shopParser:3", launchType="FARGATE", cluster=cluster_arn, networkConfiguration={"awsvpcConfiguration": {"subnets": ["subnet-ef238dce", "subnet-8acc6fec", "subnet-38c7b475", "subnet-db46ea84"]}})
         return True
