@@ -16,7 +16,7 @@ ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 ARG MONGO_LOGIN_STRING
 ENV MONGO_LOGIN_STRING=$MONGO_LOGIN_STRING
 ARG AWS_ACCESS_KEY_ID
-ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 COPY --from=0 /gitapp/SS-Parser-API/code/parser_requirements.txt ./
 RUN pip install --no-cache-dir --upgrade -r parser_requirements.txt
 COPY --from=0 /gitapp/SS-Parser-API/code/ ./
