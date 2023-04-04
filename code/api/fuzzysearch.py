@@ -109,9 +109,29 @@ def fuzzy_search(search: str):
   for i in meta_terms:
     query.append({"all_metas": {"$regex": i, "$options": 'i'}})
 
-  results = entries.find({"$and": query})
+  res = entries.find({"$and": query})
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
+  res_ids = []
+  for entry in res:
+    res_ids.append(entry['_id'])
+
+  results = entries.aggregate([
+    {"$match": {"_id": {"$in": res_ids}}},
+    {"$lookup": {
+      "from": "items",
+      "localField": "itemID",
+      "foreignField": "_id",
+      "as": "related_items"
+    }},
+    {"$lookup": {
+      "from": "people",
+      "localField": "peopleID",
+      "foreignField": "_id",
+      "as": "related_people"
+    }}
+  ])
+
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}

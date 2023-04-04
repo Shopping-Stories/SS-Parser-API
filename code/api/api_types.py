@@ -63,7 +63,9 @@ class DatabaseEntry(BaseModel):
     liber_book: Optional[str]
     mentions: Optional[List[str]]
     itemID: Optional[str]
+    related_items: Optional[str]
     peopleID: Optional[str]
+    related_people: Optional[str]
     people: Optional[List[str]]
     accountHolderID: Optional[str]
     entryID: Optional[str] = Field(alias="_id")
