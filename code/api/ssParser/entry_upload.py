@@ -253,7 +253,19 @@ def _create_item_to_item_rel(item, item_id):
         if item_id != rel_item["_id"]:
             item_collection.update_one({'_id': rel_item["_id"]}, {'$push': {'related': item_id}}) 
             item_collection.update_one({'_id': item_id}, {'$push': {'related': rel_item["_id"]}}) 
+    # inherit additional data from one related item
+    if relatedItems:
+        add_additional_item_data(relatedItems, item_id)
 
+
+# new items inherit category, subcategory, and archMat data from one related item
+def add_additional_item_data(relatedItems, item_id):
+    for rel_item in relatedItems:
+        if 'category' in rel_item and 'subcategory' in rel_item and 'archMat' in rel_item:
+            item_collection.update_one({'_id': item_id}, {'$set': {'category': rel_item['category'], 'subcategory': rel_item['subcategory'], 'archMat': rel_item['archMat']}})
+            return
+    return
+    
 
 # hashes parsed_entry and adds value to entry, done so that we do not insert duplicate database entries
 def hash_entry(parsed_entry: Dict[str, Any]):
@@ -623,6 +635,22 @@ def edit_item(item_id: str, new_values: ItemInput):
     return Message(message="Successfully edited item.")
 
 
+@router.post("/edit_tobacco_marks/", tags=["Database Management"], response_model=Message)
+def edit_tobacco_marks(old_mark_number: str, old_mark_text:str, new_mark_number: str, new_mark_text: str):
+    """
+    Edits all occurences of a given tobaccomark in the entries collection of the database. Case sensitive.
+    Sets error flag and has ERROR at the front of the message if mark is not found.
+    """
+    
+    if not entries_collection.find_one({'$and': [{'tobacco_marks.mark_number': old_mark_number}, {'tobacco_marks.mark_text': old_mark_text}]}):
+        return Message(message=f"ERROR: Tobacco mark {old_mark_number}: {old_mark_text} not found.", error=True)
+
+    entries_collection.update_many({'tobacco_marks.mark_number': old_mark_number, 'tobacco_marks.mark_text': old_mark_text}, {'$push': {'tobacco_marks': {'mark_number': new_mark_number, 'mark_text': new_mark_text}}})
+    entries_collection.update_many({'tobacco_marks.mark_number': old_mark_number, 'tobacco_marks.mark_text': old_mark_text}, {'$pull': {'tobacco_marks': {'mark_number': old_mark_number, 'mark_text': old_mark_text}}})
+    
+    return Message(message="Successfully edited tobacco mark.")
+
+
 @router.post("/add_people_relationship/", tags=["Database Management"], response_model=Message)
 def add_people_relationship(person1_name: str, person2_name: str):
     """
@@ -829,7 +857,7 @@ def item_upload(file_name: str):
             
             if 'related' in item_data:
                 for related in item_data['related']:
-                    print("has related")
+                    #print("has related")
                     if related is None:
                         continue
                     found = item_collection.find_one({'_id': related})
@@ -850,3 +878,14 @@ def item_upload(file_name: str):
                         item_collection.update_one({'_id': item['_id']}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
 
     return Message(message="Successfully uploaded item data.")
+
+
+@router.post("/edit_all_entry_years/", tags=["Database Management"], response_model=Message)
+def edit_all_entry_years():
+    """
+    DO NOT USE unless you wish to overwrite all existing date_year data in entries.
+    Changes the year in ALL entries in the entry collection to "1760/1761". Made to correct a bug from the initial entry uploads. 
+    """
+    new_years = "1760/1761"
+    entries_collection.update_many({}, {'$set': {'date_year': new_years}})
+    return Message(message=f"Successfully changed all entry years to {new_years}.")
