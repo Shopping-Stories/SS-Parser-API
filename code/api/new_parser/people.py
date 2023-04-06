@@ -39,7 +39,7 @@ def _update_data(i = 0):
         return
     _data_lock.acquire()
     try:
-        _people_data = pd.read_excel(get("https://www.dropbox.com/s/7tzuzu799zvyziy/C_1760_PP_Master%20List.xlsx?dl=1").content)
+        _people_data = pd.read_excel(get("https://shoppingstories.s3.amazonaws.com/PeopleIndex/C_1760_PP_Master+List.xlsx").content)
         _data_updated = True
         # print("Got data!")
         # print(_people_data)
