@@ -128,10 +128,16 @@ def fuzzy_search(search: str):
       "localField": "peopleID",
       "foreignField": "_id",
       "as": "related_people"
+    }},
+    {"$lookup": {
+      "from": "people",
+      "localField": "accountHolderID",
+      "foreignField": "_id",
+      "as": "accountHolder"
     }}
   ])
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items"]
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items", "accountHolder"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}

@@ -68,6 +68,7 @@ class DatabaseEntry(BaseModel):
     related_people: Optional[str]
     people: Optional[List[str]]
     accountHolderID: Optional[str]
+    accountHolder: Optional[str]
     entryID: Optional[str] = Field(alias="_id")
     entry_id: Optional[str]
     tobacco_marks: Optional[List[TobaccoMark]]

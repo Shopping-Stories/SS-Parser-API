@@ -9,7 +9,7 @@ router = APIRouter()
 
 # allows for fuzzy searching
 @router.get("/itemsearch-fuzzy/", tags=["search"], response_model=EntryList)
-def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:int = -1):
+def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:int = -1, tobacco:str = ""):
   """
   fuzzy advanced search for items for shoppingStories project
   """
@@ -107,6 +107,8 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     contents.append({"ledger.folio_year": {"$regex": year}})
   if(page!=-1):
     contents.append({"ledger.folio_page": page})
+  if(tobacco!=""):
+    contents.append({"tobacco_marks.mark_text": {"$regex": tobacco, "$options": 'i'}})
 
   query = {"$and": contents}
   res = entries.find(query)
@@ -128,10 +130,16 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
       "localField": "peopleID",
       "foreignField": "_id",
       "as": "related_people"
+    }},
+    {"$lookup": {
+      "from": "people",
+      "localField": "accountHolderID",
+      "foreignField": "_id",
+      "as": "accountHolder"
     }}
   ])
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items"]
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items", "accountHolder"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}
@@ -145,7 +153,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
 
 # case insensitive but otherwise requires exact matches
 @router.get("/itemsearch/", tags=["search"], response_model=EntryList)
-def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:int = -1):
+def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:int = -1, tobacco:str = ""):
   """
   advanced search for items for shoppingStories project
   """
@@ -180,6 +188,8 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     contents.append({"ledger.folio_year": {"$regex": year}})
   if(page!=-1):
     contents.append({"ledger.folio_page": page})
+  if(tobacco!=""):
+    contents.append({"tobacco_marks.mark_text": {"$regex": tobacco, "$options": 'i'}})
 
   query = {"$and": contents}
   res = entries.find(query)
@@ -201,10 +211,16 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
       "localField": "peopleID",
       "foreignField": "_id",
       "as": "related_people"
+    }},
+    {"$lookup": {
+      "from": "people",
+      "localField": "accountHolderID",
+      "foreignField": "_id",
+      "as": "accountHolder"
     }}
   ])
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items"]
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items", "accountHolder"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}
