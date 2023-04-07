@@ -880,12 +880,12 @@ def item_upload(file_name: str):
     return Message(message="Successfully uploaded item data.")
 
 
-@router.post("/edit_all_entry_years/", tags=["Database Management"], response_model=Message)
+@router.get("/edit_all_entry_years/", tags=["Database Management"], response_model=Message)
 def edit_all_entry_years():
     """
-    DO NOT USE unless you wish to overwrite all existing date_year data in entries.
-    Changes the year in ALL entries in the entry collection to "1760/1761". Made to correct a bug from the initial entry uploads. 
+    DO NOT USE unless you wish to overwrite all existing ledger.folio_year data in entries.
+    Changes the folio year in ALL entries in the entry collection to "1760/1761". Made to correct a bug from the initial entry uploads. 
     """
     new_years = "1760/1761"
-    entries_collection.update_many({}, {'$set': {'date_year': new_years}})
-    return Message(message=f"Successfully changed all entry years to {new_years}.")
+    entries_collection.update_many({}, {'$set': {'ledger.folio_year': new_years}})
+    return Message(message=f"Successfully changed all entry folio years to {new_years}.")
