@@ -183,6 +183,8 @@ def get_col(df, colname: str):
             elif colname == "Date Year":
                 if "Year.1" in df:
                     return get_col(df, "Year.1")
+                elif "[Year]" in df and "Year" in df:
+                    return df["Year"]
                 else:
                     return get_col(df, "Year")
             elif colname == "Colony Currency":
