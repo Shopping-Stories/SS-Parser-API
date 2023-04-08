@@ -1,15 +1,15 @@
 import logging
 import pandas as pd
-from preprocessor import preprocess
+from .preprocessor import preprocess
 from .parser_utils import parse_numbers, isNoun, handle_multiple_prices, add_error, get_col, remember_nullable_cols, verify_ender_totaling, setup_row_currency
-from british_money import Money
+from .british_money import Money
 import traceback
 from .indices import item_set
 from re import split, search
 from .people import Person, relationships, namelist
 
 # Replace this with prints if you want to debug
-def print_debug(message):
+def print_debug(message=""):
     pass
 
 # Parse the results of preprocess into json transactions

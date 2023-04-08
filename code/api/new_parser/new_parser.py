@@ -11,7 +11,7 @@ from .indices import drink_set
 from unicodedata import numeric
 import logging
 from itertools import combinations
-from parse_transactions import print_debug, get_transactions
+from .parse_transactions import print_debug, get_transactions
 
 # Performs a clean up on parser output, destroys the dict you give it
 def _clean_pass(entry: dict):

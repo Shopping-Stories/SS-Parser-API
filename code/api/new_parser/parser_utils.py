@@ -3,10 +3,10 @@ from re import split, search
 from unicodedata import numeric
 import pandas as pd
 from itertools import chain
-from british_money import Money
+from .british_money import Money
 import traceback
 
-def print_debug(string):
+def print_debug(string=""):
     pass
 
 # Various Utility Functions for the parser
