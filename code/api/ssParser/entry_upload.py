@@ -182,7 +182,19 @@ def _create_item_to_item_rel(item, item_id):
         if item_id != rel_item["_id"]:
             item_collection.update_one({'_id': rel_item["_id"]}, {'$push': {'related': item_id}}) 
             item_collection.update_one({'_id': item_id}, {'$push': {'related': rel_item["_id"]}}) 
+    # inherit additional data from one related item
+    if relatedItems:
+        add_additional_item_data(relatedItems, item_id)
 
+
+# new items inherit category, subcategory, and archMat data from one related item
+def add_additional_item_data(relatedItems, item_id):
+    for rel_item in relatedItems:
+        if 'category' in rel_item and 'subcategory' in rel_item and 'archMat' in rel_item:
+            item_collection.update_one({'_id': item_id}, {'$set': {'category': rel_item['category'], 'subcategory': rel_item['subcategory'], 'archMat': rel_item['archMat']}})
+            return
+    return
+    
 
 # hashes parsed_entry and adds value to entry, done so that we do not insert duplicate database entries
 def hash_entry(parsed_entry: Dict[str, Any]):
@@ -387,4 +399,14 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
         _create_item_to_item_rel(new_values)
 
     return Message(message="Successfully edited entry.")
-    
+
+
+@router.get("/edit_all_entry_years/", tags=["Dangerous"], response_model=Message)
+def edit_all_entry_years():
+    """
+    DO NOT USE unless you wish to overwrite all existing ledger.folio_year data in entries.
+    Changes the folio year in ALL entries in the entry collection to "1760/1761". Made to correct a bug from the initial entry uploads. 
+    """
+    new_years = "1760/1761"
+    entries_collection.update_many({}, {'$set': {'ledger.folio_year': new_years}})
+    return Message(message=f"Successfully changed all entry folio years to {new_years}.")

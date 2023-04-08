@@ -42,7 +42,7 @@ async def main():
 if __name__ == "__main__":
     # If this file is run like python api_entry.py parser, run parser on all files in s3 bucket with prefix ParseMe
     # DO NOT CHANGE BEHAVAIOR UNLESS YOU KNOW WHAT YOU ARE DOING! WILL BREAK PARSER AS IT RUNS ON AWS ECS BY RUNNING THIS FILE!
-    # Also do not move the imports in here. They are here so we don't have to install pytorch to run the basic api
+    # Also do not move the imports that are in here. They are here so we don't have to install pytorch to run the basic api
     if len(sys.argv) > 1 and sys.argv[1] == "parser":
         from boto3 import client
         from api.new_parser.parser_manager import start_parse
