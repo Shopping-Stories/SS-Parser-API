@@ -1,6 +1,4 @@
 import pymongo
-from pathlib import Path
-from json import dump, dumps, loads
 from dotenv import load_dotenv
 from os import environ
 from os.path import join, dirname

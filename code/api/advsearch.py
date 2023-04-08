@@ -1,6 +1,4 @@
-from pymongo import MongoClient
 from jellyfish import metaphone as meta
-import bson
 from .ssParser.database import db
 from fastapi import APIRouter
 from .api_types import EntryList
@@ -123,13 +121,13 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
       "from": "items",
       "localField": "itemID",
       "foreignField": "_id",
-      "as": "related_items"
+      "as": "item_obj"
     }},
     {"$lookup": {
       "from": "people",
       "localField": "peopleID",
       "foreignField": "_id",
-      "as": "related_people"
+      "as": "people_obj"
     }},
     {"$lookup": {
       "from": "people",
@@ -139,7 +137,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     }}
   ])
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items", "accountHolder"]
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "people_obj", "item_obj", "accountHolder"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}
@@ -204,13 +202,13 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
       "from": "items",
       "localField": "itemID",
       "foreignField": "_id",
-      "as": "related_items"
+      "as": "item_obj"
     }},
     {"$lookup": {
       "from": "people",
       "localField": "peopleID",
       "foreignField": "_id",
-      "as": "related_people"
+      "as": "people_obj"
     }},
     {"$lookup": {
       "from": "people",
@@ -220,7 +218,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     }}
   ])
 
-  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items", "accountHolder"]
+  ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "people_obj", "item_obj", "accountHolder"]
 
   def bson_objectid_to_str(old_entry: dict):
       entry = {x: old_entry[x] for x in old_entry}

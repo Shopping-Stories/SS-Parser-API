@@ -1,5 +1,5 @@
 import pandas as pd
-from .parser_utils import get_col, get_col_name, add_to_by, isNoun
+from .parser_utils import get_col, get_col_name, add_to_by, isNoun, fix_marginalia_dates
 from re import split, match, search, sub, finditer, Match
 import spacy
 from itertools import chain
@@ -20,59 +20,6 @@ month_regex = r"(([Jj]an|[Ff]eb|[Mm]ar|[Aa]pr|[Mm]ay|[Jj]un|[Jj]ul|[Aa]ug|[Ss]ep
 
 # Matches annoying price format: 12..2..4 ¼, extracting the 12, 2, 4, and ¼.
 fancy_price = r"£?(\d+)?\.\.\[?(\d+)\]?\.\.(\[?([0-9]+)\]?)?(\s?([\u00BC-\u00BE\u2150-\u215E]))?"
-
-# Modifies the df to copy marginalia values down into rows for which they are null
-# Also does the same for date year, month, and day.
-def _fix_marginalia_dates(df: pd.DataFrame):
-    nrows = df.shape[0]
-    marg_name = get_col_name(df, "Marginalia")
-    year_name = get_col_name(df, "Date Year")
-    month_name = get_col_name(df, "_Month")
-    day_name = get_col_name(df, "Day")
-    dr_cr_name = get_col_name(df, "Dr/Cr")
-    last_date = {"year": None, "month": None, "day": None}
-    last_marg = ""
-
-    in_cr = False
-
-    def isNull(val: str):
-        return val is None or val == "-" or val == "" or str(val) == "nan"
-
-    for i in range(nrows):
-        # Fix marginalia
-        if not isNull(val := df.at[i, marg_name]):
-            last_marg = val
-        else:
-            if last_marg != "":
-                df.at[i, marg_name] = last_marg
-
-        # If in cr, set in_cr to true and reset last date
-        if not in_cr and df.at[i, dr_cr_name] == "Cr":
-            in_cr = True
-            last_date["year"] = None
-            last_date["month"] = None
-            last_date["day"] = None
-
-        # Fix dates
-        # If date is not null, remember it
-        if not isNull(year := df.at[i, year_name]):
-            last_date["year"] = year
-            last_date["month"] = None
-            last_date["day"] = None
-            # Sometimes year is defined but no month or day is defined
-            if not isNull(month := df.at[i, month_name]):
-                last_date["month"] = month
-            if not isNull(day := df.at[i, day_name]):
-                last_date["day"] = day
-
-        # When date is undefined, use the last date we saw
-        else:
-            if last_date["year"] != None:
-                df.at[i, year_name] = last_date["year"]
-                if  last_date["month"] != None:
-                    df.at[i, month_name] = last_date["month"]
-                if last_date["day"] != None:
-                    df.at[i, day_name] = last_date["day"]
 
 # Simple function to remove the XX tag as it usually indicates a parser error
 def _remove_xx(tag, replacement):
@@ -216,7 +163,7 @@ def preprocess(df: pd.DataFrame):
     
     # Fix the marginalia issues present in the underlying spreadsheets
     # Fix missing dates by imputing with previous data
-    _fix_marginalia_dates(df)
+    fix_marginalia_dates(df)
 
     
     # For row in df

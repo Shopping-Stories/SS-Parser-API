@@ -1,4 +1,3 @@
-from pymongo import MongoClient
 from jellyfish import metaphone as meta
 import bson
 from .ssParser.database import db

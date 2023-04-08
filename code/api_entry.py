@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from api import simplesearch, stringlist, parser_endpoints, new_entry_manager, documentation_endpoints, fuzzysearch, advsearch
-from api.ssParser import entry_upload
+from api.ssParser import entry_upload, items, db_people
 from api.new_parser.people import people_index_coro
 import logging
 import sys
@@ -20,6 +20,8 @@ incoming.include_router(new_entry_manager.router)
 incoming.include_router(fuzzysearch.router)
 incoming.include_router(advsearch.router)
 incoming.include_router(documentation_endpoints.router)
+incoming.include_router(items.router)
+incoming.include_router(db_people.router)
 
 incoming.add_middleware(
     CORSMiddleware,
@@ -35,7 +37,7 @@ async def start_people_tasks():
 
 @incoming.get("/")
 async def main():
-    return {"message": "The api is still working. API Version 1.5.5"}
+    return {"message": "The api is still working. API Version 1.6.2"}
 
 if __name__ == "__main__":
     # If this file is run like python api_entry.py parser, run parser on all files in s3 bucket with prefix ParseMe
