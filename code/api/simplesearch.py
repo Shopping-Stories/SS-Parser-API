@@ -34,15 +34,41 @@ def simple_search(search: str):
 
     # searches all string fields in "entries" collection
     # Format of people has changed so we can't search by that as easily now.
-    results = entries.find({"$or": [
-        {"account_name": {"$regex": search, "$options": 'i'}},
-        {"store_owner": {"$regex": search, "$options": 'i'}},
-        {"item": {"$regex": search, "$options": 'i'}},
+    res = entries.find({"$or": [
+        {"account_name": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
+        {"store_owner": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
+        {"item": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
         # {"people.name": {"$regex": search, "$options": 'i'}},
         # {"places.name": {"$regex": search, "$options": 'i'}}
     ]})
 
-    ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id"]
+    res_ids = []
+    for entry in res:
+        res_ids.append(entry['_id'])
+
+    results = entries.aggregate([
+        {"$match": {"_id": {"$in": res_ids}}},
+        {"$lookup": {
+            "from": "items",
+            "localField": "itemID",
+            "foreignField": "_id",
+            "as": "related_items"
+        }},
+        {"$lookup": {
+            "from": "people",
+            "localField": "peopleID",
+            "foreignField": "_id",
+            "as": "related_people"
+        }},
+        {"$lookup": {
+            "from": "people",
+            "localField": "accountHolderID",
+            "foreignField": "_id",
+            "as": "accountHolder"
+        }}
+    ])
+
+    ids = ["peopleID", "itemID", "accountHolderID", "entryID", "_id", "related_people", "related_items", "accountHolder"]
 
     def bson_objectid_to_str(old_entry: dict):
         entry = {x: old_entry[x] for x in old_entry}

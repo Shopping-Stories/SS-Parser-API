@@ -1,7 +1,6 @@
 from __future__ import annotations
 from unicodedata import numeric
 from re import match, split
-from itertools import chain
 
 # Class to make dealing with money easier, implements arithmetic with money as well as dict-style accessing of attributes
 # e.g. if type(a) is Money, a["pounds"] == a["Pounds"] == a["L"] is the amount of pounds in the transaction

@@ -9,6 +9,7 @@ from traceback import format_exc
 
 router = APIRouter()
 
+# Runs the parser on everything in the s3 bucket under prefix ParseMe
 def do_parse():
     ecs = client("ecs")
     cluster_arn = "arn:aws:ecs:us-east-1:921328813402:cluster/shopParser"
