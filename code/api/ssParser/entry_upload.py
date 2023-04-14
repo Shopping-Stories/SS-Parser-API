@@ -401,6 +401,38 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
     return Message(message="Successfully edited entry.")
 
 
+@router.get("/edit_tobacco_marks/", tags=["Database Management"], response_model=Message)
+def edit_tobacco_marks(old_mark_number: str, old_mark_text:str, new_mark_number: str, new_mark_text: str):
+    """
+    Edits all occurences of a given tobaccomark in the entries collection of the database. Case sensitive.
+    Sets error flag and has ERROR at the front of the message if mark is not found.
+    """
+
+    if not entries_collection.find_one({'$and': [{'tobacco_marks.mark_number': old_mark_number}, {'tobacco_marks.mark_text': old_mark_text}]}):
+        return Message(message=f"ERROR: Tobacco mark {old_mark_number}: {old_mark_text} not found.", error=True)
+
+    entries_collection.update_many({'tobacco_marks.mark_number': old_mark_number, 'tobacco_marks.mark_text': old_mark_text}, {'$push': {'tobacco_marks': {'mark_number': new_mark_number, 'mark_text': new_mark_text}}})
+    entries_collection.update_many({'tobacco_marks.mark_number': old_mark_number, 'tobacco_marks.mark_text': old_mark_text}, {'$pull': {'tobacco_marks': {'mark_number': old_mark_number, 'mark_text': old_mark_text}}})
+
+    return Message(message="Successfully edited tobacco mark.")
+
+
+@router.get("/edit_mentions/", tags=["Database Management"], response_model=Message)
+def edit_mentions(old_mention: str, new_mention: str):
+    """
+    Edits all occurences of a given mention in the entries collection of the database. Case-sensitive.
+    Sets error flag and has ERROR at the front of the message if mention is not found.
+    """
+
+    if not entries_collection.find_one({'mentions': old_mention}):
+        return Message(message=f"ERROR: Mention {old_mention} not found.", error=True)
+    
+    entries_collection.update_many({'mentions': old_mention}, {'$push': {'mentions': new_mention}})
+    entries_collection.update_many({'mentions': old_mention}, {'$pull': {'mentions': old_mention}})
+
+    return Message(message="Successfully edited mention.")
+
+
 @router.get("/edit_all_entry_years/", tags=["Dangerous"], response_model=Message)
 def edit_all_entry_years():
     """
@@ -410,3 +442,18 @@ def edit_all_entry_years():
     new_years = "1760/1761"
     entries_collection.update_many({}, {'$set': {'ledger.folio_year': new_years}})
     return Message(message=f"Successfully changed all entry folio years to {new_years}.")
+
+
+@router.get("/delete_entries_by_page/", tags=["Dangerous"], response_model=Message)
+def delete_entries_by_page(reel: int, folio_page: str, folio_year: str):
+    """
+    DO NOT USE unless you wish to DELETE ALL entries that come from a specified folio_page, folio_year, and reel.
+    Sets error flag and has ERROR at the front of the message if entry with given reel, folio_page, AND folio_year is not found.
+    """
+
+    if not entries_collection.find_one({'$and': [{'ledger.reel': reel}, {'ledger.folio_page': folio_page}, {'ledger.folio_year': folio_year}]}):
+        return Message(message=f"ERROR: Page {folio_page} from reel {reel} with year {folio_year} not found.", error=True)
+    
+    entries_collection.delete_many({'$and': [{'ledger.reel': reel}, {'ledger.folio_page': folio_page}, {'ledger.folio_year': folio_year}]})
+
+    return Message(message="Successfully deleted entries.")

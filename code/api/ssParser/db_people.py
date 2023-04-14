@@ -37,6 +37,35 @@ def edit_person(person_id: str, new_values: PeopleInput):
 
     return Message(message="Successfully edited person.")
 
+@router.get("/remove_people_relationship/", tags=["People Management"], response_model=Message)
+def remove_people_relationship(person1_name: str, person2_name: str):
+    """
+    Removes a relationship between two people (both specified by name) in the database. Case sensitive.
+    Sets error flag and has ERROR at the front of the message if any errors occur. No relationships will be updated if any error occurs.
+    """
+
+    person1_id = people_collection.find_one({'name': person1_name}, {'_id'})
+    if person1_id == None:
+        return Message(message=f"ERROR: {person1_name} not found.", error=True)
+    person1_id = person1_id['_id']
+
+    person2_id = people_collection.find_one({'name': person2_name}, {'_id'})
+    if person2_id == None:
+        return Message(message=f"ERROR: {person2_name} not found.", error=True)
+    person2_id = person2_id['_id']
+
+    if person1_id == person2_id:
+        return Message(message=f"ERROR: Both people are the same.", error=True)
+    
+    if people_collection.find_one({'$and': [{'_id': ObjectId(person1_id)}, {'related': person2_id}]}):
+        people_collection.update_one({'_id': ObjectId(person1_id)}, {'$pull': {'related': person2_id}})
+    elif not people_collection.find_one({'$and': [{'_id': ObjectId(person2_id)}, {'related': person1_id}]}):
+        return Message(message=f"ERROR: No relationship exists.", error=True)
+    if people_collection.find_one({'$and': [{'_id': ObjectId(person2_id)}, {'related': person1_id}]}):
+        people_collection.update_one({'_id': ObjectId(person2_id)}, {'$pull': {'related': person1_id}})
+        
+    return Message(message="Successfully removed relationship.")
+
 @router.post("/add_people_relationship/", tags=["People Management"], response_model=Message)
 def add_people_relationship(person1_name: str, person2_name: str):
     """

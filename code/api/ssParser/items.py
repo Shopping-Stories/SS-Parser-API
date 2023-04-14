@@ -3,8 +3,17 @@ from ..api_types import Message
 import pandas as pd
 from fastapi import APIRouter
 from bson import ObjectId
+from boto3 import client
 
 router = APIRouter()
+
+# IN PROGRESS -- needs proper credentials 
+# downloads specified file "filename" (including file type) from aws
+def download_item_file(filename):
+    print('/Items/' + filename)
+    s3 = client("s3")
+    s3.download_file("shoppingstories", filename, '/Items/' + filename)
+    
 
 @router.post("/combine_items/", tags=["Items Management"], response_model=Message)
 def combine_items(primary_item: str, secondary_item: str, new_item_name: str):
