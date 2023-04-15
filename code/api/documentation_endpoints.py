@@ -1,14 +1,26 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, BackgroundTasks
 from .api_types import *
 import traceback
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from boto3 import client
 from io import BytesIO
+from .ssParser.items import item_upload
 
 router = APIRouter()
 
+@router.get("/test_upload_items", response_model=Message)
+def test_up_items(bg_tasks: BackgroundTasks):
+    a = None
+    with open("api/ssParser/C_1760_Item_Master_List_Categories.xlsx", 'rb') as file:
+        print("Yes")
+        a = file.read()
+    # print(a)
+    toUp = IncomingFile(file=b64encode(a), name="itemIndex.xlsx")
+    return upload_document(inc_file=toUp, bg_tasks=bg_tasks)
+    
+
 @router.post("/upload_document", tags=["Documentation"], response_model=Message)
-def upload_document(inc_file: IncomingFile) -> Message:
+def upload_document(inc_file: IncomingFile, bg_tasks: BackgroundTasks) -> Message:
     """
     uploads a document to the documentation folder
     """
@@ -19,7 +31,12 @@ def upload_document(inc_file: IncomingFile) -> Message:
     s3_cli = client('s3')
 
     try:
-        s3_cli.upload_fileobj(file, "shoppingstories", f"Documentation/{name}")
+        if inc_file.name == "itemIndex.xlsx":
+            bg_tasks.add_task(item_upload, inc_file)
+            s3_cli.upload_fileobj(file, "shoppingstories", f"Documentation/{name}")
+            return Message(message="Successfully uploaded file to s3.")
+        else:
+            s3_cli.upload_fileobj(file, "shoppingstories", f"Documentation/{name}")
     except Exception:
         print("Could not upload file to s3.")
         print(traceback.format_exc())

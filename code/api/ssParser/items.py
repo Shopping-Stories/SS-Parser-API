@@ -1,19 +1,11 @@
 from .entry_upload import item_collection, entries_collection, item_regex, ItemInput, create_item
-from ..api_types import Message
+from ..api_types import Message, IncomingFile
 import pandas as pd
 from fastapi import APIRouter
 from bson import ObjectId
-from boto3 import client
+from base64 import b64decode
 
 router = APIRouter()
-
-# IN PROGRESS -- needs proper credentials 
-# downloads specified file "filename" (including file type) from aws
-def download_item_file(filename):
-    print('/Items/' + filename)
-    s3 = client("s3")
-    s3.download_file("shoppingstories", filename, '/Items/' + filename)
-    
 
 @router.post("/combine_items/", tags=["Items Management"], response_model=Message)
 def combine_items(primary_item: str, secondary_item: str, new_item_name: str):
@@ -70,16 +62,18 @@ def combine_items(primary_item: str, secondary_item: str, new_item_name: str):
 
 
 @router.post("/upload_items/", tags=["Items Management"], response_model=Message)
-def item_upload(file_name: str):
+def item_upload(incoming_file: IncomingFile):
     """
     Uploads items from a master list's categories sheet. Categories must be FIRST or ONLY sheet in the document, or function will fail. File must be in \api\ssParser\...
     If categories section is not read, function will fail. If data differs from expected formatting, all data prior to error will still be entered.
     """
 
-    df = pd.read_excel("api\ssParser\\" + file_name)
+    name = incoming_file.name
+    data = b64decode(incoming_file.file)
+    df = pd.read_excel(data)
 
     for index, row in df.iterrows():
-        ## reformats items with commas
+        # reformats items with commas
         if ", " in row['Item']:
             split_input = row['Item'].split(", ")
             sorted_input = list(reversed(split_input))

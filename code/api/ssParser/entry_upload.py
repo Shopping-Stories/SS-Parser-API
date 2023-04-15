@@ -417,7 +417,7 @@ def edit_tobacco_marks(old_mark_number: str, old_mark_text:str, new_mark_number:
     return Message(message="Successfully edited tobacco mark.")
 
 
-@router.get("/edit_mentions/", tags=["Database Management"], response_model=Message)
+@router.get("/find_and_replace_mention/", tags=["Dangerous"], response_model=Message)
 def edit_mentions(old_mention: str, new_mention: str):
     """
     Edits all occurences of a given mention in the entries collection of the database. Case-sensitive.
