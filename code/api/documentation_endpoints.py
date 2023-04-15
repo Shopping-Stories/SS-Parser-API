@@ -8,7 +8,7 @@ from .ssParser.items import item_upload
 
 router = APIRouter()
 
-@router.get("/test_upload_items", response_model=Message)
+@router.get("/test_upload_items", tags=["Documentation"], response_model=Message)
 def test_up_items(bg_tasks: BackgroundTasks):
     a = None
     with open("api/ssParser/C_1760_Item_Master_List_Categories.xlsx", 'rb') as file:
