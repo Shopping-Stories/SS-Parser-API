@@ -4,7 +4,7 @@ from io import BytesIO
 from .api_types import *
 import traceback
 from base64 import b64decode
-from json import loads
+from json import loads, dumps
 from traceback import format_exc
 
 router = APIRouter()
@@ -12,6 +12,13 @@ router = APIRouter()
 # Runs the parser on everything in the s3 bucket under prefix ParseMe
 def do_parse():
     ecs = client("ecs")
+    
+    # Update parser progress to be 0.
+    s3 = client("s3")
+    prog = {"progress": 0}
+    toUpload = BytesIO(dumps(prog).encode("UTF-8"))
+    s3.upload_fileobj(toUpload, "shoppingstories", "ParserProgress/progress.json")
+    
     cluster_arn = "arn:aws:ecs:us-east-1:921328813402:cluster/shopParser"
     currTasks = ecs.list_tasks(cluster=cluster_arn, desiredStatus="RUNNING")
     if len(currTasks["taskArns"]) == 0: 
