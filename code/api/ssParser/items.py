@@ -58,7 +58,7 @@ def combine_items(primary_item: str, secondary_item: str, new_item_name: str):
     # update entries
     entries_collection.update_many({'itemID': secondary_item_id}, {'$set': {'itemID': primary_item_id, 'item': new_item_name}})
 
-    return Message(message=f"Successfully compined items as {primary_item_id}.")
+    return Message(message=f"Successfully combined items as {primary_item_id}.")
 
 
 @router.post("/upload_items/", tags=["Items Management"], response_model=Message)
