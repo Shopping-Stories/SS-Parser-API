@@ -9,6 +9,7 @@ from json import dumps
 from json import JSONEncoder 
 import hashlib
 from ..fuzzysearch import createMetasForEntries
+from re import escape
 
 # add collections
 entries_collection = db.entries
@@ -45,8 +46,8 @@ def _create_account_holder_rel(parsed_entry: Dict[str, Any]):
 # exact search for "item" in items collection (case insensitive), returns itemID
 # checks if already in db, adds to db if not, calls _create_item_to_item_rel for new items
 def create_item(item):
-    if item_collection.find_one({'item': {'$regex': '^' + item + '$', '$options': 'i'}}): # choose regex
-        item_id = item_collection.find_one({'item': {'$regex': '^' + item + '$', '$options': 'i'}}, {'_id'}) #update? simplify?
+    if item_collection.find_one({'item': {'$regex': '^' + escape(item) + '$', '$options': 'i'}}): # choose regex
+        item_id = item_collection.find_one({'item': {'$regex': '^' + escape(item) + '$', '$options': 'i'}}, {'_id'}) #update? simplify?
         item_id = item_id['_id']
     else:
         item_id = item_collection.insert_one({'item': item}).inserted_id
@@ -65,8 +66,8 @@ def _create_item_rel(parsed_entry: Dict[str, Any]):
 # exact search for "person" in people collection (case insensitive), returns peopleID
 # checks if already in db, adds to db if not
 def create_people(person):
-    if people_collection.find_one({'name': {'$regex': '^' + person + '$', '$options': 'i'}}):
-        people_id = people_collection.find_one({'name': {'$regex': '^' + person + '$', '$options': 'i'}}, {'_id'})
+    if people_collection.find_one({'name': {'$regex': '^' + escape(person) + '$', '$options': 'i'}}):
+        people_id = people_collection.find_one({'name': {'$regex': '^' + escape(person) + '$', '$options': 'i'}}, {'_id'})
         people_id = people_id['_id']
     else:
         people_id = people_collection.insert_one({'name': person}).inserted_id
@@ -165,7 +166,7 @@ def item_regex(item):
     for i in item:
         i = i.rstrip("s")
         related_items = item_collection.find({"item": {
-        "$regex": '(^|\s+)' + i + 's*($|\s+)', 
+        "$regex": '(^|\s+)' + escape(i) + 's*($|\s+)', 
         "$options": 'i'
         }})
         for rel in related_items:

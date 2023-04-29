@@ -4,6 +4,7 @@ import pandas as pd
 from fastapi import APIRouter
 from bson import ObjectId
 from base64 import b64decode
+from re import escape
 
 router = APIRouter()
 
@@ -14,8 +15,8 @@ def combine_items(primary_item: str, secondary_item: str, new_item_name: str):
     Sets error flag and has ERROR at the front of the message if any errors occur. People will not be combined if any error occurs.
     """
 
-    primary_item_data = item_collection.find_one({'item': primary_item})
-    secondary_item_data = item_collection.find_one({'item': secondary_item})
+    primary_item_data = item_collection.find_one({'item': {"$regex": "^" + escape(primary_item) + "$", "$options": 'i'}})
+    secondary_item_data = item_collection.find_one({'item': {"$regex": "^" + escape(secondary_item) + "$", "$options": 'i'}})
 
     if primary_item_data == None:
         return Message(message=f"ERROR: {primary_item} not found.", error=True)
@@ -80,9 +81,9 @@ def item_upload(incoming_file: IncomingFile):
             joined_input = " ".join(sorted_input)
             row['Item'] = joined_input
 
-        if item_collection.find_one({'item': {"$regex": "^" + row['Item'] + "$", "$options": 'i'}}):
+        if item_collection.find_one({'item': {"$regex": "^" + escape(row['Item']) + "$", "$options": 'i'}}):
             
-            item_data = item_collection.find_one({'item': {"$regex": "^" + row['Item'] + "$", "$options": 'i'}})
+            item_data = item_collection.find_one({'item': {"$regex": "^" + escape(row['Item']) + "$", "$options": 'i'}})
             item_collection.update_one({'_id': item_data['_id']}, {'$set': {'category': row['Category'], 'subcategory': row['Subcategory'], 'archMat': row['ArchMat']}})
             
             if 'related' in item_data:
