@@ -7,7 +7,7 @@ router = APIRouter()
 
 # allows for fuzzy searching
 @router.get("/itemsearch-fuzzy/", tags=["search"], response_model=EntryList)
-def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:int = -1, tobacco:str = ""):
+def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:str = "", tobacco:str = ""):
   """
   fuzzy advanced search for items for shoppingStories project
   """
@@ -15,6 +15,11 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   categories = db['categories']
   entries = db['entries']
   _ids = []
+
+  _page = page
+  if(page!=""):
+    if(page.isnumeric()):
+      page = int(page)
 
   # process search terms
   _item = item
@@ -103,7 +108,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     contents.append({"$and": co_query})
   if(year!=""):
     contents.append({"ledger.folio_year": {"$regex": year}})
-  if(page!=-1):
+  if(_page!=""):
     contents.append({"ledger.folio_page": page})
   if(tobacco!=""):
     contents.append({"tobacco_marks.mark_text": {"$regex": tobacco, "$options": 'i'}})
@@ -151,7 +156,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
 
 # case insensitive but otherwise requires exact matches
 @router.get("/itemsearch/", tags=["search"], response_model=EntryList)
-def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:int = -1, tobacco:str = ""):
+def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:str = "", tobacco:str = ""):
   """
   advanced search for items for shoppingStories project
   """
@@ -159,6 +164,11 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   categories = db['categories']
   entries = db['entries']
   _ids = []
+
+  _page = page
+  if(page!=""):
+    if(page.isnumeric()):
+      page = int(page)
 
   itemids = items.find({"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}})
   for i in itemids:
@@ -184,7 +194,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     contents.append({"store_owner": {"$regex": co, "$options": 'i'}})
   if(year!=""):
     contents.append({"ledger.folio_year": {"$regex": year}})
-  if(page!=-1):
+  if(_page!=""):
     contents.append({"ledger.folio_page": page})
   if(tobacco!=""):
     contents.append({"tobacco_marks.mark_text": {"$regex": tobacco, "$options": 'i'}})

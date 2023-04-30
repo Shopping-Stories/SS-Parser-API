@@ -38,7 +38,7 @@ def simple_search(search: str):
         {"account_name": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
         {"store_owner": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
         {"item": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
-        # {"people.name": {"$regex": search, "$options": 'i'}},
+        {"people": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
         # {"places.name": {"$regex": search, "$options": 'i'}}
     ]})
 
