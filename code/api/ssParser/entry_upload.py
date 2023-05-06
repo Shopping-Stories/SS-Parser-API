@@ -396,8 +396,8 @@ def edit_entry(entry_id: str, new_values: ParserOutput):
             _create_people_to_people_rel(new_values)
     if "accountHolderID" in new_values and "peopleID" in new_values:
         _create_people_to_account_holder_rel(new_values)
-    if "itemID" in new_values:
-        _create_item_to_item_rel(new_values)
+    if ("item" in new_values) and ("itemID" in new_values):
+        _create_item_to_item_rel(new_values["item"], new_values["itemID"])
 
     return Message(message="Successfully edited entry.")
 
