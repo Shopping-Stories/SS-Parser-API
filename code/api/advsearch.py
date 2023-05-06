@@ -11,32 +11,32 @@ router = APIRouter()
 
 @router.get("/itemsearch-fuzzy/", tags=["search"], response_model=EntryList)
 def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:str = "", tobacco:str = ""):
-  """
-  fuzzy advanced search for items for shoppingStories project
-  """
-  items = db['items']
-  categories = db['categories']
-  entries = db['entries']
-  _ids = []
+    """
+    fuzzy advanced search for items for shoppingStories project
+    """
+    items = db['items']
+    categories = db['categories']
+    entries = db['entries']
+    _ids = []
 
-  _page = page
+    _page = page
 
-  # process search terms
-  _item = item
-  item_query = []
-  if item!="":
-    item = item.strip()
-    item = item.split(" ")
-    item_terms = [i for i in item if i]
-    temp = []
-    
-    for i in item_terms:
-      temp.append(str(meta(i)))
-    
-    item_terms = temp
-    
-    for i in item_terms:
-      item_query.append({"item_metas": {"$regex": escape(i), "$options": 'i'}})
+    # process search terms
+    _item = item
+    item_query = []
+    if item!="":
+        item = item.strip()
+        item = item.split(" ")
+        item_terms = [i for i in item if i]
+        temp = []
+
+        for i in item_terms:
+            temp.append(str(meta(i)))
+
+        item_terms = temp
+
+        for i in item_terms:
+            item_query.append({"item_metas": {"$regex": escape(i), "$options": 'i'}})
 
     _acc_name = acc_name
     if acc_name != "":
@@ -179,28 +179,26 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
 
 @router.get("/itemsearch/", tags=["search"], response_model=EntryList)
 def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:str = "", tobacco:str = ""):
-  """
-  advanced search for items for shoppingStories project
-  """
-  items = db['items']
-  categories = db['categories']
-  entries = db['entries']
-  _ids = []
+    """
+    advanced search for items for shoppingStories project
+    """
+    items = db['items']
+    categories = db['categories']
+    entries = db['entries']
+    _ids = []
 
-  _page = page
-  if(page!=""):
-    if(page.isnumeric()):
-      page = int(page)
+    _page = page
 
-  itemids = items.find({"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}})
-  for i in itemids:
-    _ids.append(i['_id'])
+    itemids = items.find({"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}})
+    for i in itemids:
+        _ids.append(i['_id'])
 
     catids = categories.find({"$and": [
         {"item": {"$regex": '(^|\\s)' + escape(item), "$options": 'i'}},
         {"category": {"$regex": escape(cat), "$options": 'i'}},
         {"subcategory": {"$regex": escape(subcat), "$options": 'i'}}
     ]})
+    
     for i in catids:
         _ids.append(i['_id'])
 
