@@ -146,4 +146,10 @@ def fuzzy_search(search: str):
       
       return entry
 
-  return EntryList.parse_obj({"entries": [bson_objectid_to_str(x) for x in results]})
+  toret = None
+  try:
+    toret = EntryList.parse_obj({"entries": [bson_objectid_to_str(x) for x in results]})
+  except:
+    toret = EntryList(entries=[])
+  
+  return toret

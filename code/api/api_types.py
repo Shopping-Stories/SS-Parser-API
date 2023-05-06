@@ -130,7 +130,7 @@ class ParserOutput(BaseModel):
     tobacco_amount_off: Optional[str]
 
 class EntryList(BaseModel):
-    entries: List[DatabaseEntry]
+    entries: Optional[List[Optional[DatabaseEntry]]]
 
 class StringList(BaseModel):
     strings: List[str]
