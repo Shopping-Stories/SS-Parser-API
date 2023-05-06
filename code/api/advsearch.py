@@ -10,30 +10,36 @@ router = APIRouter()
 
 
 @router.get("/itemsearch-fuzzy/", tags=["search"], response_model=EntryList)
-def item_search(item: str = "", cat: str = "", subcat: str = "", amt: str = "", acc_name: str = "", person: str = "", co: str = "", year: str = "", page: int = -1, tobacco: str = ""):
-    """
-    fuzzy advanced search for items for shoppingStories project
-    """
-    items = db['items']
-    categories = db['categories']
-    entries = db['entries']
-    _ids = []
+def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:str = "", tobacco:str = ""):
+  """
+  fuzzy advanced search for items for shoppingStories project
+  """
+  items = db['items']
+  categories = db['categories']
+  entries = db['entries']
+  _ids = []
 
-    # process search terms
-    _item = item
-    item_query = []
-    if item != "":
-        item = item.strip()
-        item = item.split(" ")
-        item_terms = [i for i in item if i]
-        temp = []
-        
-        for i in item_terms:
-            temp.append(str(meta(i)))
-        item_terms = temp
-        
-        for i in item_terms:
-            item_query.append({"item_metas": {"$regex": escape(i), "$options": 'i'}})
+  _page = page
+  if page!="":
+    if page.isnumeric():
+      page = int(page)
+
+  # process search terms
+  _item = item
+  item_query = []
+  if item!="":
+    item = item.strip()
+    item = item.split(" ")
+    item_terms = [i for i in item if i]
+    temp = []
+    
+    for i in item_terms:
+      temp.append(str(meta(i)))
+    
+    item_terms = temp
+    
+    for i in item_terms:
+      item_query.append({"item_metas": {"$regex": escape(i), "$options": 'i'}})
 
     _acc_name = acc_name
     if acc_name != "":
@@ -108,8 +114,26 @@ def item_search(item: str = "", cat: str = "", subcat: str = "", amt: str = "", 
     else:
         contents = [{"itemID": {"$in": _ids}}]
 
-    if amt != "":
-        contents.append({"amount": {"$regex": escape(amt), "$options": 'i'}})
+  if amt!="":
+    contents.append({"amount": {"$regex": amt, "$options": 'i'}})
+  
+  if _acc_name!="":
+    contents.append({"$and": acc_query})
+  
+  if _person!="":
+    contents.append({"$and": person_query})
+  
+  if _co!="":
+    contents.append({"$and": co_query})
+  
+  if year!="":
+    contents.append({"ledger.folio_year": {"$regex": escape(year)}})
+  
+  if _page!="":
+    contents.append({"ledger.folio_page": page})
+  
+  if tobacco!="":
+    contents.append({"tobacco_marks.mark_text": {"$regex": escape(tobacco), "$options": 'i'}})
 
     if _acc_name != "":
         contents.append({"$and": acc_query})
@@ -176,18 +200,23 @@ def item_search(item: str = "", cat: str = "", subcat: str = "", amt: str = "", 
 
 
 @router.get("/itemsearch/", tags=["search"], response_model=EntryList)
-def item_search(item: str = "", cat: str = "", subcat: str = "", amt: str = "", acc_name: str = "", person: str = "", co: str = "", year: str = "", page: int = -1, tobacco: str = ""):
-    """
-    advanced search for items for shoppingStories project
-    """
-    items = db['items']
-    categories = db['categories']
-    entries = db['entries']
-    _ids = []
+def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_name:str = "", person:str = "", co:str = "", year:str = "", page:str = "", tobacco:str = ""):
+  """
+  advanced search for items for shoppingStories project
+  """
+  items = db['items']
+  categories = db['categories']
+  entries = db['entries']
+  _ids = []
 
-    itemids = items.find({"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}})
-    for i in itemids:
-        _ids.append(i['_id'])
+  _page = page
+  if(page!=""):
+    if(page.isnumeric()):
+      page = int(page)
+
+  itemids = items.find({"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}})
+  for i in itemids:
+    _ids.append(i['_id'])
 
     catids = categories.find({"$and": [
         {"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}},
@@ -200,6 +229,26 @@ def item_search(item: str = "", cat: str = "", subcat: str = "", amt: str = "", 
     contents = [{"$or": [{"itemID": {"$in": _ids}}, {
         "item": {"$regex": '(^|\\s)'+escape(item), "$options": 'i'}}]}]
 
+  if amt != "":
+    contents.append({"amount": {"$regex": amt, "$options": 'i'}})
+  
+  if acc_name != "":
+    contents.append({"account_name": {"$regex": acc_name, "$options": 'i'}})
+  
+  if person != "":
+    contents.append({"$or":[{"people": {"$regex": person, "$options": 'i'}}, {"account_name": {"$regex": escape(person), "$options": 'i'}}, {"store_owner": {"$regex": escape(person), "$options": 'i'}}]})
+  
+  if co != "":
+    contents.append({"store_owner": {"$regex": co, "$options": 'i'}})
+  
+  if year != "":
+    contents.append({"ledger.folio_year": {"$regex": year}})
+  
+  if _page != "":
+    contents.append({"ledger.folio_page": page})
+  
+  if tobacco != "":
+    contents.append({"tobacco_marks.mark_text": {"$regex": escape(tobacco), "$options": 'i'}})
 
     if amt != "":
         contents.append({"amount": {"$regex": escape(amt), "$options": 'i'}})
