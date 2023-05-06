@@ -3,6 +3,7 @@ from bson.json_util import dumps, loads
 from .ssParser.database import db
 from fastapi import APIRouter
 from .api_types import EntryList
+from re  import escape
 
 router = APIRouter()
 
@@ -35,9 +36,9 @@ def simple_search(search: str):
     # searches all string fields in "entries" collection
     # Format of people has changed so we can't search by that as easily now.
     res = entries.find({"$or": [
-        {"account_name": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
-        {"store_owner": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
-        {"item": {"$regex": '(^|\\s)'+search, "$options": 'i'}},
+        {"account_name": {"$regex": '(^|\\s)' + escape(search), "$options": 'i'}},
+        {"store_owner": {"$regex": '(^|\\s)' + escape(search), "$options": 'i'}},
+        {"item": {"$regex": '(^|\\s)' + escape(search), "$options": 'i'}},
         # {"people.name": {"$regex": search, "$options": 'i'}},
         # {"places.name": {"$regex": search, "$options": 'i'}}
     ]})
