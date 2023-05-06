@@ -115,7 +115,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
         contents = [{"itemID": {"$in": _ids}}]
 
     if amt!="":
-        contents.append({"amount": {"$regex": amt, "$options": 'i'}})
+        contents.append({"amount": {"$regex": escape(amt), "$options": 'i'}})
 
     if _acc_name!="":
         contents.append({"$and": acc_query})
@@ -130,7 +130,7 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
         contents.append({"ledger.folio_year": {"$regex": escape(year)}})
 
     if _page!="":
-        contents.append({"ledger.folio_page": page})
+        contents.append({"ledger.folio_page": {"$regex": escape(page), "$options": "i"}})
 
     if tobacco!="":
         contents.append({"tobacco_marks.mark_text": {"$regex": escape(tobacco), "$options": 'i'}})
@@ -200,9 +200,9 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
     _ids.append(i['_id'])
 
     catids = categories.find({"$and": [
-        {"item": {"$regex": '(^|\\s)'+item, "$options": 'i'}},
-        {"category": {"$regex": cat, "$options": 'i'}},
-        {"subcategory": {"$regex": subcat, "$options": 'i'}}
+        {"item": {"$regex": '(^|\\s)' + escape(item), "$options": 'i'}},
+        {"category": {"$regex": escape(cat), "$options": 'i'}},
+        {"subcategory": {"$regex": escape(subcat), "$options": 'i'}}
     ]})
     for i in catids:
         _ids.append(i['_id'])
@@ -211,19 +211,19 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
         "item": {"$regex": '(^|\\s)'+escape(item), "$options": 'i'}}]}]
 
     if amt != "":
-        contents.append({"amount": {"$regex": amt, "$options": 'i'}})
+        contents.append({"amount": {"$regex": escape(amt), "$options": 'i'}})
 
     if acc_name != "":
-        contents.append({"account_name": {"$regex": acc_name, "$options": 'i'}})
+        contents.append({"account_name": {"$regex": escape(acc_name), "$options": 'i'}})
 
     if person != "":
-        contents.append({"$or":[{"people": {"$regex": person, "$options": 'i'}}, {"account_name": {"$regex": escape(person), "$options": 'i'}}, {"store_owner": {"$regex": escape(person), "$options": 'i'}}]})
+        contents.append({"$or":[{"people": {"$regex": escape(person), "$options": 'i'}}, {"account_name": {"$regex": escape(person), "$options": 'i'}}, {"store_owner": {"$regex": escape(person), "$options": 'i'}}]})
 
     if co != "":
-        contents.append({"store_owner": {"$regex": co, "$options": 'i'}})
+        contents.append({"store_owner": {"$regex": escape(co), "$options": 'i'}})
 
     if year != "":
-        contents.append({"ledger.folio_year": {"$regex": year}})
+        contents.append({"ledger.folio_year": {"$regex": escape(year)}})
 
     if _page != "":
         contents.append({"ledger.folio_page": page})
