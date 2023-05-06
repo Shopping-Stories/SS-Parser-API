@@ -20,9 +20,6 @@ def item_search(item:str = "", cat:str = "", subcat:str = "", amt:str = "", acc_
   _ids = []
 
   _page = page
-  if page!="":
-    if page.isnumeric():
-      page = int(page)
 
   # process search terms
   _item = item
