@@ -37,7 +37,7 @@ async def start_people_tasks():
 
 @incoming.get("/")
 async def main():
-    return {"message": "The api is still working. API Version 1.6.2"}
+    return {"message": "The api is still working. API Version 1.6.3"}
 
 if __name__ == "__main__":
     # If this file is run like python api_entry.py parser, run parser on all files in s3 bucket with prefix ParseMe
